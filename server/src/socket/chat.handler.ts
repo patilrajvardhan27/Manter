@@ -6,11 +6,27 @@ import { AuthPayload } from '../middleware/auth.middleware';
 export function registerChatHandlers(io: Server, socket: Socket) {
   const sender = socket.data.user as AuthPayload;
 
+  // Client joins a match room when they open a chat screen
+  socket.on('chat:join', async (matchId: string) => {
+    const match = await prisma.match.findFirst({
+      where: {
+        id: matchId,
+        status: 'MATCHED',
+        OR: [{ womanId: sender.userId }, { manId: sender.userId }],
+      },
+    });
+    if (!match) return;
+    socket.join(`match:${matchId}`);
+  });
+
+  socket.on('chat:leave', (matchId: string) => {
+    socket.leave(`match:${matchId}`);
+  });
+
   socket.on('message:send', async (payload: { matchId: string; content: string }) => {
     const { matchId, content } = payload;
     if (!content?.trim()) return;
 
-    // Verify sender is part of this match
     const match = await prisma.match.findFirst({
       where: {
         id: matchId,
@@ -20,54 +36,67 @@ export function registerChatHandlers(io: Server, socket: Socket) {
     });
     if (!match) return;
 
-    // Save message
     const message = await prisma.message.create({
-      data: { matchId, senderId: sender.userId, content },
+      data: { matchId, senderId: sender.userId, content: content.trim() },
     });
 
     const recipientId = match.womanId === sender.userId ? match.manId : match.womanId;
 
-    // Emit to both participants immediately
-    io.to(`user:${sender.userId}`).to(`user:${recipientId}`).emit('message:new', message);
+    // Emit to match room (both users if both are in it) + recipient's user room (fallback)
+    io.to(`match:${matchId}`).to(`user:${recipientId}`).emit('message:new', message);
 
-    // Run red flag scan async (only scan messages from men)
+    // AI scan async — only scan messages from men, emit alert to woman only
     if (sender.role === 'MAN') {
-      runRedFlagScan(io, matchId, message.id, recipientId).catch(() => null);
+      runRedFlagScan(io, match, message.id, recipientId).catch(() => null);
     }
   });
 
-  socket.on('message:read', async (payload: { matchId: string; messageId: string }) => {
-    await prisma.message.updateMany({
+  socket.on('message:read', async (payload: { matchId: string }) => {
+    const { matchId } = payload;
+
+    const match = await prisma.match.findFirst({
       where: {
-        matchId: payload.matchId,
+        id: matchId,
+        OR: [{ womanId: sender.userId }, { manId: sender.userId }],
+      },
+      select: { womanId: true, manId: true },
+    });
+    if (!match) return;
+
+    const updated = await prisma.message.updateMany({
+      where: {
+        matchId,
         senderId: { not: sender.userId },
         readAt: null,
       },
       data: { readAt: new Date() },
     });
 
-    socket.to(`match:${payload.matchId}`).emit('message:read', {
-      matchId: payload.matchId,
-      readBy: sender.userId,
-    });
+    if (updated.count > 0) {
+      const senderId = match.womanId === sender.userId ? match.manId : match.womanId;
+      // Tell the other user their messages were read
+      io.to(`user:${senderId}`).to(`match:${matchId}`).emit('message:read', {
+        matchId,
+        readBy: sender.userId,
+      });
+    }
   });
 }
 
 async function runRedFlagScan(
   io: Server,
-  matchId: string,
+  match: { id: string; manId: string },
   messageId: string,
   recipientId: string,
 ) {
   const recent = await prisma.message.findMany({
-    where: { matchId },
+    where: { matchId: match.id },
     orderBy: { createdAt: 'desc' },
     take: 10,
-    include: { match: { select: { manId: true } } },
   });
 
   const context = recent.reverse().map((m) => ({
-    role: m.senderId === m.match.manId ? ('man' as const) : ('woman' as const),
+    role: m.senderId === match.manId ? ('man' as const) : ('woman' as const),
     content: m.content,
   }));
 
@@ -81,9 +110,11 @@ async function runRedFlagScan(
 
     if (result.score >= 0.7) {
       io.to(`user:${recipientId}`).emit('red_flag:alert', {
-        matchId,
+        matchId: match.id,
         messageId,
-        ...result,
+        score: result.score,
+        flags: result.flags,
+        explanation: result.explanation,
       });
     }
   }

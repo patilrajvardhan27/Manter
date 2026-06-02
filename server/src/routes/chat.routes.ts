@@ -1,8 +1,8 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { getChatHistory } from '../controllers/chat.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.get('/history/:matchId', getChatHistory);
 
 export default router;
