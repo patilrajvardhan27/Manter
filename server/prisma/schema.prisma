@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String?  @unique
+  passwordHash String
+  role         Role
+  name         String
+  age          Int
+  bio          String?
+  photos       String[]
+  city         String?
+  lat          Float?
+  lng          Float?
+  isVerified   Boolean  @default(false)
+  idVerified   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  manProfile        ManProfile?
+  womanProfile      WomanProfile?
+  ratingsGiven      Rating[]          @relation("Rater")
+  ratingsReceived   Rating[]          @relation("Rated")
+  matchesAsWoman    Match[]           @relation("Woman")
+  matchesAsMan      Match[]           @relation("Man")
+  reportsGiven      Report[]          @relation("Reporter")
+  reportsReceived   Report[]          @relation("Reported")
+  checkins          SafetyCheckin[]
+  emergencyContacts EmergencyContact[]
+  blocksGiven       Block[]           @relation("Blocker")
+  blocksReceived    Block[]           @relation("Blocked")
+}
+
+model ManProfile {
+  id             String @id @default(cuid())
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualityScores  Json   // { q1: 8, q2: 7, ... q23: 9 } — from quiz
+  quizAnswers    Json   // Raw quiz responses for audit
+  communityScore Float  @default(0)
+  ratingCount    Int    @default(0)
+}
+
+model WomanProfile {
+  id             String @id @default(cuid())
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualityWeights Json   // { q1: 5, q2: 3, ... q23: 4 } — priority 1–5
+}
+
+model Rating {
+  id            String   @id @default(cuid())
+  raterId       String
+  rater         User     @relation("Rater", fields: [raterId], references: [id])
+  ratedId       String
+  rated         User     @relation("Rated", fields: [ratedId], references: [id])
+  qualityScores Json     // { q1: 9, q2: 6, ... q23: 8 } — real-date experience
+  overallScore  Float
+  reviewText    String?
+  isAnonymous   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([raterId, ratedId])
+}
+
+model Match {
+  id                 String      @id @default(cuid())
+  womanId            String
+  woman              User        @relation("Woman", fields: [womanId], references: [id])
+  manId              String
+  man                User        @relation("Man", fields: [manId], references: [id])
+  status             MatchStatus @default(PENDING)
+  compatibilityScore Float
+  womanLiked         Boolean     @default(false)
+  manLiked           Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  messages           Message[]
+
+  @@unique([womanId, manId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  matchId        String
+  match          Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId       String
+  content        String
+  redFlagScore   Float?
+  redFlagsFound  Json?    // RedFlagCategory[]
+  readAt         DateTime?
+  createdAt      DateTime @default(now())
+}
+
+model SafetyCheckin {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateWithUserId  String?
+  scheduledAt     DateTime
+  confirmedAt     DateTime?
+  alertSent       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+}
+
+model EmergencyContact {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  phone    String
+  relation String
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  reporterId String
+  reporter   User         @relation("Reporter", fields: [reporterId], references: [id])
+  reportedId String
+  reported   User         @relation("Reported", fields: [reportedId], references: [id])
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id])
+  blockedId String
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+enum Role         { WOMAN MAN }
+enum MatchStatus  { PENDING MATCHED DECLINED }
+enum ReportReason { HARASSMENT FAKE_PROFILE INAPPROPRIATE_CONTENT THREATENING CATFISH OTHER }
+enum ReportStatus { PENDING REVIEWED ACTIONED DISMISSED }

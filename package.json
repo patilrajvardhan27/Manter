@@ -1,0 +1,12 @@
+{
+  "name": "manter",
+  "private": true,
+  "workspaces": ["mobile", "server", "shared"],
+  "scripts": {
+    "mobile": "pnpm --filter manter-mobile start",
+    "server": "pnpm --filter manter-server dev",
+    "db:migrate": "pnpm --filter manter-server db:migrate",
+    "db:generate": "pnpm --filter manter-server db:generate"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
