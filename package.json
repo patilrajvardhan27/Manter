@@ -2,6 +2,7 @@
   "name": "manter",
   "private": true,
   "workspaces": ["mobile", "server", "shared"],
+  "pnpm": { "overrides": {} },
   "scripts": {
     "mobile": "pnpm --filter manter-mobile start",
     "server": "pnpm --filter manter-server dev",

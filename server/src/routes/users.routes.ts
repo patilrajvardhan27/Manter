@@ -1,8 +1,10 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { getMe, updateProfile, getUserById } from '../controllers/users.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.get('/me', getMe);
+router.put('/me', updateProfile);
+router.get('/:id', getUserById);
 
 export default router;

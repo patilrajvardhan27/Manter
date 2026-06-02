@@ -143,7 +143,29 @@ model Block {
   @@unique([blockerId, blockedId])
 }
 
-enum Role         { WOMAN MAN }
-enum MatchStatus  { PENDING MATCHED DECLINED }
-enum ReportReason { HARASSMENT FAKE_PROFILE INAPPROPRIATE_CONTENT THREATENING CATFISH OTHER }
-enum ReportStatus { PENDING REVIEWED ACTIONED DISMISSED }
+enum Role {
+  WOMAN
+  MAN
+}
+
+enum MatchStatus {
+  PENDING
+  MATCHED
+  DECLINED
+}
+
+enum ReportReason {
+  HARASSMENT
+  FAKE_PROFILE
+  INAPPROPRIATE_CONTENT
+  THREATENING
+  CATFISH
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  ACTIONED
+  DISMISSED
+}

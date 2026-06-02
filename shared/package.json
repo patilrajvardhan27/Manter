@@ -1,0 +1,14 @@
+{
+  "name": "manter-shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "types/index.ts",
+  "types": "types/index.ts",
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "zod": "^3.23.0"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  }
+}
