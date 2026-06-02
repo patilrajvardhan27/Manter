@@ -1,8 +1,10 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { reportUser, blockUser, unblockUser } from '../controllers/safety.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.post('/report', reportUser);
+router.post('/block/:userId', blockUser);
+router.delete('/block/:userId', unblockUser);
 
 export default router;

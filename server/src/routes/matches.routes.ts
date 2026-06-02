@@ -1,8 +1,10 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { getMatches, likeUser, passUser } from '../controllers/matches.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.get('/', getMatches);
+router.post('/like/:userId', likeUser);
+router.post('/pass/:userId', passUser);
 
 export default router;

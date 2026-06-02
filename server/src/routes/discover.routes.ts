@@ -1,8 +1,8 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { getDiscoverFeed } from '../controllers/discover.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.get('/', getDiscoverFeed);
 
 export default router;
