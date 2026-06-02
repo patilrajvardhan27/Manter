@@ -157,7 +157,23 @@ export default function ChatRoomScreen() {
             </View>
           </Pressable>
 
-          <View style={{ width: 40 }} />
+          {/* AI Shield button — only for women */}
+          {user?.role === 'WOMAN' && roomMessages.length >= 3 ? (
+            <Pressable
+              style={styles.shieldBtn}
+              hitSlop={8}
+              onPress={() =>
+                router.push({
+                  pathname: '/analysis/[matchId]',
+                  params: { matchId, otherName: otherUser?.name ?? '' },
+                })
+              }
+            >
+              <Text style={styles.shieldText}>🛡</Text>
+            </Pressable>
+          ) : (
+            <View style={{ width: 40 }} />
+          )}
         </View>
 
         {/* Messages */}
@@ -287,4 +303,12 @@ const styles = StyleSheet.create({
   },
   typingDots: { fontSize: 16, color: '#9ca3af', letterSpacing: 3 },
   typingLabel: { fontSize: 12, color: '#9ca3af' },
+
+  shieldBtn: {
+    width: 40,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shieldText: { fontSize: 20 },
 });

@@ -78,6 +78,35 @@ export interface RedFlagScanResult {
   explanation: string;
 }
 
+export type ConversationHealth = 'healthy' | 'caution' | 'concerning';
+
+export interface FlagPattern {
+  category: RedFlagCategory;
+  severity: 'mild' | 'moderate' | 'severe';
+  count: number;
+  explanation: string;
+  // Representative quote from the conversation, anonymised
+  excerpt?: string;
+}
+
+export interface ConversationAnalysis {
+  overallScore: number;           // 0–1
+  health: ConversationHealth;
+  summary: string;
+  patterns: FlagPattern[];
+  greenFlags: string[];
+  recommendation: string;
+  analyzedAt: string;
+}
+
+export interface RedFlagStats {
+  totalConversations: number;
+  flaggedConversations: number;
+  flagRate: number;               // 0–1
+  averageScore: number;           // 0–1
+  topCategories: { category: RedFlagCategory; count: number }[];
+}
+
 export interface Rating {
   id: string;
   raterId: string;

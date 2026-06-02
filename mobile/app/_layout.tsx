@@ -24,6 +24,7 @@ export default function RootLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="profile/[userId]" options={{ presentation: 'modal' }} />
       <Stack.Screen name="rate/[userId]" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="analysis/[matchId]" />
       <Stack.Screen name="safety/index" />
     </Stack>
   );

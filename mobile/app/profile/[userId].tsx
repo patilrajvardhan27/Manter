@@ -14,8 +14,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScoreBreakdown } from '../../components/cards/ScoreBreakdown';
 import { api } from '../../lib/api';
-import { QualityScores } from '../../../shared/types';
+import { QualityScores, RedFlagStats } from '../../../shared/types';
 import { useAuthStore } from '../../store/auth.store';
+import { RED_FLAG_LABELS } from '../../constants/redFlags';
+import { RedFlagCategory } from '../../../shared/types';
 
 const { width } = Dimensions.get('window');
 
@@ -44,10 +46,17 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showFullScore, setShowFullScore] = useState(false);
+  const [flagStats, setFlagStats] = useState<RedFlagStats | null>(null);
 
   useEffect(() => {
     api.get(`/users/${userId}`)
-      .then((res) => setProfile(res.data))
+      .then((res) => {
+        setProfile(res.data);
+        // Fetch red flag stats for men if viewer is a woman
+        if (res.data.role === 'MAN') {
+          api.get(`/ai/stats/${userId}`).then((r) => setFlagStats(r.data)).catch(() => null);
+        }
+      })
       .catch(() => Alert.alert('Error', 'Could not load this profile.'))
       .finally(() => setLoading(false));
   }, [userId]);
@@ -167,6 +176,11 @@ export default function ProfileScreen() {
             </View>
           )}
 
+          {/* AI red flag stats (women viewing men) */}
+          {me?.role === 'WOMAN' && isMan && flagStats && flagStats.totalConversations >= 2 && (
+            <FlagStatsSection stats={flagStats} name={profile.name} />
+          )}
+
           {/* Rate button (women can rate men they've dated) */}
           {me?.role === 'WOMAN' && isMan && (
             <Pressable
@@ -274,4 +288,104 @@ const styles = StyleSheet.create({
 
   reportBtn: { paddingVertical: 8, alignItems: 'center' },
   reportBtnText: { fontSize: 13, color: '#9ca3af' },
+});
+
+// ─── Red flag stats section ───────────────────────────────────────────────────
+
+function FlagStatsSection({ stats, name }: { stats: RedFlagStats; name: string }) {
+  const { flaggedConversations, totalConversations, flagRate, topCategories } = stats;
+  const isClean = flaggedConversations === 0;
+
+  return (
+    <View style={flagStyles.card}>
+      <View style={flagStyles.header}>
+        <Text style={flagStyles.title}>AI Safety Signal</Text>
+        <Text style={flagStyles.sub}>Based on {name}'s conversations on Manter</Text>
+      </View>
+
+      {isClean ? (
+        <View style={flagStyles.cleanRow}>
+          <Text style={flagStyles.cleanIcon}>✅</Text>
+          <Text style={flagStyles.cleanText}>
+            No concerning patterns detected across {totalConversations} conversation
+            {totalConversations !== 1 ? 's' : ''}.
+          </Text>
+        </View>
+      ) : (
+        <>
+          <View style={flagStyles.statRow}>
+            <View style={[flagStyles.statBox, flagRate > 0.4 ? flagStyles.statBoxRed : flagStyles.statBoxAmber]}>
+              <Text style={flagStyles.statNum}>{flaggedConversations}</Text>
+              <Text style={flagStyles.statLabel}>
+                of {totalConversations} conversation{totalConversations !== 1 ? 's' : ''} flagged
+              </Text>
+            </View>
+          </View>
+
+          {topCategories.length > 0 && (
+            <View style={flagStyles.categories}>
+              <Text style={flagStyles.catTitle}>Most common patterns:</Text>
+              {topCategories.map((c) => (
+                <View key={c.category} style={flagStyles.catRow}>
+                  <Text style={flagStyles.catDot}>•</Text>
+                  <Text style={flagStyles.catLabel}>
+                    {RED_FLAG_LABELS[c.category as RedFlagCategory] ?? c.category}
+                  </Text>
+                  <Text style={flagStyles.catCount}>{c.count}×</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </>
+      )}
+
+      <Text style={flagStyles.disclaimer}>
+        AI-generated signal. Anonymous and aggregate — no individual conversations are revealed.
+      </Text>
+    </View>
+  );
+}
+
+const flagStyles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f9fafb',
+    padding: 16,
+    gap: 12,
+  },
+  header: { gap: 2 },
+  title: { fontSize: 14, fontWeight: '700', color: '#111827' },
+  sub: { fontSize: 12, color: '#6b7280' },
+
+  cleanRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  cleanIcon: { fontSize: 20 },
+  cleanText: { flex: 1, fontSize: 13, color: '#065f46', lineHeight: 19 },
+
+  statRow: { flexDirection: 'row' },
+  statBox: {
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 2,
+  },
+  statBoxAmber: { backgroundColor: '#fffbeb', borderWidth: 1, borderColor: '#fde68a' },
+  statBoxRed: { backgroundColor: '#fff1f2', borderWidth: 1, borderColor: '#fecaca' },
+  statNum: { fontSize: 22, fontWeight: '800', color: '#111827' },
+  statLabel: { fontSize: 12, color: '#6b7280' },
+
+  categories: { gap: 6 },
+  catTitle: { fontSize: 12, fontWeight: '600', color: '#374151' },
+  catRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  catDot: { color: '#9ca3af', fontSize: 12 },
+  catLabel: { flex: 1, fontSize: 13, color: '#374151' },
+  catCount: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
+
+  disclaimer: {
+    fontSize: 10,
+    color: '#9ca3af',
+    fontStyle: 'italic',
+    lineHeight: 15,
+  },
 });
