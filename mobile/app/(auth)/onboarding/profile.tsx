@@ -85,8 +85,11 @@ export default function ProfileScreen() {
         });
       }
 
-      // Redirect based on role: men go to quiz, women to weights — Phase 2
-      // For now both land on the main tabs
+      if (params.role === 'MAN') {
+        router.replace('/(auth)/onboarding/quiz');
+      } else {
+        router.replace('/(auth)/onboarding/weights');
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.error ?? 'Registration failed. Please try again.';
       Alert.alert('Error', msg);

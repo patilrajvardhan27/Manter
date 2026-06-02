@@ -1,8 +1,9 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { submitQuiz, getQuizStatus } from '../controllers/quiz.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.get('/status', getQuizStatus);
+router.post('/submit', submitQuiz);
 
 export default router;
