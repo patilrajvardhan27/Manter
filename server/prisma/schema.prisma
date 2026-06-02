@@ -26,18 +26,31 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  manProfile        ManProfile?
-  womanProfile      WomanProfile?
-  ratingsGiven      Rating[]          @relation("Rater")
-  ratingsReceived   Rating[]          @relation("Rated")
-  matchesAsWoman    Match[]           @relation("Woman")
-  matchesAsMan      Match[]           @relation("Man")
-  reportsGiven      Report[]          @relation("Reporter")
-  reportsReceived   Report[]          @relation("Reported")
-  checkins          SafetyCheckin[]
-  emergencyContacts EmergencyContact[]
-  blocksGiven       Block[]           @relation("Blocker")
-  blocksReceived    Block[]           @relation("Blocked")
+  manProfile          ManProfile?
+  womanProfile        WomanProfile?
+  onboardingResponse  OnboardingResponse?
+  ratingsGiven        Rating[]          @relation("Rater")
+  ratingsReceived     Rating[]          @relation("Rated")
+  matchesAsWoman      Match[]           @relation("Woman")
+  matchesAsMan        Match[]           @relation("Man")
+  reportsGiven        Report[]          @relation("Reporter")
+  reportsReceived     Report[]          @relation("Reported")
+  checkins            SafetyCheckin[]
+  emergencyContacts   EmergencyContact[]
+  blocksGiven         Block[]           @relation("Blocker")
+  blocksReceived      Block[]           @relation("Blocked")
+}
+
+model OnboardingResponse {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role
+  // MAN:   [{ questionId, scenario, question, answer }]
+  // WOMAN: [{ qualityKey, label, category, weight }]
+  responses   Json
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ManProfile {
@@ -60,9 +73,9 @@ model WomanProfile {
 model Rating {
   id            String   @id @default(cuid())
   raterId       String
-  rater         User     @relation("Rater", fields: [raterId], references: [id])
+  rater         User     @relation("Rater", fields: [raterId], references: [id], onDelete: Cascade)
   ratedId       String
-  rated         User     @relation("Rated", fields: [ratedId], references: [id])
+  rated         User     @relation("Rated", fields: [ratedId], references: [id], onDelete: Cascade)
   qualityScores Json     // { q1: 9, q2: 6, ... q23: 8 } — real-date experience
   overallScore  Float
   reviewText    String?
@@ -75,9 +88,9 @@ model Rating {
 model Match {
   id                 String      @id @default(cuid())
   womanId            String
-  woman              User        @relation("Woman", fields: [womanId], references: [id])
+  woman              User        @relation("Woman", fields: [womanId], references: [id], onDelete: Cascade)
   manId              String
-  man                User        @relation("Man", fields: [manId], references: [id])
+  man                User        @relation("Man", fields: [manId], references: [id], onDelete: Cascade)
   status             MatchStatus @default(PENDING)
   compatibilityScore Float
   womanLiked         Boolean     @default(false)
@@ -123,9 +136,9 @@ model EmergencyContact {
 model Report {
   id         String       @id @default(cuid())
   reporterId String
-  reporter   User         @relation("Reporter", fields: [reporterId], references: [id])
+  reporter   User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
   reportedId String
-  reported   User         @relation("Reported", fields: [reportedId], references: [id])
+  reported   User         @relation("Reported", fields: [reportedId], references: [id], onDelete: Cascade)
   reason     ReportReason
   details    String?
   status     ReportStatus @default(PENDING)
@@ -135,9 +148,9 @@ model Report {
 model Block {
   id        String   @id @default(cuid())
   blockerId String
-  blocker   User     @relation("Blocker", fields: [blockerId], references: [id])
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
   blockedId String
-  blocked   User     @relation("Blocked", fields: [blockedId], references: [id])
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@unique([blockerId, blockedId])

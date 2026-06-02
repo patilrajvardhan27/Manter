@@ -20,7 +20,7 @@ export async function register(req: Request, res: Response) {
   });
 
   const tokens = issueTokens(user.id, user.role);
-  res.status(201).json({ user, ...tokens });
+  res.status(201).json({ user: { ...user, quizCompleted: false }, ...tokens });
 }
 
 export async function login(req: Request, res: Response) {

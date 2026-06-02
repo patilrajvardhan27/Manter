@@ -2,7 +2,7 @@
 
 **The first dating app that turns "is he actually a good man?" from a gut feeling into a verified, data-backed score.**
 
-Women browse men ranked by 23 character qualities — scored by a behavioral quiz, refined by real community ratings from women who've actually dated them, with AI-powered red flag detection in every conversation.
+Women browse men ranked by 23 character qualities — scored by an open-ended behavioral assessment evaluated by Claude AI (no multiple choice, so answers can't be faked), refined by real community ratings from women who've actually dated them, with AI-powered red flag detection in every conversation.
 
 ---
 
@@ -11,7 +11,7 @@ Women browse men ranked by 23 character qualities — scored by a behavioral qui
 | Feature | Tinder | Bumble | Hinge | Manter |
 |---|---|---|---|---|
 | Match on 23 character qualities | No | No | Partial | **Yes** |
-| Behavioral quiz for men | No | No | No | **Yes** |
+| AI-evaluated open-ended assessment for men | No | No | No | **Yes** |
 | Community ratings from real women | No | No | No | **Yes** |
 | AI red flag scan in every chat | No | No | No | **Yes** |
 | Full conversation safety analysis | No | No | No | **Yes** |
@@ -32,7 +32,7 @@ Women browse men ranked by 23 character qualities — scored by a behavioral qui
 | Database | PostgreSQL | Primary data store |
 | Cache | Redis (ioredis) | Sessions, push tokens, pass tracking |
 | Real-time | Socket.io | Chat, typing, presence, red flag alerts |
-| AI | Claude Haiku (`claude-haiku-4-5-20251001`) | Per-message scan + full conversation analysis |
+| AI | Claude Haiku (`claude-haiku-4-5-20251001`) | Quiz evaluation + per-message red flag scan + full conversation analysis |
 | File Storage | Cloudflare R2 | Photos, S3-compatible, generous free tier |
 | Auth | JWT (15m access + 30d refresh) + bcrypt | No third-party auth service |
 | Push Notifications | Expo Push API + FCM | Match alerts, messages, safety alerts |
@@ -74,9 +74,9 @@ manter/
 │   │   ├── middleware/          # auth, role, validate, rateLimit, errorHandler
 │   │   └── lib/                 # prisma, redis, claude, r2, env
 │   └── prisma/
-│       └── schema.prisma        # 9 models: User, ManProfile, WomanProfile,
-│                                #   Match, Message, Rating, SafetyCheckin,
-│                                #   EmergencyContact, Report, Block
+│       └── schema.prisma        # 10 models: User, ManProfile, WomanProfile,
+│                                #   OnboardingResponse, Match, Message, Rating,
+│                                #   SafetyCheckin, EmergencyContact, Report, Block
 │
 ├── shared/                      # Shared across mobile + server
 │   ├── types/index.ts           # All TypeScript interfaces
@@ -179,7 +179,7 @@ pnpm assets
 ### Quiz & Ratings
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/quiz/submit` | Submit behavioral quiz (men) |
+| POST | `/quiz/submit` | Submit free-text quiz answers → Claude AI evaluates → quality scores stored (men) |
 | GET | `/quiz/status` | Quiz completion status |
 | POST | `/ratings/:userId` | Rate a man on 23 qualities (women) |
 | GET | `/ratings/:userId` | Get ratings for a profile |
@@ -239,7 +239,7 @@ pnpm assets
 | Login | `/(auth)/login` | Email + password |
 | Role | `/(auth)/onboarding/role` | Woman / Man card picker |
 | Profile setup | `/(auth)/onboarding/profile` | Name, age, city, bio, photo |
-| Quiz | `/(auth)/onboarding/quiz` | 6 behavioral scenarios (men) |
+| Quiz | `/(auth)/onboarding/quiz` | 6 open-ended behavioral scenarios, free-text answers evaluated by Claude AI (men) |
 | Weights | `/(auth)/onboarding/weights` | 23-quality priority setter (women) |
 | Discover | `/(tabs)/discover` | Swipeable card stack with like/pass |
 | Matches | `/(tabs)/matches` | Matched users with last message |
@@ -266,7 +266,7 @@ Computed server-side per candidate in the discover feed:
 score = Σ(weight_i × quality_score_i) / Σ(weight_i)  ×  100
 
 weight_i       = woman's priority for quality i  (1–5)
-quality_score_i = community aggregate if ratingCount ≥ 3, else quiz self-score  (1–10)
+quality_score_i = community aggregate if ratingCount ≥ 3, else AI quiz score  (1–10)
 ```
 
 Women with different priorities see different rankings for the same man.
@@ -278,6 +278,9 @@ communityScore_i = mean(all ratings for quality i)
 overallCommunityScore = mean(communityScore_1..23)
 ManProfile.qualityScores overwritten with community aggregate
 ```
+
+### AI Quiz Evaluation
+Men answer 6 open-ended scenario questions (60-character minimum per answer). Claude Haiku reads all answers together and scores each of the 23 qualities (1–10), explicitly penalising generic virtue-signalling, inconsistency across answers, and deflection. No answer options means the system cannot be gamed by picking the "right" choice.
 
 ### Red Flag Detection
 - **Per-message scan:** Claude Haiku scans last 10 messages after every message sent by a man. Score 0–1 across 7 flag categories. Emits `red_flag:alert` socket event + push notification at score ≥ 0.7.

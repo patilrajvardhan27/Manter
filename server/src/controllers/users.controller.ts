@@ -3,6 +3,17 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { storePushToken } from '../services/notifications.service';
 
+const QUALITY_LABELS: Record<string, string> = {
+  q1: 'Respects Her Decisions', q2: 'Protects Not Controls', q3: 'Supportive of Her Growth',
+  q4: 'Trustworthy', q5: 'Genuine Connection', q6: 'Stands Up for Her',
+  q7: 'Notices Small Things', q8: 'Patient & Gives Space', q9: 'Emotionally Intelligent',
+  q10: 'Sense of Humor', q11: 'Respects Boundaries', q12: 'Safe Presence',
+  q13: 'Confident & Self-Respecting', q14: 'Expresses Emotions Freely',
+  q15: 'Respects Womanhood', q16: 'Never Mocks Women', q17: 'Ambitious & Futuristic',
+  q18: 'No Anger Issues', q19: 'Shares Responsibilities', q20: 'Reliable',
+  q21: 'Basic Manners', q22: 'Humble & Down-to-Earth', q23: 'No Ego',
+};
+
 const qualityWeight = z.number().int().min(1).max(5);
 const WeightsSchema = z.object({
   qualityWeights: z.object({
@@ -40,7 +51,7 @@ export async function getMe(req: Request, res: Response) {
     return;
   }
 
-  res.json(user);
+  res.json({ ...user, quizCompleted: !!user.manProfile });
 }
 
 export async function updateProfile(req: Request, res: Response) {
@@ -105,13 +116,28 @@ export async function saveWeights(req: Request, res: Response) {
     return;
   }
 
-  const profile = await prisma.womanProfile.upsert({
-    where: { userId: req.user.userId },
-    create: { userId: req.user.userId, qualityWeights: parsed.data.qualityWeights },
-    update: { qualityWeights: parsed.data.qualityWeights },
-  });
+  const weights = parsed.data.qualityWeights;
 
-  res.json({ qualityWeights: profile.qualityWeights, message: 'Priorities saved' });
+  const labeledResponses = Object.entries(weights).map(([key, weight]) => ({
+    qualityKey: key,
+    label: QUALITY_LABELS[key] ?? key,
+    weight,
+  }));
+
+  await prisma.$transaction([
+    prisma.womanProfile.upsert({
+      where: { userId: req.user.userId },
+      create: { userId: req.user.userId, qualityWeights: weights },
+      update: { qualityWeights: weights },
+    }),
+    prisma.onboardingResponse.upsert({
+      where: { userId: req.user.userId },
+      create: { userId: req.user.userId, role: 'WOMAN', responses: labeledResponses },
+      update: { responses: labeledResponses, updatedAt: new Date() },
+    }),
+  ]);
+
+  res.json({ qualityWeights: weights, message: 'Priorities saved' });
 }
 
 export async function savePushToken(req: Request, res: Response) {

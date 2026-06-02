@@ -17,7 +17,11 @@ export default function RootLayout() {
   useEffect(() => {
     if (isLoading) return;
     if (user) {
-      router.replace('/(tabs)/discover');
+      if (user.role === 'MAN' && !user.quizCompleted) {
+        router.replace('/(auth)/onboarding/quiz');
+      } else {
+        router.replace('/(tabs)/discover');
+      }
     } else {
       router.replace('/(auth)/welcome');
     }

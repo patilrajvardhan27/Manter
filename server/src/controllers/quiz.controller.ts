@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
-import { computeQuizScores } from '../services/quiz.service';
+import { evaluateQuizWithAI } from '../services/quiz.service';
 
 const AnswerSchema = z.object({
   questionId: z.string(),
-  optionId: z.string(),
-  scores: z.record(z.string(), z.number()),
+  scenario: z.string(),
+  question: z.string(),
+  answer: z.string().min(1, 'Answer cannot be empty'),
 });
 
 const SubmitQuizSchema = z.object({
@@ -26,22 +27,22 @@ export async function submitQuiz(req: Request, res: Response) {
   }
 
   const { answers } = parsed.data;
-  const qualityScores = computeQuizScores(answers as any);
+  const qualityScores = await evaluateQuizWithAI(answers);
 
-  const profile = await prisma.manProfile.upsert({
-    where: { userId: req.user.userId },
-    create: {
-      userId: req.user.userId,
-      qualityScores,
-      quizAnswers: answers,
-    },
-    update: {
-      qualityScores,
-      quizAnswers: answers,
-    },
-  });
+  await prisma.$transaction([
+    prisma.manProfile.upsert({
+      where: { userId: req.user.userId },
+      create: { userId: req.user.userId, qualityScores, quizAnswers: answers },
+      update: { qualityScores, quizAnswers: answers },
+    }),
+    prisma.onboardingResponse.upsert({
+      where: { userId: req.user.userId },
+      create: { userId: req.user.userId, role: 'MAN', responses: answers },
+      update: { responses: answers, updatedAt: new Date() },
+    }),
+  ]);
 
-  res.json({ qualityScores: profile.qualityScores, message: 'Quiz submitted' });
+  res.json({ qualityScores, message: 'Quiz evaluated and submitted' });
 }
 
 export async function getQuizStatus(req: Request, res: Response) {

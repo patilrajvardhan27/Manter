@@ -11,6 +11,7 @@ interface AuthState {
   register: (data: any) => Promise<void>;
   logout: () => Promise<void>;
   restore: () => Promise<void>;
+  setQuizCompleted: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -29,6 +30,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     await SecureStore.setItemAsync('accessToken', data.accessToken);
     await SecureStore.setItemAsync('refreshToken', data.refreshToken);
     set({ user: data.user });
+  },
+
+  setQuizCompleted: () => {
+    set((state) => state.user ? { user: { ...state.user, quizCompleted: true } } : {});
   },
 
   logout: async () => {

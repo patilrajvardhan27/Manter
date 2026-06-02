@@ -28,6 +28,7 @@ export interface User {
   isVerified: boolean;
   idVerified: boolean;
   createdAt: string;
+  quizCompleted: boolean;
 }
 
 export interface ManProfile {
