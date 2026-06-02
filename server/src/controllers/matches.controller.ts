@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { redis } from '../lib/redis';
+import { notifyNewMatch } from '../services/notifications.service';
 
 const PASS_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
@@ -60,6 +61,14 @@ export async function likeUser(req: Request, res: Response) {
           compatibilityScore: 0, // will be recomputed in background; 0 as placeholder
         },
       });
+
+  // Fire push notification async — don't block the response
+  if (isMatch) {
+    const otherName = role === 'WOMAN'
+      ? (await prisma.user.findUnique({ where: { id: manId }, select: { name: true } }))?.name ?? 'Someone'
+      : (await prisma.user.findUnique({ where: { id: womanId }, select: { name: true } }))?.name ?? 'Someone';
+    notifyNewMatch(womanId, manId, otherName, match.id).catch(() => null);
+  }
 
   res.json({ matched: isMatch, matchId: match.id });
 }

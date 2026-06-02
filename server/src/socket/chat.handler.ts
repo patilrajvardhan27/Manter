@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { prisma } from '../lib/prisma';
 import { scanForRedFlags } from '../services/ai.service';
+import { notifyNewMessage, notifyRedFlagAlert } from '../services/notifications.service';
 import { AuthPayload } from '../middleware/auth.middleware';
 
 export function registerChatHandlers(io: Server, socket: Socket) {
@@ -44,6 +45,17 @@ export function registerChatHandlers(io: Server, socket: Socket) {
 
     // Emit to match room (both users if both are in it) + recipient's user room (fallback)
     io.to(`match:${matchId}`).to(`user:${recipientId}`).emit('message:new', message);
+
+    // Push notification if recipient is not in the match room (app in background)
+    const recipientInRoom = io.sockets.adapter.rooms.get(`match:${matchId}`)?.size ?? 0;
+    if (recipientInRoom === 0) {
+      const senderUser = await prisma.user.findUnique({
+        where: { id: sender.userId },
+        select: { name: true },
+      });
+      notifyNewMessage(recipientId, senderUser?.name ?? 'Someone', content.trim(), matchId)
+        .catch(() => null);
+    }
 
     // AI scan async — only scan messages from men, emit alert to woman only
     if (sender.role === 'MAN') {
@@ -116,6 +128,8 @@ async function runRedFlagScan(
         flags: result.flags,
         explanation: result.explanation,
       });
+      // Push notification if app is backgrounded
+      notifyRedFlagAlert(recipientId, match.id).catch(() => null);
     }
   }
 }

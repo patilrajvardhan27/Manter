@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { usePreventScreenCapture } from 'expo-screen-capture';
 import { MessageBubble } from '../../../components/chat/MessageBubble';
 import { ChatInput } from '../../../components/chat/ChatInput';
 import { RedFlagBanner } from '../../../components/chat/RedFlagBanner';
@@ -37,6 +38,9 @@ export default function ChatRoomScreen() {
 
   const { messages, hasMore, typingUsers, onlineUsers, redFlagAlerts, setMessages,
     prependMessages, dismissRedFlag } = useChatStore();
+
+  // Prevent screenshots in chat for privacy
+  usePreventScreenCapture();
 
   const roomMessages = messages[matchId] ?? [];
   const roomTyping = typingUsers[matchId] ?? new Set<string>();

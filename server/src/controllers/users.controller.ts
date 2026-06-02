@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
+import { storePushToken } from '../services/notifications.service';
 
 const qualityWeight = z.number().int().min(1).max(5);
 const WeightsSchema = z.object({
@@ -111,4 +112,14 @@ export async function saveWeights(req: Request, res: Response) {
   });
 
   res.json({ qualityWeights: profile.qualityWeights, message: 'Priorities saved' });
+}
+
+export async function savePushToken(req: Request, res: Response) {
+  const { token } = req.body as { token?: string };
+  if (!token) {
+    res.status(400).json({ error: 'token is required' });
+    return;
+  }
+  await storePushToken(req.user.userId, token);
+  res.json({ ok: true });
 }
