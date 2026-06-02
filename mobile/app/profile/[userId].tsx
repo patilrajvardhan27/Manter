@@ -185,7 +185,7 @@ export default function ProfileScreen() {
           {me?.role === 'WOMAN' && isMan && (
             <Pressable
               style={styles.rateBtn}
-              onPress={() => router.push({ pathname: '/rate/[userId]', params: { userId: profile.id } })}
+              onPress={() => router.push({ pathname: '/rate/[userId]', params: { userId: profile.id, name: profile.name } })}
             >
               <Text style={styles.rateBtnText}>Rate {profile.name}</Text>
               <Text style={styles.rateBtnSub}>Share your experience to help other women</Text>

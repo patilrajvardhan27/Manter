@@ -1,8 +1,10 @@
 import { Router } from 'express';
-// TODO: import controllers
+import { submitRating, getRatings, getCommunityFeed } from '../controllers/ratings.controller';
 
 const router = Router();
 
-// TODO: add routes
+router.get('/feed', getCommunityFeed);
+router.post('/:userId', submitRating);
+router.get('/:userId', getRatings);
 
 export default router;
