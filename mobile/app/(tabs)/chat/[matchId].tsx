@@ -37,7 +37,7 @@ export default function ChatRoomScreen() {
   const socketRef = useSocket();
 
   const { messages, hasMore, typingUsers, onlineUsers, redFlagAlerts, setMessages,
-    prependMessages, dismissRedFlag } = useChatStore();
+    prependMessages, addMessage, dismissRedFlag } = useChatStore();
 
   // Prevent screenshots in chat for privacy
   usePreventScreenCapture();
@@ -102,6 +102,15 @@ export default function ChatRoomScreen() {
   }, [matchId, hasMore, loadingOlder, oldestMessageId]);
 
   function sendMessage(text: string) {
+    // Optimistic: show message immediately without waiting for server echo
+    addMessage({
+      id: `temp_${Date.now()}`,
+      matchId,
+      senderId: user!.id,
+      content: text,
+      createdAt: new Date().toISOString(),
+      readAt: null,
+    });
     emitSocket(socketRef, 'message:send', { matchId, content: text });
   }
 

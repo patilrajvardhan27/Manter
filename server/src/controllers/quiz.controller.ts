@@ -26,14 +26,18 @@ export async function submitQuiz(req: Request, res: Response) {
     return;
   }
 
+  const existing = await prisma.manProfile.findUnique({ where: { userId: req.user.userId } });
+  if (existing) {
+    res.status(409).json({ error: 'Quiz already submitted. Your character score is locked.' });
+    return;
+  }
+
   const { answers } = parsed.data;
   const qualityScores = await evaluateQuizWithAI(answers);
 
   await prisma.$transaction([
-    prisma.manProfile.upsert({
-      where: { userId: req.user.userId },
-      create: { userId: req.user.userId, qualityScores, quizAnswers: answers },
-      update: { qualityScores, quizAnswers: answers },
+    prisma.manProfile.create({
+      data: { userId: req.user.userId, qualityScores, quizAnswers: answers },
     }),
     prisma.onboardingResponse.upsert({
       where: { userId: req.user.userId },

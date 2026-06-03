@@ -110,18 +110,18 @@ export default function DiscoverScreen() {
           {candidates.length === 0 ? (
             <EmptyState onRefresh={() => fetchCandidates(1)} />
           ) : (
-            candidates.slice(0, 3).map((c, i) =>
-              i === 0 ? (
-                <SwipeableCard
-                  key={c.id}
-                  candidate={c}
-                  onLike={() => handleLike(c)}
-                  onPass={() => handlePass(c)}
-                />
-              ) : (
-                <CandidateCard key={c.id} candidate={c} stackIndex={i} />
-              ),
-            )
+            <>
+              {/* Back cards rendered first so front card sits on top */}
+              {candidates.slice(1, 3).map((c, i) => (
+                <CandidateCard key={c.id} candidate={c} stackIndex={i + 1} />
+              ))}
+              <SwipeableCard
+                key={candidates[0].id}
+                candidate={candidates[0]}
+                onLike={() => handleLike(candidates[0])}
+                onPass={() => handlePass(candidates[0])}
+              />
+            </>
           )}
         </View>
 
@@ -337,6 +337,8 @@ const styles = StyleSheet.create({
 
   swipeableCard: {
     position: 'absolute',
+    width: CARD_W,
+    height: CARD_H,
     zIndex: 10,
   },
 

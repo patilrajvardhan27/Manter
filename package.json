@@ -1,15 +1,29 @@
 {
   "name": "manter",
   "private": true,
-  "workspaces": ["mobile", "server", "shared"],
-  "pnpm": { "overrides": {} },
+  "workspaces": [
+    "mobile",
+    "server",
+    "shared"
+  ],
+  "pnpm": {
+    "overrides": {}
+  },
   "scripts": {
     "mobile": "pnpm --filter manter-mobile start",
     "server": "pnpm --filter manter-server dev",
     "db:migrate": "pnpm --filter manter-server db:migrate",
     "db:generate": "pnpm --filter manter-server db:generate",
     "assets": "cd server && node ../scripts/generate-assets.mjs",
-    "build:server": "pnpm --filter manter-server build"
+    "build:server": "pnpm --filter manter-server build",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@9.0.0",
+  "version": "1.0.0",
+  "dependencies": {
+    "expo": "~52.0.49",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
+  }
 }

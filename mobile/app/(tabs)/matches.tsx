@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   View,
   Text,
@@ -56,7 +57,7 @@ export default function MatchesScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchMatches(); }, []);
+  useFocusEffect(useCallback(() => { fetchMatches(); }, [fetchMatches]));
 
   if (loading) {
     return (

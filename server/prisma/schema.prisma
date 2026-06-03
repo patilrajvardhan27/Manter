@@ -1,4 +1,4 @@
-generator client {
+priya.patel@example.comgenerator client {
   provider = "prisma-client-js"
 }
 

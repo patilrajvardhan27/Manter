@@ -69,7 +69,12 @@ export default function MyProfileScreen() {
             <View style={styles.scoreCard}>
               <ScoreBreakdown
                 scores={mp.qualityScores}
-                communityScore={mp.communityScore}
+                communityScore={
+                  mp.ratingCount > 0
+                    ? mp.communityScore
+                    : Object.values(mp.qualityScores as Record<string, number>).reduce((a, b) => a + b, 0) /
+                      Object.values(mp.qualityScores as Record<string, number>).length
+                }
                 ratingCount={mp.ratingCount}
               />
             </View>

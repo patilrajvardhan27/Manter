@@ -70,7 +70,7 @@ export default function RootLayout() {
 const lockStyles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10,0,30,0.96)',
+    backgroundColor: 'rgba(15,10,12,0.97)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 9999,
@@ -85,7 +85,7 @@ const lockStyles = StyleSheet.create({
   sub: { fontSize: 15, color: 'rgba(255,255,255,0.6)', textAlign: 'center' },
   btn: {
     marginTop: 12,
-    backgroundColor: '#7c3aed',
+    backgroundColor: '#e11d48',
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 40,

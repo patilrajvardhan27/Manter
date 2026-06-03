@@ -66,8 +66,19 @@ export const useChatStore = create<ChatState>((set) => ({
   addMessage: (message) =>
     set((s) => {
       const existing = s.messages[message.matchId] ?? [];
-      // Avoid duplicates
       if (existing.some((m) => m.id === message.id)) return s;
+      // Replace matching optimistic temp message with the real server one
+      const tempIdx = existing.findIndex(
+        (m) =>
+          m.id.startsWith('temp_') &&
+          m.senderId === message.senderId &&
+          m.content === message.content,
+      );
+      if (tempIdx !== -1) {
+        const updated = [...existing];
+        updated[tempIdx] = message;
+        return { messages: { ...s.messages, [message.matchId]: updated } };
+      }
       return { messages: { ...s.messages, [message.matchId]: [...existing, message] } };
     }),
 

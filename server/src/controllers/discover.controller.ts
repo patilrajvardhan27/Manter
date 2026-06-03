@@ -13,16 +13,21 @@ export async function getDiscoverFeed(req: Request, res: Response) {
 
   const targetRole = role === 'WOMAN' ? 'MAN' : 'WOMAN';
 
-  // IDs already interacted with (liked/declined matches)
-  const existingMatchIds = await prisma.match.findMany({
-    where: {
-      OR: [{ womanId: userId }, { manId: userId }],
-    },
-    select: { womanId: true, manId: true },
+  // Exclude only users the current user has already liked, or mutual matches.
+  // Do NOT exclude users who liked the current user but haven't been liked back yet —
+  // they must stay in the feed so the current user can match with them.
+  const existingMatches = await prisma.match.findMany({
+    where: { OR: [{ womanId: userId }, { manId: userId }] },
+    select: { womanId: true, manId: true, womanLiked: true, manLiked: true, status: true },
   });
-  const interactedIds = new Set(
-    existingMatchIds.flatMap((m) => [m.womanId, m.manId]).filter((id) => id !== userId),
-  );
+  const interactedIds = new Set<string>();
+  for (const m of existingMatches) {
+    const otherId = m.womanId === userId ? m.manId : m.womanId;
+    const iCurrentlyLiked = m.womanId === userId ? m.womanLiked : m.manLiked;
+    if (m.status === 'MATCHED' || iCurrentlyLiked) {
+      interactedIds.add(otherId);
+    }
+  }
 
   // IDs passed via Redis (ephemeral, 30-day TTL)
   const passedRaw = await redis.smembers(`passed:${userId}`).catch(() => [] as string[]);

@@ -26,7 +26,10 @@ export async function register(req: Request, res: Response) {
 export async function login(req: Request, res: Response) {
   const { email, password } = req.body as LoginInput;
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { manProfile: { select: { userId: true } } },
+  });
   if (!user || !user.isActive) {
     res.status(401).json({ error: 'Invalid credentials' });
     return;
@@ -40,7 +43,14 @@ export async function login(req: Request, res: Response) {
 
   const tokens = issueTokens(user.id, user.role);
   res.json({
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, age: user.age },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      age: user.age,
+      quizCompleted: !!user.manProfile,
+    },
     ...tokens,
   });
 }

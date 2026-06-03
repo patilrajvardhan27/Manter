@@ -97,56 +97,154 @@ manter/
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 9+
-- Docker Desktop
+| Tool | Version | Notes |
+|---|---|---|
+| Node.js | 20+ | |
+| pnpm | 9+ | `npm i -g pnpm` |
+| Docker Desktop | latest | for PostgreSQL + Redis |
+| Java (JDK) | 17 | Android builds only — `brew install openjdk@17` |
+| Android Studio | latest | Android emulator / SDK |
+| Xcode | 15+ | iOS builds only (Mac only) |
 
-### 1. Install dependencies
+---
+
+### 1. Clone and install
 
 ```bash
+git clone https://github.com/your-username/manter.git
+cd manter
 pnpm install
 ```
 
-### 2. Start database and Redis
+### 2. Start PostgreSQL and Redis
 
 ```bash
 docker compose up -d
+# PostgreSQL on localhost:5432 · Redis on localhost:6379
 ```
 
-### 3. Set up environment
+### 3. Configure environment
 
 ```bash
 cp server/.env.example server/.env
-# Fill in: ANTHROPIC_API_KEY, R2 credentials, SMTP config
 ```
 
-### 4. Generate Prisma client and run migrations
+Open `server/.env` and fill in:
+
+```env
+DATABASE_URL=postgresql://manter:manter_dev@localhost:5432/manter
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=<any-long-random-string>
+JWT_REFRESH_SECRET=<any-long-random-string>
+ANTHROPIC_API_KEY=sk-ant-...        # console.anthropic.com
+R2_ACCOUNT_ID=...                   # Cloudflare R2 (optional for dev)
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=manter-media
+R2_PUBLIC_URL=https://...r2.dev
+```
+
+### 4. Set up the database
 
 ```bash
-pnpm db:generate
-pnpm db:migrate
+cd server
+npx prisma migrate dev     # run all migrations
+npx prisma generate        # generate Prisma client
+pnpm db:seed               # load 10 fake profiles (5 men, 5 women)
+cd ..
 ```
 
 ### 5. Start the backend
 
 ```bash
-pnpm server
-# API running at http://localhost:3000
+cd server && pnpm dev
+# ✓ API running at http://localhost:3000
+# ✓ Socket.io attached to same port
 ```
 
-### 6. Start the mobile app
+### 6. Configure mobile API URL
+
+Edit `mobile/.env`:
+
+```env
+# Android emulator
+EXPO_PUBLIC_API_URL=http://10.0.2.2:3000
+
+# iOS simulator or physical device on same WiFi
+# EXPO_PUBLIC_API_URL=http://<your-mac-ip>:3000
+```
+
+### 7. Run on Android emulator
 
 ```bash
-pnpm mobile
-# Scan the QR code with Expo Go (iOS or Android)
+cd mobile
+
+# First time only — set JAVA_HOME for the build
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=~/Library/Android/sdk
+
+npx expo run:android
+# Builds native APK, installs on emulator, starts Metro bundler
 ```
 
-### 7. Generate app store assets (optional)
+### 8. Run on iOS simulator (Mac only)
 
 ```bash
-pnpm assets
-# Creates icon.png, splash.png, adaptive-icon.png, notification-icon.png in mobile/assets/images/
+cd mobile
+npx expo run:ios
+# Builds and opens in iOS Simulator automatically
 ```
+
+### 9. Run on a physical device
+
+```bash
+cd mobile
+npx expo start
+# Scan the QR code with the Expo Go app (iOS/Android)
+# For a full native build, use: npx expo run:android / run:ios
+```
+
+---
+
+## Useful Dev Commands
+
+```bash
+# Backend
+cd server
+pnpm dev              # start server with hot-reload
+pnpm db:studio        # open Prisma Studio (visual DB browser) at localhost:5555
+pnpm db:seed          # seed 10 fake profiles
+pnpm db:migrate       # run pending migrations
+npx prisma generate   # regenerate Prisma client after schema changes
+
+# Mobile
+cd mobile
+npx expo start        # Metro bundler only (use with Expo Go)
+npx expo run:android  # full native Android build + run
+npx expo run:ios      # full native iOS build + run
+
+# Root (runs both)
+pnpm dev              # starts server + mobile metro in parallel
+```
+
+---
+
+## Test Accounts (seeded)
+
+All accounts use password: **`Raj$2003`**
+
+| Email | Role | Notes |
+|---|---|---|
+| `arjun.sharma@example.com` | Man | High emotional intelligence |
+| `rahul.verma@example.com` | Man | Practical, less expressive |
+| `dev.nair@example.com` | Man | Highest overall score |
+| `vikram.singh@example.com` | Man | Ambitious, confident |
+| `aditya.kumar@example.com` | Man | Near-perfect character score |
+| `priya.patel@example.com` | Woman | Prioritises safety & no control |
+| `neha.gupta@example.com` | Woman | Prioritises emotional depth |
+| `ananya.reddy@example.com` | Woman | Prioritises reliability & 50/50 |
+| `kavya.menon@example.com` | Woman | Prioritises trust & character |
+| `riya.kapoor@example.com` | Woman | Balanced priorities |
 
 ---
 
