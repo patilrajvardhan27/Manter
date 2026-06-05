@@ -1,62 +1,21 @@
-# Dependencies
+# Node / Next.js
 node_modules/
-.pnp
-.pnp.js
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native builds
-ios/
-android/
-*.jks
-*.keystore
-*.p8
-*.p12
-*.mobileprovision
-
-# Environment variables — NEVER commit these
+# Env
 .env
 .env.local
-.env.development
-.env.production
-.env.staging
+.env*.local
+server/.env
 
-# Build artifacts
-build/
-*.ipa
-*.aab
-*.apk
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-Thumbs.db
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# TypeScript
-*.tsbuildinfo
-
-# Testing
-coverage/
-
-# Misc
-.cache/
-tmp/
-temp/

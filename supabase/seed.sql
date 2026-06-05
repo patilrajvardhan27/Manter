@@ -1,0 +1,26 @@
+-- Seed the 23 qualities (mirrors client/src/lib/constants/qualities.ts).
+insert into qualities (key, n, label, grp) values
+  ('respects_decisions', 1, 'Respects her decisions', 'respect'),
+  ('protects_not_controls', 2, 'Protects, never controls', 'respect'),
+  ('supportive_not_jealous', 3, 'Supportive of her success', 'respect'),
+  ('trustworthy', 4, 'Loyal, honest & kind', 'character'),
+  ('vibe_match', 5, 'Thoughts connect', 'character'),
+  ('takes_her_side', 6, 'Takes a stand for her', 'respect'),
+  ('notices_small_things', 7, 'Notices the small things', 'emotional-maturity'),
+  ('patient', 8, 'Patient, gives space', 'safety'),
+  ('emotionally_intelligent', 9, 'Emotionally mature', 'emotional-maturity'),
+  ('sense_of_humour', 10, 'A little funny', 'character'),
+  ('respects_boundaries', 11, 'Respects boundaries', 'safety'),
+  ('feels_safe', 12, 'Makes her feel safe', 'safety'),
+  ('confident_self_respect', 13, 'Confident & self-respecting', 'character'),
+  ('expresses_emotions', 14, 'Expresses his feelings', 'emotional-maturity'),
+  ('no_womanhood_taboo', 15, 'No taboo about womanhood', 'respect'),
+  ('no_misogyny', 16, 'Never mocks women to fit in', 'character'),
+  ('ambitious', 17, 'Ambitious & hardworking', 'partnership'),
+  ('no_anger_issues', 18, 'Calm, no anger issues', 'safety'),
+  ('shares_chores', 19, 'Shares the load 50-50', 'partnership'),
+  ('reliable', 20, 'Reliable', 'partnership'),
+  ('basic_manners', 21, 'Basic manners', 'character'),
+  ('humble', 22, 'Humble & down to earth', 'character'),
+  ('no_ego', 23, 'No ego', 'emotional-maturity')
+on conflict (key) do nothing;
