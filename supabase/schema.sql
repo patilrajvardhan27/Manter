@@ -32,15 +32,25 @@ create table profiles (
 
 alter table profiles enable row level security;
 
+-- Is the given user a woman? SECURITY DEFINER so the lookup runs without RLS,
+-- which is what lets policies *on profiles* ask this without recursing into
+-- themselves (a plain subquery on profiles inside a profiles policy = 42P17).
+create or replace function public.is_woman(uid uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from profiles where id = uid and role = 'woman');
+$$;
+
 create policy "profiles: read own" on profiles
   for select using (auth.uid() = id);
 
 -- Women may browse men's public profile fields (curated discovery).
 create policy "profiles: women read men" on profiles
-  for select using (
-    role = 'man'
-    and exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'woman')
-  );
+  for select using (role = 'man' and public.is_woman(auth.uid()));
 
 create policy "profiles: insert own" on profiles
   for insert with check (auth.uid() = id);
@@ -89,9 +99,7 @@ alter table man_quiz_scores enable row level security;
 create policy "quiz: owner write" on man_quiz_scores
   for all using (auth.uid() = man_id) with check (auth.uid() = man_id);
 create policy "quiz: women read" on man_quiz_scores
-  for select using (
-    exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'woman')
-  );
+  for select using (public.is_woman(auth.uid()));
 
 -- ---------------------------------------------------------------------------
 -- ratings : women rate men they've dated. Anonymous to the man.
@@ -140,6 +148,17 @@ create policy "matches: woman creates" on matches
   for insert with check (auth.uid() = woman_id);
 create policy "matches: participants update" on matches
   for update using (auth.uid() = woman_id or auth.uid() = man_id);
+
+-- Matched users may read each other's profile (chat headers + lists). Defined
+-- here (not with the profiles table) because it references matches.
+create policy "profiles: match participants read" on profiles
+  for select using (
+    exists (
+      select 1 from matches m
+      where (m.woman_id = auth.uid() and m.man_id = profiles.id)
+         or (m.man_id = auth.uid() and m.woman_id = profiles.id)
+    )
+  );
 
 -- ---------------------------------------------------------------------------
 -- messages : realtime chat, participants only.

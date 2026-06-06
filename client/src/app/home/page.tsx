@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/profile";
+import { TabBar } from "@/components/TabBar";
 
 const VERIFICATION_LABEL: Record<string, string> = {
   unverified: "Not verified yet",
@@ -13,13 +15,23 @@ export default async function HomePage() {
   if (!userId) redirect("/login");
   if (!profile) redirect("/onboarding/role");
 
-  const nextStep =
-    profile.role === "woman"
-      ? { title: "Set your quality weights", body: "Rank the 23 qualities so we can rank men for you.", soon: "Coming in Phase 2" }
-      : { title: "Take the character quiz", body: "Behavioral scenarios that build your starting score.", soon: "Coming in Phase 2" };
+  const isWoman = profile.role === "woman";
+  const nextStep = isWoman
+    ? {
+        title: "Discover your matches",
+        body: "See men ranked by the 23 qualities that matter to you, and start a conversation.",
+        href: "/discover",
+        cta: "Open Discover",
+      }
+    : {
+        title: "Your conversations",
+        body: "When a woman starts a conversation with you, it lands here.",
+        href: "/chats",
+        cta: "Open Chats",
+      };
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-12 pt-[max(2rem,env(safe-area-inset-top))]">
+    <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-28 pt-[max(2rem,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between rise" style={{ animationDelay: "0ms" }}>
         <span className="font-display text-2xl font-semibold tracking-tight text-plum-deep">
           Manter
@@ -78,8 +90,9 @@ export default async function HomePage() {
         </dl>
       </section>
 
-      <section
-        className="mt-4 rounded-[var(--radius-card)] border border-plum/15 p-6 rise"
+      <Link
+        href={nextStep.href}
+        className="mt-4 block rounded-[var(--radius-card)] border border-plum/15 p-6 transition active:scale-[0.99] rise"
         style={{ animationDelay: "280ms" }}
       >
         <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
@@ -87,10 +100,12 @@ export default async function HomePage() {
         </p>
         <h2 className="mt-2 font-display text-xl font-medium text-ink">{nextStep.title}</h2>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">{nextStep.body}</p>
-        <span className="mt-4 inline-block rounded-full bg-plum/10 px-3 py-1 text-xs font-medium text-plum">
-          {nextStep.soon}
+        <span className="mt-4 inline-flex items-center gap-1 rounded-full bg-plum px-4 py-1.5 text-xs font-semibold text-cream">
+          {nextStep.cta} →
         </span>
-      </section>
+      </Link>
+
+      <TabBar isWoman={isWoman} />
     </main>
   );
 }

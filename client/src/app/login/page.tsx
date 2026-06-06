@@ -43,12 +43,20 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
+        // This is a sign-in page: only authenticate existing accounts, never
+        // silently create a new one for an unrecognized email.
+        shouldCreateUser: false,
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     setLoading(false);
     if (error) {
-      setError(error.message);
+      // Supabase returns this when the email has no account yet.
+      setError(
+        error.message.toLowerCase().includes("signups not allowed")
+          ? "No account found for that email. Create one to get started."
+          : error.message,
+      );
       return;
     }
     setMagicSent(true);
