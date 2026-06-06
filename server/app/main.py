@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import ai, scoring
+from app.routers import ai, quiz, scoring
 
 settings = get_settings()
 
@@ -21,6 +21,7 @@ app.add_middleware(
 
 app.include_router(scoring.router)
 app.include_router(ai.router)
+app.include_router(quiz.router)
 
 
 @app.get("/health")

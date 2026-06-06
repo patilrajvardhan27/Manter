@@ -54,7 +54,8 @@ export function ProfileForm({ role }: { role: Role }) {
       return;
     }
 
-    router.replace("/home");
+    // Men take the behavioral quiz next; women go straight in.
+    router.replace(role === "man" ? "/onboarding/quiz" : "/home");
     router.refresh();
   }
 

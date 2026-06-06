@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ArrowUp, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { scanMessage, type RedFlagResult } from "@/lib/api";
 import type { ChatMessage } from "@/lib/match";
@@ -118,13 +119,14 @@ export function Chat({
                 ? flag.flags.map((f, i) => (
                     <div
                       key={i}
-                      className="mt-1 max-w-[80%] rounded-xl border border-ink/10 bg-paper/70 px-3 py-2 text-xs"
+                      className="mt-1 max-w-[80%] rounded-xl border border-redflag/15 bg-redflag/[0.04] px-3 py-2 text-xs"
                     >
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 font-semibold uppercase tracking-wide ${
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold uppercase tracking-wide ${
                           SEVERITY_STYLE[f.severity] ?? SEVERITY_STYLE.low
                         }`}
                       >
+                        <ShieldAlert size={12} strokeWidth={2.4} />
                         {f.severity} · {f.category}
                       </span>
                       <p className="mt-1 leading-snug text-ink-soft">{f.rationale}</p>
@@ -150,10 +152,10 @@ export function Chat({
         <button
           type="submit"
           disabled={sending || !draft.trim()}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-plum text-cream shadow-[var(--shadow-soft)] transition active:scale-95 disabled:opacity-40"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-plum text-cream shadow-[var(--shadow-soft)] transition active:scale-90 disabled:opacity-40"
           aria-label="Send"
         >
-          ↑
+          <ArrowUp size={20} strokeWidth={2.6} />
         </button>
       </form>
     </div>

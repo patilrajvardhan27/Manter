@@ -102,6 +102,49 @@ create policy "quiz: women read" on man_quiz_scores
   for select using (public.is_woman(auth.uid()));
 
 -- ---------------------------------------------------------------------------
+-- quiz_questions : behavioral questions women author; men answer them.
+-- The 6 default questions live in app code (lib/constants/quiz.ts); this table
+-- holds women's custom additions.
+-- ---------------------------------------------------------------------------
+create table quiz_questions (
+  id          uuid primary key default gen_random_uuid(),
+  created_by  uuid references profiles(id) on delete cascade,
+  quality_key text references qualities(key) on delete cascade,
+  prompt      text not null,
+  options     jsonb not null,        -- [{ id, text, effects: { quality_key: delta } }]
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+
+alter table quiz_questions enable row level security;
+create policy "questions: read" on quiz_questions
+  for select to authenticated using (true);
+create policy "questions: women author" on quiz_questions
+  for insert to authenticated
+  with check (auth.uid() = created_by and public.is_woman(auth.uid()));
+create policy "questions: author manages" on quiz_questions
+  for update to authenticated using (auth.uid() = created_by) with check (auth.uid() = created_by);
+create policy "questions: author deletes" on quiz_questions
+  for delete to authenticated using (auth.uid() = created_by);
+
+-- ---------------------------------------------------------------------------
+-- quiz_answers : a man's free-text answer per question. question_id is text so
+-- it can point at a code default ("q1_decision") or a custom question's uuid.
+-- Claude scores the answer into man_quiz_scores.
+-- ---------------------------------------------------------------------------
+create table quiz_answers (
+  man_id      uuid not null references profiles(id) on delete cascade,
+  question_id text not null,
+  answer      text not null,
+  created_at  timestamptz not null default now(),
+  primary key (man_id, question_id)
+);
+
+alter table quiz_answers enable row level security;
+create policy "answers: man writes own" on quiz_answers
+  for all to authenticated using (auth.uid() = man_id) with check (auth.uid() = man_id);
+
+-- ---------------------------------------------------------------------------
 -- ratings : women rate men they've dated. Anonymous to the man.
 -- ---------------------------------------------------------------------------
 create table ratings (

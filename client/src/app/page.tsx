@@ -1,24 +1,28 @@
 import Link from "next/link";
+import { Award, ShieldAlert, MapPinned, ArrowRight, type LucideIcon } from "lucide-react";
 import { QUALITIES, QUALITY_GROUPS } from "@/lib/constants/qualities";
 
-const FEATURES = [
+const FEATURES: { tag: string; title: string; body: string; color: string; Icon: LucideIcon }[] = [
   {
     tag: "Character score",
     title: "23 qualities, not 23 photos",
     body: "She weights what matters to her. He's scored on it — by a behavioral quiz and by women who've actually dated him.",
     color: "var(--color-plum)",
+    Icon: Award,
   },
   {
     tag: "AI red-flag scan",
     title: "Catches the patterns you'd miss",
     body: "Claude reads for controlling language, guilt-trips, and love-bombing — and explains why each one matters.",
     color: "var(--color-redflag)",
+    Icon: ShieldAlert,
   },
   {
     tag: "Date check-in",
     title: "Someone always knows you're safe",
     body: "Set a timer before a date. Don't confirm you're okay, and your emergency contact is alerted with your last location.",
     color: "var(--color-sage)",
+    Icon: MapPinned,
   },
 ];
 
@@ -70,9 +74,10 @@ export default function Landing() {
         <div className="rise mt-8 flex flex-col gap-3" style={{ animationDelay: "280ms" }}>
           <Link
             href="/register"
-            className="flex h-14 items-center justify-center rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition active:scale-[0.98]"
+            className="group flex h-14 items-center justify-center gap-2 rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98]"
           >
             Create your account
+            <ArrowRight size={18} strokeWidth={2.4} className="transition group-hover:translate-x-0.5" />
           </Link>
           <Link
             href="#how"
@@ -92,12 +97,18 @@ export default function Landing() {
             style={{ animationDelay: `${340 + i * 80}ms` }}
           >
             <span
-              className="text-xs font-semibold uppercase tracking-wider"
+              className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider"
               style={{ color: f.color }}
             >
+              <span
+                className="flex h-8 w-8 items-center justify-center rounded-xl"
+                style={{ backgroundColor: `color-mix(in srgb, ${f.color} 12%, transparent)` }}
+              >
+                <f.Icon size={17} strokeWidth={2} />
+              </span>
               {f.tag}
             </span>
-            <h3 className="mt-2 font-display text-xl font-medium text-ink">
+            <h3 className="mt-3 font-display text-xl font-medium text-ink">
               {f.title}
             </h3>
             <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">

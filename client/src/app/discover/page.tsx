@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Compass } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
 import { getDiscovery } from "@/lib/match";
 import { TabBar } from "@/components/TabBar";
@@ -16,7 +17,10 @@ export default async function DiscoverPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-28 pt-[max(2rem,env(safe-area-inset-top))]">
       <header className="rise" style={{ animationDelay: "0ms" }}>
-        <p className="text-xs font-semibold uppercase tracking-wider text-plum">Discover</p>
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+          <Compass size={14} strokeWidth={2.4} />
+          Discover
+        </p>
         <h1 className="mt-1 font-display text-[2rem] font-light leading-tight tracking-tight text-ink">
           Ranked for you, {profile.display_name}.
         </h1>

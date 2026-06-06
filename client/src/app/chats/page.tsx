@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { MessagesSquare, ChevronRight } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
 import { getConversations } from "@/lib/match";
 import { TabBar } from "@/components/TabBar";
@@ -23,15 +24,18 @@ export default async function ChatsPage() {
 
       <section className="mt-8 space-y-3">
         {conversations.length === 0 ? (
-          <div className="rounded-[var(--radius-card)] bg-paper/70 p-6 text-sm leading-relaxed text-ink-soft shadow-[var(--shadow-soft)]">
-            No conversations yet.{" "}
-            {isWoman ? (
-              <Link href="/discover" className="font-medium text-plum underline-offset-4 hover:underline">
-                Find someone in Discover.
-              </Link>
-            ) : (
-              "When a woman starts a conversation with you, it'll show up here."
-            )}
+          <div className="rounded-[var(--radius-card)] bg-paper/70 p-8 text-center shadow-[var(--shadow-soft)]">
+            <MessagesSquare size={30} className="mx-auto text-plum/70" strokeWidth={1.8} />
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              No conversations yet.{" "}
+              {isWoman ? (
+                <Link href="/discover" className="font-medium text-plum underline-offset-4 hover:underline">
+                  Find someone in Discover.
+                </Link>
+              ) : (
+                "When a woman starts a conversation with you, it'll show up here."
+              )}
+            </p>
           </div>
         ) : null}
 
@@ -51,6 +55,7 @@ export default async function ChatsPage() {
                 {c.last ? c.last.body : "No messages yet — say hi."}
               </p>
             </div>
+            <ChevronRight size={18} className="shrink-0 text-ink-soft/40" strokeWidth={2} />
           </Link>
         ))}
       </section>

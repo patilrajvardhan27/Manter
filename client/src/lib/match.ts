@@ -5,6 +5,7 @@
  */
 import { createClient } from "@/lib/supabase/server";
 import { scoreMan } from "@/lib/scoring";
+import { QUALITIES, type QualityGroup } from "@/lib/constants/qualities";
 
 export interface DiscoverMan {
   id: string;
@@ -79,6 +80,88 @@ export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
       return { ...m, score, top, matchId: matchByMan[m.id] ?? null };
     })
     .sort((a, b) => b.score - a.score);
+}
+
+export interface QualityDetail {
+  key: string;
+  label: string;
+  blurb: string;
+  group: QualityGroup;
+  manScore: number; // his self-assessment, 0–5 (0 = not answered)
+  weight: number; // her priority, 0–5 (0 = not weighted)
+}
+
+export interface ManDetail {
+  id: string;
+  display_name: string;
+  age: number | null;
+  city: string | null;
+  bio: string | null;
+  verification: string;
+  score: number;
+  matchId: string | null;
+  qualities: QualityDetail[]; // all 23, canonical order
+  strengths: string[]; // labels he scores well on among her priorities
+  gaps: string[]; // labels she cares about where he lags
+}
+
+/** Full profile + per-quality breakdown for one man, scored for this woman. */
+export async function getManDetail(womanId: string, manId: string): Promise<ManDetail | null> {
+  const supabase = await createClient();
+
+  const { data: man } = await supabase
+    .from("profiles")
+    .select("id, display_name, age, city, bio, verification, role")
+    .eq("id", manId)
+    .maybeSingle();
+  if (!man || man.role !== "man") return null;
+
+  const [{ data: weightRows }, { data: quizRows }, { data: existing }] = await Promise.all([
+    supabase.from("woman_weights").select("quality_key, weight").eq("woman_id", womanId),
+    supabase.from("man_quiz_scores").select("quality_key, score").eq("man_id", manId),
+    supabase.from("matches").select("id").eq("woman_id", womanId).eq("man_id", manId).maybeSingle(),
+  ]);
+
+  const weights: Record<string, number> = {};
+  (weightRows ?? []).forEach((r) => (weights[r.quality_key] = r.weight));
+  const quiz: Record<string, number> = {};
+  (quizRows ?? []).forEach((r) => (quiz[r.quality_key] = Number(r.score)));
+
+  const qualities: QualityDetail[] = QUALITIES.map((q) => ({
+    key: q.key,
+    label: q.label,
+    blurb: q.blurb,
+    group: q.group,
+    manScore: quiz[q.key] ?? 0,
+    weight: weights[q.key] ?? 0,
+  }));
+
+  const { score } = scoreMan(weights, quiz);
+
+  const weighted = qualities.filter((q) => q.weight > 0);
+  const strengths = [...weighted]
+    .sort((a, b) => b.weight * b.manScore - a.weight * a.manScore)
+    .slice(0, 3)
+    .map((q) => q.label);
+  const gaps = [...weighted]
+    .filter((q) => q.manScore < 5)
+    .sort((a, b) => b.weight * (5 - b.manScore) - a.weight * (5 - a.manScore))
+    .slice(0, 3)
+    .map((q) => q.label);
+
+  return {
+    id: man.id,
+    display_name: man.display_name,
+    age: man.age,
+    city: man.city,
+    bio: man.bio,
+    verification: man.verification,
+    score,
+    matchId: existing?.id ?? null,
+    qualities,
+    strengths,
+    gaps,
+  };
 }
 
 /** All conversations the user participates in, newest activity first. */

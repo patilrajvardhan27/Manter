@@ -2,7 +2,7 @@ import { createServerClient, type SetAllCookies } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /** Routes that require an authenticated session. */
-const PROTECTED = ["/home", "/onboarding", "/discover", "/chats"];
+const PROTECTED = ["/home", "/onboarding", "/discover", "/chats", "/questions"];
 /** Auth routes a signed-in user should be bounced away from. */
 const AUTH_ONLY = ["/login", "/register"];
 

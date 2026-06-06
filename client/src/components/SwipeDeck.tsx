@@ -1,15 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Heart, X, Sparkles, ChevronRight, MapPin, PartyPopper } from "lucide-react";
 import type { DiscoverMan } from "@/lib/match";
+import { VerifyBadge } from "@/components/VerifyBadge";
 import { startConversation } from "@/app/discover/actions";
-
-const VERIFIED_BADGE: Record<string, { label: string; cls: string }> = {
-  verified: { label: "✓ Verified", cls: "text-sage" },
-  pending: { label: "Verification pending", cls: "text-gold" },
-  rejected: { label: "Unverified", cls: "text-ink-soft" },
-  unverified: { label: "Not verified", cls: "text-ink-soft" },
-};
 
 const THRESHOLD = 110; // px past which a release commits the swipe
 
@@ -19,6 +15,7 @@ const THRESHOLD = 110; // px past which a release commits the swipe
  * passes and reveals the next card. Built on pointer events, no deps.
  */
 export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
+  const router = useRouter();
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [flyOut, setFlyOut] = useState<"left" | "right" | null>(null);
@@ -61,17 +58,20 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
 
   function onPointerUp() {
     if (!start.current) return;
-    const { x } = drag;
+    const { x, y } = drag;
     start.current = null;
     if (x > THRESHOLD && current) like(current);
     else if (x < -THRESHOLD) pass();
+    else if (Math.abs(x) < 8 && Math.abs(y) < 8 && current && !busy)
+      router.push(`/discover/${current.id}`); // a tap (not a drag) = open profile
     else setDrag({ x: 0, y: 0 }); // snap back
   }
 
   if (!current) {
     return (
       <div className="mt-10 rounded-[var(--radius-card)] bg-paper/70 p-8 text-center shadow-[var(--shadow-soft)]">
-        <p className="font-display text-xl text-ink">You&apos;re all caught up.</p>
+        <PartyPopper size={32} className="mx-auto text-plum" strokeWidth={1.8} />
+        <p className="mt-3 font-display text-xl text-ink">You&apos;re all caught up.</p>
         <p className="mt-2 text-sm text-ink-soft">
           No more profiles for now. Check your chats, or come back later.
         </p>
@@ -118,21 +118,29 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
           onClick={pass}
           disabled={busy}
           aria-label="Pass"
-          className="flex h-16 w-16 items-center justify-center rounded-full border border-ink/10 bg-paper text-2xl text-redflag shadow-[var(--shadow-soft)] transition active:scale-95 disabled:opacity-40"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-ink/10 bg-paper text-redflag shadow-[var(--shadow-soft)] transition hover:border-redflag/30 active:scale-90 disabled:opacity-40"
         >
-          ✕
+          <X size={26} strokeWidth={2.4} />
         </button>
         <button
           onClick={() => like(current)}
           disabled={busy}
           aria-label="Like and message"
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-plum text-2xl text-cream shadow-[var(--shadow-soft)] transition active:scale-95 disabled:opacity-40"
+          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-plum text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-90 disabled:opacity-40"
         >
-          ♥
+          <Heart size={28} strokeWidth={2.2} fill="currentColor" />
         </button>
       </div>
-      <p className="mt-3 text-center text-xs text-ink-soft">
-        Swipe right to message · left to pass
+      <button
+        onClick={() => router.push(`/discover/${current.id}`)}
+        disabled={busy}
+        className="mx-auto mt-5 flex items-center gap-1 text-xs font-semibold text-plum transition hover:gap-1.5 disabled:opacity-40"
+      >
+        View full profile & answers
+        <ChevronRight size={14} strokeWidth={2.5} />
+      </button>
+      <p className="mt-2 text-center text-[0.7rem] text-ink-soft/70">
+        Swipe right to message · left to pass · tap for details
       </p>
     </div>
   );
@@ -171,10 +179,9 @@ function Card({
   style?: React.CSSProperties;
   dragging?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const badge = VERIFIED_BADGE[man.verification] ?? VERIFIED_BADGE.unverified;
   return (
     <div
-      className={`absolute inset-0 flex flex-col overflow-hidden rounded-[var(--radius-card)] bg-paper p-6 shadow-[var(--shadow-soft)] ${className}`}
+      className={`absolute inset-0 flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-ink/[0.04] bg-paper p-6 shadow-[var(--shadow-soft)] ${className}`}
       style={style}
       {...handlers}
     >
@@ -185,15 +192,16 @@ function Card({
             {man.display_name}
             {man.age ? <span className="text-ink-soft">, {man.age}</span> : null}
           </h2>
-          {man.city ? <p className="text-sm text-ink-soft">{man.city}</p> : null}
-          <p className={`mt-0.5 text-xs font-medium ${badge.cls}`}>{badge.label}</p>
+          {man.city ? <p className="flex items-center gap-1 text-sm text-ink-soft"><MapPin size={13} strokeWidth={2} />{man.city}</p> : null}
+          <VerifyBadge status={man.verification} className="mt-1" />
         </div>
-        <div className="shrink-0 text-right">
-          <div className="font-display text-4xl font-light leading-none text-plum">
+        <div className="flex shrink-0 flex-col items-center rounded-2xl bg-plum/[0.06] px-3 py-2">
+          <Sparkles size={14} className="text-plum/60" strokeWidth={2.2} />
+          <div className="font-display text-3xl font-light leading-tight text-plum">
             {man.score}
-            <span className="text-lg text-ink-soft">%</span>
+            <span className="text-base text-ink-soft">%</span>
           </div>
-          <p className="text-[0.65rem] uppercase tracking-wider text-ink-soft">match</p>
+          <p className="text-[0.6rem] uppercase tracking-wider text-ink-soft">match</p>
         </div>
       </div>
 

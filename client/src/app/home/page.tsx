@@ -1,14 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LogOut, ArrowRight } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
 import { TabBar } from "@/components/TabBar";
-
-const VERIFICATION_LABEL: Record<string, string> = {
-  unverified: "Not verified yet",
-  pending: "Verification pending",
-  verified: "Verified",
-  rejected: "Verification rejected",
-};
+import { VerifyBadge } from "@/components/VerifyBadge";
 
 export default async function HomePage() {
   const { userId, profile } = await getMyProfile();
@@ -39,9 +34,10 @@ export default async function HomePage() {
         <form action="/auth/signout" method="post">
           <button
             type="submit"
-            className="text-sm font-medium text-ink-soft underline-offset-4 hover:text-plum"
+            aria-label="Sign out"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-plum"
           >
-            Sign out
+            <LogOut size={18} strokeWidth={2} />
           </button>
         </form>
       </header>
@@ -66,9 +62,7 @@ export default async function HomePage() {
       >
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-lg font-medium text-ink">Your profile</h2>
-          <span className="text-xs font-medium text-gold">
-            {VERIFICATION_LABEL[profile.verification]}
-          </span>
+          <VerifyBadge status={profile.verification} />
         </div>
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex justify-between">
@@ -92,7 +86,7 @@ export default async function HomePage() {
 
       <Link
         href={nextStep.href}
-        className="mt-4 block rounded-[var(--radius-card)] border border-plum/15 p-6 transition active:scale-[0.99] rise"
+        className="group mt-4 block rounded-[var(--radius-card)] border border-plum/15 bg-paper/30 p-6 transition hover:border-plum/30 active:scale-[0.99] rise"
         style={{ animationDelay: "280ms" }}
       >
         <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
@@ -100,8 +94,9 @@ export default async function HomePage() {
         </p>
         <h2 className="mt-2 font-display text-xl font-medium text-ink">{nextStep.title}</h2>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">{nextStep.body}</p>
-        <span className="mt-4 inline-flex items-center gap-1 rounded-full bg-plum px-4 py-1.5 text-xs font-semibold text-cream">
-          {nextStep.cta} →
+        <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-plum px-4 py-2 text-xs font-semibold text-cream transition group-hover:gap-2">
+          {nextStep.cta}
+          <ArrowRight size={14} strokeWidth={2.4} />
         </span>
       </Link>
 
