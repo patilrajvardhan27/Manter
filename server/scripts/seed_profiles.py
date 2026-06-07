@@ -42,6 +42,42 @@ DEFAULT_PASSWORD = "ManterSeed!23"      # shared login for all demo accounts
 VERIFICATIONS = ["unverified", "pending", "verified", "rejected"]
 VERIFICATION_WEIGHTS = [3, 1, 5, 1]     # most demo users land "verified"
 
+# Free-text answers to the 6 default behavioral questions so seeded men show
+# real "Your answers" content (question_ids mirror client/src/lib/constants/quiz.ts).
+# Several variants per question; one is picked at random per man.
+SEED_ANSWERS: dict[str, list[str]] = {
+    "q1_decision": [
+        "It's your career and your call — go for it. We'll figure out the distance together and I'll visit every chance I get.",
+        "Honestly that's a huge opportunity. I'd be proud of you. A year apart is hard but we can make it work.",
+        "Let's talk it through, but I don't want to be the reason you pass on something this big.",
+    ],
+    "q2_conflict": [
+        "I'd stop, admit I was wrong, and apologize properly. Being right matters less than being fair to her.",
+        "I'd own it in the moment — 'you're right, I shouldn't have said that' — and ask how to make it better.",
+        "I'd take a breath, acknowledge my part, and not let pride drag the argument out.",
+    ],
+    "q3_boundary": [
+        "Completely her pace, no pressure ever. I'd rather she feel safe than rushed, and I'd tell her that clearly.",
+        "That's totally fine. I'd never bring it up to push — I'd just ask what helps her feel comfortable with me.",
+        "No clock here. Whenever she's ready, or not — both are okay.",
+    ],
+    "q4_chores": [
+        "I'd cook tonight and take the dishes tomorrow, or we split it however's easier. It's both our home.",
+        "I'd just start cleaning and tell her to rest — we trade off, no keeping score.",
+        "Let's divide it 50-50. I'd handle the kitchen, she takes the laundry, done in twenty minutes together.",
+    ],
+    "q5_friends": [
+        "I'd call it out, even if it's awkward. 'Not funny, drop it.' I'm not laughing at women to fit in.",
+        "I'd shut it down in the moment. My friends know I don't find that stuff funny.",
+        "I'd say something there and then — staying silent feels like agreeing.",
+    ],
+    "q6_emotion": [
+        "I'd actually open up about it. Bottling things up never helped me, and she should know what's going on with me.",
+        "I'd tell her honestly that I'm having a rough time. I don't do the 'I'm fine' thing.",
+        "I'd share what's weighing on me — being able to be vulnerable with her is the point.",
+    ],
+}
+
 fake = Faker()
 
 
@@ -66,10 +102,14 @@ def make_bio() -> str:
     return f"{fake.job()}. Into {interests}. {fake.sentence(nb_words=10)}"
 
 
-def create_person(sb: Client, role: str, keys: list[str], password: str) -> dict:
-    """Create one auth user + profile (+ role-specific data). Returns a summary."""
+def create_person(sb: Client, role: str, keys: list[str], password: str, n: int) -> dict:
+    """Create one auth user + profile (+ role-specific data). Returns a summary.
+
+    Emails are deterministic (woman1@, man1@, ...) so the demo logins are
+    predictable without reading this script's output.
+    """
     first = fake.first_name_female() if role == "woman" else fake.first_name_male()
-    email = f"{first.lower()}.{fake.uuid4()[:8]}@{SEED_DOMAIN}"
+    email = f"{role}{n}@{SEED_DOMAIN}"
 
     user = sb.auth.admin.create_user(
         {
@@ -102,6 +142,13 @@ def create_person(sb: Client, role: str, keys: list[str], password: str) -> dict
             [
                 {"man_id": uid, "quality_key": k, "score": round(random.uniform(1, 5), 2)}
                 for k in keys
+            ]
+        ).execute()
+        # Free-text answers to the default questions, so his profile has content.
+        sb.table("quiz_answers").insert(
+            [
+                {"man_id": uid, "question_id": qid, "answer": random.choice(variants)}
+                for qid, variants in SEED_ANSWERS.items()
             ]
         ).execute()
 
@@ -143,10 +190,10 @@ def main() -> None:
     print(f"Seeding {args.women} women + {args.men} men against {len(keys)} qualities...\n")
 
     created = []
-    for _ in range(args.women):
-        created.append(create_person(sb, "woman", keys, args.password))
-    for _ in range(args.men):
-        created.append(create_person(sb, "man", keys, args.password))
+    for i in range(1, args.women + 1):
+        created.append(create_person(sb, "woman", keys, args.password, i))
+    for i in range(1, args.men + 1):
+        created.append(create_person(sb, "man", keys, args.password, i))
 
     for p in created:
         print(f"  {p['role']:<5}  {p['name']:<12}  {p['email']}")
