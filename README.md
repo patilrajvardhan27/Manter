@@ -19,6 +19,7 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 - **Behavioral quiz** — women author questions; men answer in **free text**, which **Claude scores** (1–5 per quality) instead of multiple choice. Six default questions ship in app code; women can add their own.
 - **Swipe discovery** — women browse compatible men ranked by a weighted match score (her 1–5 priority per quality × his quiz scores).
 - **Realtime chat** — matched users message over Supabase Realtime, with a **Claude Haiku red-flag scan** on incoming messages.
+- **Editable profiles + photos** — both roles can edit their details and upload up to **3 photos** (private Storage bucket). Women see men's photos in Discover; a man sees a woman's photos **only after she starts the conversation** (RLS-gated).
 - **Verification badges** — profiles carry an `unverified / pending / verified / rejected` state.
 
 ## Getting started
@@ -28,8 +29,13 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 2. In the SQL editor, run, in order:
    - `supabase/schema.sql` (tables, RLS, helpers)
    - `supabase/seed.sql` (the 23 qualities)
-   - each file in `supabase/migrations/` in numeric order (`0001` → `0005`)
+   - each file in `supabase/migrations/` in numeric order (`0001` → `0006`)
 3. Copy the Project URL + anon key (Settings → API).
+
+> `supabase/migrations/0006_profile_photos.sql` creates the private
+> `profile-photos` Storage bucket and its RLS (fresh installs get it from
+> `schema.sql`). Photo reads mirror profile visibility: women see men's photos,
+> and matched participants see each other's.
 
 > `supabase/migrations/0005_named_views.sql` adds read-only `*_named` views
 > (`matches_named`, `messages_named`, `woman_weights_named`, …) that join in

@@ -5,6 +5,7 @@
  */
 import { createClient } from "@/lib/supabase/server";
 import { scoreMan } from "@/lib/scoring";
+import { signPhotoUrls, PHOTO_BUCKET } from "@/lib/photos";
 import { QUALITIES, type QualityGroup } from "@/lib/constants/qualities";
 
 export interface DiscoverMan {
@@ -16,6 +17,7 @@ export interface DiscoverMan {
   verification: string;
   score: number;
   top: string[];
+  photo: string | null; // first photo, signed (if any)
   matchId: string | null; // set if she already started a conversation
 }
 
@@ -47,13 +49,50 @@ export interface Thread {
   messages: ChatMessage[];
 }
 
+export interface ProfileView {
+  id: string;
+  display_name: string;
+  age: number | null;
+  city: string | null;
+  bio: string | null;
+  verification: string;
+  role: string;
+  photos: string[]; // signed URLs
+}
+
+/**
+ * Another user's profile + photos, for a standalone profile page. RLS decides
+ * visibility: a man can only read a woman's profile (and her photos) once she's
+ * matched with him, so this returns null until she's liked him.
+ */
+export async function getProfileView(profileId: string): Promise<ProfileView | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, display_name, age, city, bio, verification, role, photos")
+    .eq("id", profileId)
+    .maybeSingle();
+  if (!data) return null;
+  const photos = await signPhotoUrls(supabase, data.photos as string[] | null);
+  return {
+    id: data.id,
+    display_name: data.display_name,
+    age: data.age,
+    city: data.city,
+    bio: data.bio,
+    verification: data.verification,
+    role: data.role,
+    photos,
+  };
+}
+
 /** Men ranked by compatibility for the given woman. */
 export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
   const supabase = await createClient();
 
   const [{ data: weightRows }, { data: men }, { data: existing }] = await Promise.all([
     supabase.from("woman_weights").select("quality_key, weight").eq("woman_id", womanId),
-    supabase.from("profiles").select("id, display_name, age, city, bio, verification").eq("role", "man"),
+    supabase.from("profiles").select("id, display_name, age, city, bio, verification, photos").eq("role", "man"),
     supabase.from("matches").select("id, man_id").eq("woman_id", womanId),
   ]);
 
@@ -74,10 +113,34 @@ export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
     (quizByMan[r.man_id] ??= {})[r.quality_key] = Number(r.score);
   });
 
+  // Sign each man's first photo in a single batch.
+  const firstPaths = (men ?? [])
+    .map((m) => (m.photos as string[] | null)?.[0])
+    .filter((p): p is string => Boolean(p));
+  const { data: signed } = firstPaths.length
+    ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(firstPaths, 3600)
+    : { data: [] };
+  const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+
   return (men ?? [])
+    // Drop men she's already started a conversation with — once matched, they
+    // live in Chats, not the discovery deck.
+    .filter((m) => !matchByMan[m.id])
     .map((m) => {
       const { score, top } = scoreMan(weights, quizByMan[m.id] ?? {});
-      return { ...m, score, top, matchId: matchByMan[m.id] ?? null };
+      const first = (m.photos as string[] | null)?.[0];
+      return {
+        id: m.id,
+        display_name: m.display_name,
+        age: m.age,
+        city: m.city,
+        bio: m.bio,
+        verification: m.verification,
+        score,
+        top,
+        photo: (first && urlByPath.get(first)) || null,
+        matchId: matchByMan[m.id] ?? null,
+      };
     })
     .sort((a, b) => b.score - a.score);
 }
@@ -100,6 +163,7 @@ export interface ManDetail {
   verification: string;
   score: number;
   matchId: string | null;
+  photos: string[]; // signed URLs
   qualities: QualityDetail[]; // all 23, canonical order
   strengths: string[]; // labels he scores well on among her priorities
   gaps: string[]; // labels she cares about where he lags
@@ -111,10 +175,12 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
 
   const { data: man } = await supabase
     .from("profiles")
-    .select("id, display_name, age, city, bio, verification, role")
+    .select("id, display_name, age, city, bio, verification, role, photos")
     .eq("id", manId)
     .maybeSingle();
   if (!man || man.role !== "man") return null;
+
+  const photos = await signPhotoUrls(supabase, man.photos as string[] | null);
 
   const [{ data: weightRows }, { data: quizRows }, { data: existing }] = await Promise.all([
     supabase.from("woman_weights").select("quality_key, weight").eq("woman_id", womanId),
@@ -158,6 +224,7 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
     verification: man.verification,
     score,
     matchId: existing?.id ?? null,
+    photos,
     qualities,
     strengths,
     gaps,

@@ -30,20 +30,25 @@ export default async function ChatThreadPage({
         >
           <ArrowLeft size={20} strokeWidth={2.2} />
         </Link>
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-plum/10 font-display text-lg text-plum">
-          {thread.other.display_name.charAt(0)}
-        </span>
-        <div className="min-w-0">
-          <p className="font-medium leading-tight text-ink">{thread.other.display_name}</p>
-          {isWoman ? (
-            <p className="flex items-center gap-1 text-xs text-sage">
-              <ShieldCheck size={13} strokeWidth={2.2} />
-              Red-flag scanning on
-            </p>
-          ) : thread.other.city ? (
-            <p className="text-xs text-ink-soft">{thread.other.city}</p>
-          ) : null}
-        </div>
+        <Link
+          href={`/profile/${thread.other.id}`}
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-full transition active:scale-[0.99]"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-plum/10 font-display text-lg text-plum">
+            {thread.other.display_name.charAt(0)}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate font-medium leading-tight text-ink">{thread.other.display_name}</p>
+            {isWoman ? (
+              <p className="flex items-center gap-1 text-xs text-sage">
+                <ShieldCheck size={13} strokeWidth={2.2} />
+                Red-flag scanning on
+              </p>
+            ) : (
+              <p className="text-xs text-plum">View profile</p>
+            )}
+          </div>
+        </Link>
       </header>
 
       <Chat

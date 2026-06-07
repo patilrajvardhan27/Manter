@@ -27,6 +27,8 @@ from __future__ import annotations
 import argparse
 import random
 import sys
+import urllib.request
+import uuid
 from pathlib import Path
 
 # Allow `python scripts/seed_profiles.py` to import the app package.
@@ -41,6 +43,9 @@ SEED_DOMAIN = "seed.manter.test"        # marks accounts this script owns
 DEFAULT_PASSWORD = "ManterSeed!23"      # shared login for all demo accounts
 VERIFICATIONS = ["unverified", "pending", "verified", "rejected"]
 VERIFICATION_WEIGHTS = [3, 1, 5, 1]     # most demo users land "verified"
+
+PHOTO_BUCKET = "profile-photos"         # must match client/src/lib/photos.ts
+PORTRAIT_BASE = "https://randomuser.me/api/portraits"  # free face photos
 
 # Free-text answers to the 6 default behavioral questions so seeded men show
 # real "Your answers" content (question_ids mirror client/src/lib/constants/quiz.ts).
@@ -102,7 +107,36 @@ def make_bio() -> str:
     return f"{fake.job()}. Into {interests}. {fake.sentence(nb_words=10)}"
 
 
-def create_person(sb: Client, role: str, keys: list[str], password: str, n: int) -> dict:
+def upload_photos(sb: Client, uid: str, role: str) -> list[str]:
+    """Download 1-3 face portraits and upload them to the private photo bucket.
+
+    Returns the storage paths (to write into profiles.photos). Network failures
+    are non-fatal: the person just ends up with fewer/no photos. The service-role
+    client bypasses RLS, so the demo gating is exercised only on the read side.
+    """
+    gender = "women" if role == "woman" else "men"
+    paths: list[str] = []
+    for idx in random.sample(range(0, 90), random.randint(1, 3)):
+        try:
+            with urllib.request.urlopen(f"{PORTRAIT_BASE}/{gender}/{idx}.jpg", timeout=20) as r:
+                data = r.read()
+        except Exception as exc:  # noqa: BLE001 — best-effort seeding
+            print(f"    (skipped a photo: {exc})")
+            continue
+        path = f"{uid}/{uuid.uuid4().hex}.jpg"
+        try:
+            sb.storage.from_(PHOTO_BUCKET).upload(
+                path, data, {"content-type": "image/jpeg", "upsert": "true"}
+            )
+            paths.append(path)
+        except Exception as exc:  # noqa: BLE001
+            print(f"    (photo upload failed: {exc})")
+    return paths
+
+
+def create_person(
+    sb: Client, role: str, keys: list[str], password: str, n: int, with_photos: bool
+) -> dict:
     """Create one auth user + profile (+ role-specific data). Returns a summary.
 
     Emails are deterministic (woman1@, man1@, ...) so the demo logins are
@@ -152,7 +186,23 @@ def create_person(sb: Client, role: str, keys: list[str], password: str, n: int)
             ]
         ).execute()
 
+    if with_photos:
+        paths = upload_photos(sb, uid, role)
+        if paths:
+            sb.table("profiles").update({"photos": paths}).eq("id", uid).execute()
+
     return {"email": email, "role": role, "name": first, "id": uid}
+
+
+def remove_photos(sb: Client, uid: str) -> None:
+    """Best-effort delete of a user's photo folder (auth delete won't touch it)."""
+    try:
+        files = sb.storage.from_(PHOTO_BUCKET).list(uid)
+        names = [f"{uid}/{f['name']}" for f in (files or []) if f.get("name")]
+        if names:
+            sb.storage.from_(PHOTO_BUCKET).remove(names)
+    except Exception:  # noqa: BLE001 — bucket may not exist yet; ignore
+        pass
 
 
 def clean(sb: Client) -> int:
@@ -166,6 +216,7 @@ def clean(sb: Client) -> int:
             break
         for u in users:
             if (u.email or "").endswith(f"@{SEED_DOMAIN}"):
+                remove_photos(sb, u.id)
                 sb.auth.admin.delete_user(u.id)
                 removed += 1
         page += 1
@@ -178,22 +229,27 @@ def main() -> None:
     parser.add_argument("--men", type=int, default=5, help="number of men (default 5)")
     parser.add_argument("--password", default=DEFAULT_PASSWORD, help="shared login password")
     parser.add_argument("--clean", action="store_true", help="delete prior seed users first")
+    parser.add_argument(
+        "--no-photos", action="store_true", help="skip downloading/uploading demo photos"
+    )
     args = parser.parse_args()
 
     sb = client()
+    with_photos = not args.no_photos
 
     if args.clean:
         print(f"Removing existing @{SEED_DOMAIN} accounts...")
         print(f"  deleted {clean(sb)} account(s).\n")
 
     keys = quality_keys(sb)
-    print(f"Seeding {args.women} women + {args.men} men against {len(keys)} qualities...\n")
+    photo_note = "with demo photos" if with_photos else "no photos"
+    print(f"Seeding {args.women} women + {args.men} men ({photo_note}) against {len(keys)} qualities...\n")
 
     created = []
     for i in range(1, args.women + 1):
-        created.append(create_person(sb, "woman", keys, args.password, i))
+        created.append(create_person(sb, "woman", keys, args.password, i, with_photos))
     for i in range(1, args.men + 1):
-        created.append(create_person(sb, "man", keys, args.password, i))
+        created.append(create_person(sb, "man", keys, args.password, i, with_photos))
 
     for p in created:
         print(f"  {p['role']:<5}  {p['name']:<12}  {p['email']}")

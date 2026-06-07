@@ -24,7 +24,8 @@ create table profiles (
   age         int check (age >= 18),
   city        text,
   bio         text,
-  photos      text[] default '{}',            -- Storage paths
+  photos      text[] default '{}'             -- Storage paths (max 3)
+              check (coalesce(cardinality(photos), 0) <= 3),
   verification verification_status not null default 'unverified',
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -84,6 +85,16 @@ create table woman_weights (
 alter table woman_weights enable row level security;
 create policy "weights: owner all" on woman_weights
   for all using (auth.uid() = woman_id) with check (auth.uid() = woman_id);
+-- A matched man may read her priorities (her full profile is visible to him
+-- once she's liked him).
+create policy "weights: matched man reads" on woman_weights
+  for select to authenticated
+  using (
+    exists (
+      select 1 from matches m
+      where m.woman_id = woman_weights.woman_id and m.man_id = auth.uid()
+    )
+  );
 
 -- ---------------------------------------------------------------------------
 -- man_quiz_scores : derived self-assessment per quality (1..5).
@@ -353,3 +364,39 @@ create or replace view quiz_answers_named with (security_invoker = true) as
 select p.display_name as man, qa.question_id, qa.answer, qa.created_at, qa.man_id
 from quiz_answers qa
 join profiles p on p.id = qa.man_id;
+
+-- ---------------------------------------------------------------------------
+-- Storage : profile photos (private bucket). Path "<owner_id>/<filename>".
+-- Reads mirror profile visibility — women see men; matched participants see
+-- each other; everyone manages their own folder.
+-- ---------------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('profile-photos', 'profile-photos', false)
+on conflict (id) do nothing;
+
+create policy "profile-photos: owner manages" on storage.objects
+  for all to authenticated
+  using (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "profile-photos: women view men" on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'profile-photos'
+    and public.is_woman(auth.uid())
+    and exists (
+      select 1 from public.profiles p
+      where p.id = ((storage.foldername(name))[1])::uuid and p.role = 'man'
+    )
+  );
+
+create policy "profile-photos: matched participants view" on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'profile-photos'
+    and exists (
+      select 1 from public.matches m
+      where (m.woman_id = auth.uid() and m.man_id = ((storage.foldername(name))[1])::uuid)
+         or (m.man_id = auth.uid() and m.woman_id = ((storage.foldername(name))[1])::uuid)
+    )
+  );

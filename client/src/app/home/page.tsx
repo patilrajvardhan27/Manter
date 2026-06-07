@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/profile";
 import { getMyAnswers, getMyScores, getMyWeights, getMyQuestions } from "@/lib/quiz-data";
+import { signPhotoUrls } from "@/lib/photos";
+import { createClient } from "@/lib/supabase/server";
 import { ManProfile } from "@/components/ManProfile";
 import { WomanProfile } from "@/components/WomanProfile";
 import { TabBar } from "@/components/TabBar";
@@ -10,6 +12,9 @@ export default async function HomePage() {
   if (!userId) redirect("/login");
   if (!profile) redirect("/onboarding/role");
 
+  const supabase = await createClient();
+  const photos = await signPhotoUrls(supabase, profile.photos);
+
   if (profile.role === "woman") {
     const [weights, questions] = await Promise.all([
       getMyWeights(userId),
@@ -17,7 +22,7 @@ export default async function HomePage() {
     ]);
     return (
       <>
-        <WomanProfile profile={profile} weights={weights} questions={questions} />
+        <WomanProfile profile={profile} weights={weights} questions={questions} photos={photos} />
         <TabBar isWoman />
       </>
     );
@@ -29,7 +34,7 @@ export default async function HomePage() {
   ]);
   return (
     <>
-      <ManProfile profile={profile} answers={answers} scores={scores} />
+      <ManProfile profile={profile} answers={answers} scores={scores} photos={photos} />
       <TabBar isWoman={false} />
     </>
   );

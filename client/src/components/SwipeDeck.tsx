@@ -186,6 +186,15 @@ function Card({
       {...handlers}
     >
       {children}
+      {man.photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={man.photo}
+          alt={man.display_name}
+          draggable={false}
+          className="pointer-events-none -mx-6 -mt-6 mb-4 h-52 w-[calc(100%+3rem)] object-cover"
+        />
+      ) : null}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-2xl font-medium text-ink">

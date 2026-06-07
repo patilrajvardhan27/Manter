@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, MessageCircle, IdCard, MessageSquareQuote, BarChart3 } from "lucide-react";
+import { LogOut, MessageCircle, IdCard, MessageSquareQuote, BarChart3, Pencil, ImagePlus } from "lucide-react";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import type { Profile } from "@/lib/profile";
 import type { AnsweredQuestion, QualityScore } from "@/lib/quiz-data";
@@ -20,10 +20,12 @@ export function ManProfile({
   profile,
   answers,
   scores,
+  photos,
 }: {
   profile: Profile;
   answers: AnsweredQuestion[];
   scores: QualityScore[];
+  photos: string[];
 }) {
   const [tab, setTab] = useState<Tab>("profile");
 
@@ -33,15 +35,24 @@ export function ManProfile({
         <span className="font-display text-2xl font-semibold tracking-tight text-plum-deep">
           Manter
         </span>
-        <form action="/auth/signout" method="post">
-          <button
-            type="submit"
-            aria-label="Sign out"
+        <div className="flex items-center gap-1">
+          <Link
+            href="/profile/edit"
+            aria-label="Edit profile"
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-plum"
           >
-            <LogOut size={18} strokeWidth={2} />
-          </button>
-        </form>
+            <Pencil size={17} strokeWidth={2} />
+          </Link>
+          <form action="/auth/signout" method="post">
+            <button
+              type="submit"
+              aria-label="Sign out"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-plum"
+            >
+              <LogOut size={18} strokeWidth={2} />
+            </button>
+          </form>
+        </div>
       </header>
 
       {/* Hero */}
@@ -89,7 +100,9 @@ export function ManProfile({
 
       {/* Panels */}
       <div key={tab} className="mt-5 rise" style={{ animationDelay: "0ms" }}>
-        {tab === "profile" && <ProfilePanel profile={profile} answers={answers} scores={scores} />}
+        {tab === "profile" && (
+          <ProfilePanel profile={profile} answers={answers} scores={scores} photos={photos} />
+        )}
         {tab === "answers" && <AnswersPanel answers={answers} />}
         {tab === "scores" && <ScoresPanel scores={scores} />}
       </div>
@@ -103,10 +116,12 @@ function ProfilePanel({
   profile,
   answers,
   scores,
+  photos,
 }: {
   profile: Profile;
   answers: AnsweredQuestion[];
   scores: QualityScore[];
+  photos: string[];
 }) {
   const avg = scores.length
     ? scores.reduce((s, q) => s + q.score, 0) / scores.length
@@ -114,6 +129,8 @@ function ProfilePanel({
 
   return (
     <div className="space-y-4">
+      <PhotoStrip photos={photos} />
+
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Questions answered" value={String(answers.length)} />
         <Stat label="Avg quality score" value={avg ? avg.toFixed(1) : "—"} />
@@ -227,6 +244,33 @@ function ScoresPanel({ scores }: { scores: QualityScore[] }) {
 }
 
 /* ------------------------------------------------------------------- Bits */
+
+function PhotoStrip({ photos }: { photos: string[] }) {
+  if (!photos.length) {
+    return (
+      <Link
+        href="/profile/edit"
+        className="flex items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-dashed border-plum/25 bg-paper/30 px-4 py-6 text-sm font-semibold text-plum transition hover:border-plum/45 active:scale-[0.99]"
+      >
+        <ImagePlus size={18} strokeWidth={2.2} />
+        Add photos
+      </Link>
+    );
+  }
+  return (
+    <div className="flex gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none]">
+      {photos.map((url, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={i}
+          src={url}
+          alt={`Photo ${i + 1}`}
+          className="h-44 w-36 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)]"
+        />
+      ))}
+    </div>
+  );
+}
 
 function Card({ children }: { children: React.ReactNode }) {
   return (

@@ -64,6 +64,20 @@ export default async function ManDetailPage({
         <span className="text-sm font-medium text-ink-soft">Profile</span>
       </header>
 
+      {man.photos.length ? (
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none]">
+          {man.photos.map((url, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src={url}
+              alt={`${man.display_name} photo ${i + 1}`}
+              className="h-56 w-44 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)]"
+            />
+          ))}
+        </div>
+      ) : null}
+
       {/* Score hero */}
       <section className="rise rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
         <div className="flex items-start justify-between gap-4">
