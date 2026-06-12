@@ -29,7 +29,7 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 2. In the SQL editor, run, in order:
    - `supabase/schema.sql` (tables, RLS, helpers)
    - `supabase/seed.sql` (the 23 qualities)
-   - each file in `supabase/migrations/` in numeric order (`0001` → `0006`)
+   - each file in `supabase/migrations/` in numeric order (`0001` → `0009`)
 3. Copy the Project URL + anon key (Settings → API).
 
 > `supabase/migrations/0006_profile_photos.sql` creates the private

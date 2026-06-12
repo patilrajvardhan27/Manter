@@ -7,6 +7,22 @@ import { createClient } from "@/lib/supabase/server";
 import { scoreMan } from "@/lib/scoring";
 import { signPhotoUrls, PHOTO_BUCKET } from "@/lib/photos";
 import { QUALITIES, type QualityGroup } from "@/lib/constants/qualities";
+import { DETAIL_COLUMNS } from "@/lib/profile";
+import type { ProfileDetailFields } from "@/components/ProfileDetails";
+
+/** Pull the detail columns off a profile row into the shared display shape. */
+function pickDetails(row: Record<string, unknown>): ProfileDetailFields {
+  return {
+    profession: (row.profession as string) ?? null,
+    education: (row.education as string) ?? null,
+    height_cm: (row.height_cm as number) ?? null,
+    drinking: (row.drinking as string) ?? null,
+    smoking: (row.smoking as string) ?? null,
+    exercise: (row.exercise as string) ?? null,
+    relationship_goal: (row.relationship_goal as string) ?? null,
+    interests: (row.interests as string[]) ?? [],
+  };
+}
 
 export interface DiscoverMan {
   id: string;
@@ -49,7 +65,7 @@ export interface Thread {
   messages: ChatMessage[];
 }
 
-export interface ProfileView {
+export interface ProfileView extends ProfileDetailFields {
   id: string;
   display_name: string;
   age: number | null;
@@ -69,7 +85,7 @@ export async function getProfileView(profileId: string): Promise<ProfileView | n
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, display_name, age, city, bio, verification, role, photos")
+    .select(`id, display_name, age, city, bio, verification, role, photos, ${DETAIL_COLUMNS}`)
     .eq("id", profileId)
     .maybeSingle();
   if (!data) return null;
@@ -83,6 +99,7 @@ export async function getProfileView(profileId: string): Promise<ProfileView | n
     verification: data.verification,
     role: data.role,
     photos,
+    ...pickDetails(data),
   };
 }
 
@@ -154,7 +171,7 @@ export interface QualityDetail {
   weight: number; // her priority, 0–5 (0 = not weighted)
 }
 
-export interface ManDetail {
+export interface ManDetail extends ProfileDetailFields {
   id: string;
   display_name: string;
   age: number | null;
@@ -175,7 +192,7 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
 
   const { data: man } = await supabase
     .from("profiles")
-    .select("id, display_name, age, city, bio, verification, role, photos")
+    .select(`id, display_name, age, city, bio, verification, role, photos, ${DETAIL_COLUMNS}`)
     .eq("id", manId)
     .maybeSingle();
   if (!man || man.role !== "man") return null;
@@ -228,6 +245,7 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
     qualities,
     strengths,
     gaps,
+    ...pickDetails(man),
   };
 }
 

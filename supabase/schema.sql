@@ -26,6 +26,16 @@ create table profiles (
   bio         text,
   photos      text[] default '{}'             -- Storage paths (max 3)
               check (coalesce(cardinality(photos), 0) <= 3),
+  -- Optional "about you" details surfaced on profiles (see 0009 migration).
+  profession        text,
+  education         text,
+  height_cm         int  check (height_cm is null or height_cm between 120 and 250),
+  drinking          text,
+  smoking           text,
+  exercise          text,
+  relationship_goal text,
+  interests         text[] default '{}'
+              check (coalesce(cardinality(interests), 0) <= 12),
   verification verification_status not null default 'unverified',
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -202,6 +212,9 @@ create policy "matches: woman creates" on matches
   for insert with check (auth.uid() = woman_id);
 create policy "matches: participants update" on matches
   for update using (auth.uid() = woman_id or auth.uid() = man_id);
+-- The woman who initiated may unmatch; deleting cascades to the thread's messages.
+create policy "matches: woman deletes" on matches
+  for delete using (auth.uid() = woman_id);
 
 -- Matched users may read each other's profile (chat headers + lists). Defined
 -- here (not with the profiles table) because it references matches.

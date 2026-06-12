@@ -5,6 +5,7 @@ import { getMyProfile } from "@/lib/profile";
 import { getManDetail, type QualityDetail } from "@/lib/match";
 import { QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
 import { VerifyBadge } from "@/components/VerifyBadge";
+import { ProfileDetails } from "@/components/ProfileDetails";
 import { startConversation } from "../actions";
 
 const GROUP_ORDER: QualityGroup[] = [
@@ -139,6 +140,10 @@ export default async function ManDetailPage({
           </div>
         ) : null}
       </section>
+
+      <div className="mt-4">
+        <ProfileDetails details={man} />
+      </div>
 
       {/* Per-quality answers */}
       <section className="mt-6">

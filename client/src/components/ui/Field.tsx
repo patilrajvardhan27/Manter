@@ -30,3 +30,7 @@ export function Textarea({ className = "", ...props }: ComponentProps<"textarea"
     <textarea className={`${inputBase} min-h-[96px] resize-none ${className}`} {...props} />
   );
 }
+
+export function Select({ className = "", ...props }: ComponentProps<"select">) {
+  return <select className={`${inputBase} pr-3 ${className}`} {...props} />;
+}

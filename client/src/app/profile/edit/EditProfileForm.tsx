@@ -8,6 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import { PHOTO_BUCKET, MAX_PHOTOS } from "@/lib/photos";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Textarea } from "@/components/ui/Field";
+import {
+  ProfileDetailsFields,
+  detailsFromProfile,
+  detailsPayload,
+  type DetailsState,
+} from "@/components/ProfileDetailsFields";
 import type { Profile } from "@/lib/profile";
 
 interface Photo {
@@ -30,6 +36,7 @@ export function EditProfileForm({
   const [age, setAge] = useState(profile.age ? String(profile.age) : "");
   const [city, setCity] = useState(profile.city ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
+  const [details, setDetails] = useState<DetailsState>(detailsFromProfile(profile));
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
 
   const [uploading, setUploading] = useState(false);
@@ -120,6 +127,7 @@ export function EditProfileForm({
         age: ageNum,
         city: city.trim() || null,
         bio: bio.trim() || null,
+        ...detailsPayload(details),
       })
       .eq("id", profile.id);
     setSaving(false);
@@ -241,6 +249,16 @@ export function EditProfileForm({
             placeholder="A line or two about you."
           />
         </Field>
+
+        <div className="border-t border-ink/[0.06] pt-4">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-plum">
+            About you <span className="font-normal normal-case text-ink-soft/70">· optional</span>
+          </p>
+          <ProfileDetailsFields
+            value={details}
+            onChange={(patch) => setDetails((d) => ({ ...d, ...patch }))}
+          />
+        </div>
 
         {error ? (
           <p className="rounded-xl bg-redflag/10 px-4 py-3 text-sm text-redflag" role="alert">

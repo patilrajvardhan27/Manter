@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { LogOut, MessageCircle, IdCard, MessageSquareQuote, BarChart3, Pencil, ImagePlus } from "lucide-react";
 import { VerifyBadge } from "@/components/VerifyBadge";
+import { ProfileDetails } from "@/components/ProfileDetails";
 import type { Profile } from "@/lib/profile";
 import type { AnsweredQuestion, QualityScore } from "@/lib/quiz-data";
 import { QUALITY_BY_KEY, QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
@@ -150,6 +151,8 @@ function ProfilePanel({
           {profile.city ? <Row label="City" value={profile.city} /> : null}
         </dl>
       </Card>
+
+      <ProfileDetails details={profile} />
 
       <Link
         href="/chats"

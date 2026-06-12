@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { LogOut, Compass, IdCard, SlidersHorizontal, SquarePen, Check, Pencil, ImagePlus } from "lucide-react";
 import { VerifyBadge } from "@/components/VerifyBadge";
+import { ProfileDetails } from "@/components/ProfileDetails";
 import { saveWeights } from "@/app/home/actions";
 import type { Profile } from "@/lib/profile";
 import type { QualityWeight } from "@/lib/quiz-data";
@@ -165,6 +166,8 @@ function ProfilePanel({
           {profile.city ? <Row label="City" value={profile.city} /> : null}
         </dl>
       </Card>
+
+      <ProfileDetails details={profile} />
 
       <Link
         href="/discover"

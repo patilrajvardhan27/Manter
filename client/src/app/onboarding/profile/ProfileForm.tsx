@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 import { AuthShell } from "@/components/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Textarea } from "@/components/ui/Field";
+import {
+  ProfileDetailsFields,
+  EMPTY_DETAILS,
+  detailsPayload,
+  type DetailsState,
+} from "@/components/ProfileDetailsFields";
 import type { Role } from "@/lib/profile";
 
 export function ProfileForm({ role }: { role: Role }) {
@@ -14,6 +20,7 @@ export function ProfileForm({ role }: { role: Role }) {
   const [age, setAge] = useState("");
   const [city, setCity] = useState("");
   const [bio, setBio] = useState("");
+  const [details, setDetails] = useState<DetailsState>(EMPTY_DETAILS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +53,7 @@ export function ProfileForm({ role }: { role: Role }) {
       age: ageNum,
       city: city.trim() || null,
       bio: bio.trim() || null,
+      ...detailsPayload(details),
     });
 
     setLoading(false);
@@ -112,6 +120,19 @@ export function ProfileForm({ role }: { role: Role }) {
             }
           />
         </Field>
+
+        <div className="border-t border-ink/[0.06] pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-plum">
+            About you <span className="font-normal normal-case text-ink-soft/70">· optional</span>
+          </p>
+          <p className="mt-1 mb-4 text-xs text-ink-soft/80">
+            A few details for your profile. You can fill these in or skip and add them later.
+          </p>
+          <ProfileDetailsFields
+            value={details}
+            onChange={(patch) => setDetails((d) => ({ ...d, ...patch }))}
+          />
+        </div>
 
         {error ? (
           <p className="rounded-xl bg-redflag/10 px-4 py-3 text-sm text-redflag" role="alert">

@@ -4,6 +4,7 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
 import { getThread } from "@/lib/match";
 import { Chat } from "@/components/Chat";
+import { UnmatchButton } from "@/components/UnmatchButton";
 
 export default async function ChatThreadPage({
   params,
@@ -49,6 +50,9 @@ export default async function ChatThreadPage({
             )}
           </div>
         </Link>
+        {isWoman ? (
+          <UnmatchButton matchId={thread.matchId} otherName={thread.other.display_name} />
+        ) : null}
       </header>
 
       <Chat

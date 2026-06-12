@@ -6,6 +6,7 @@ import { getProfileView } from "@/lib/match";
 import { getMyWeights, getMyQuestions } from "@/lib/quiz-data";
 import { QUALITY_BY_KEY, QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
 import { VerifyBadge } from "@/components/VerifyBadge";
+import { ProfileDetails } from "@/components/ProfileDetails";
 
 export default async function ProfileViewPage({
   params,
@@ -84,6 +85,10 @@ export default async function ProfileViewPage({
           <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">{person.bio}</p>
         ) : null}
       </section>
+
+      <div className="mt-4">
+        <ProfileDetails details={person} />
+      </div>
 
       {/* Her priorities */}
       {weights.length ? (

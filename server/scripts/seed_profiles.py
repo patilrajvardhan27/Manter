@@ -47,6 +47,21 @@ VERIFICATION_WEIGHTS = [3, 1, 5, 1]     # most demo users land "verified"
 PHOTO_BUCKET = "profile-photos"         # must match client/src/lib/photos.ts
 PORTRAIT_BASE = "https://randomuser.me/api/portraits"  # free face photos
 
+# Optional "about you" details (mirror client/src/lib/constants/profileFields.ts).
+DRINKING_OPTIONS = ["Never", "Socially", "Often"]
+SMOKING_OPTIONS = ["No", "Sometimes", "Yes"]
+EXERCISE_OPTIONS = ["Rarely", "Sometimes", "Often", "Daily"]
+RELATIONSHIP_GOALS = ["Long-term relationship", "Marriage", "Short-term", "Still figuring it out"]
+EDUCATIONS = [
+    "High school", "Some college", "BA, State University", "BSc, NYU",
+    "MBA, Wharton", "MSc, Stanford", "Trade school", "Self-taught",
+]
+INTEREST_POOL = [
+    "Cooking", "Travel", "Reading", "Fitness", "Music", "Hiking", "Photography",
+    "Movies", "Gaming", "Art", "Coffee", "Volunteering", "Cycling", "Yoga",
+    "Live music", "Board games", "Running", "Painting",
+]
+
 # Free-text answers to the 6 default behavioral questions so seeded men show
 # real "Your answers" content (question_ids mirror client/src/lib/constants/quiz.ts).
 # Several variants per question; one is picked at random per man.
@@ -107,6 +122,20 @@ def make_bio() -> str:
     return f"{fake.job()}. Into {interests}. {fake.sentence(nb_words=10)}"
 
 
+def make_details() -> dict:
+    """Random values for the optional profile-detail columns."""
+    return {
+        "profession": fake.job(),
+        "education": random.choice(EDUCATIONS),
+        "height_cm": random.randint(155, 198),
+        "drinking": random.choice(DRINKING_OPTIONS),
+        "smoking": random.choice(SMOKING_OPTIONS),
+        "exercise": random.choice(EXERCISE_OPTIONS),
+        "relationship_goal": random.choice(RELATIONSHIP_GOALS),
+        "interests": random.sample(INTEREST_POOL, random.randint(3, 6)),
+    }
+
+
 def upload_photos(sb: Client, uid: str, role: str) -> list[str]:
     """Download 1-3 face portraits and upload them to the private photo bucket.
 
@@ -164,6 +193,7 @@ def create_person(
             "city": fake.city(),
             "bio": make_bio(),
             "verification": random.choices(VERIFICATIONS, weights=VERIFICATION_WEIGHTS)[0],
+            **make_details(),
         }
     ).execute()
 
