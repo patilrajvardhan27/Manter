@@ -1,5 +1,5 @@
 /**
- * Quiz data access (server). The 6 default behavioral questions come from
+ * Quiz data access (server). The default behavioral questions come from
  * lib/constants/quiz.ts; women's custom questions come from the DB. Men answer
  * both, and their choices derive per-quality self-assessment scores.
  */
@@ -123,24 +123,28 @@ export interface QualityScore {
   key: string;
   label: string;
   score: number;
+  reason: string | null;
 }
 
 /**
  * A man's Claude-derived per-quality self-assessment scores (1–5), ordered by
- * the canonical 23-quality order. Unknown keys are skipped.
+ * the canonical 23-quality order. Unknown keys are skipped. `reason` is
+ * Claude's one-sentence explanation of what drove that score.
  */
 export async function getMyScores(manId: string): Promise<QualityScore[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("man_quiz_scores")
-    .select("quality_key, score")
+    .select("quality_key, score, reason")
     .eq("man_id", manId);
 
-  const byKey = new Map((data ?? []).map((r) => [r.quality_key as string, r.score as number]));
+  const byKey = new Map(
+    (data ?? []).map((r) => [r.quality_key as string, { score: r.score as number, reason: r.reason as string | null }]),
+  );
   const scores: QualityScore[] = [];
   for (const q of QUALITIES) {
-    const score = byKey.get(q.key);
-    if (score != null) scores.push({ key: q.key, label: q.label, score });
+    const row = byKey.get(q.key);
+    if (row != null) scores.push({ key: q.key, label: q.label, score: row.score, reason: row.reason });
   }
   return scores;
 }

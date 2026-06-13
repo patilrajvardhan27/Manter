@@ -221,22 +221,34 @@ function ScoresPanel({ scores }: { scores: QualityScore[] }) {
           </h2>
           <ul className="mt-3 space-y-3">
             {items.map((s) => (
-              <li key={s.key} className="flex items-center gap-3">
-                <span className="w-36 shrink-0 text-[0.85rem] leading-tight text-ink">
-                  {s.label}
-                </span>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-plum/10">
-                  <span
-                    className="block h-full rounded-full"
-                    style={{
-                      width: `${(s.score / 5) * 100}%`,
-                      backgroundColor: QUALITY_GROUPS[group].color,
-                    }}
-                  />
-                </span>
-                <span className="w-7 shrink-0 text-right text-[0.8rem] font-medium tabular-nums text-ink-soft">
-                  {s.score.toFixed(1)}
-                </span>
+              <li key={s.key}>
+                <div className="flex items-center gap-3">
+                  <span className="w-36 shrink-0 text-[0.85rem] leading-tight text-ink">
+                    {s.label}
+                  </span>
+                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-plum/10">
+                    <span
+                      className="block h-full rounded-full"
+                      style={{
+                        width: `${(s.score / 5) * 100}%`,
+                        backgroundColor: QUALITY_GROUPS[group].color,
+                      }}
+                    />
+                  </span>
+                  <span className="w-7 shrink-0 text-right text-[0.8rem] font-medium tabular-nums text-ink-soft">
+                    {s.score.toFixed(1)}
+                  </span>
+                </div>
+                {s.reason ? (
+                  <p
+                    className={`mt-1.5 pl-1 text-[0.78rem] leading-snug ${
+                      s.score <= 2.5 ? "text-clay" : "text-ink-soft"
+                    }`}
+                  >
+                    {s.score <= 2.5 ? "What pulled this down: " : "What affected this: "}
+                    {s.reason}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>

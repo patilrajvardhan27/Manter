@@ -113,6 +113,7 @@ create table man_quiz_scores (
   man_id     uuid references profiles(id) on delete cascade,
   quality_key text references qualities(key) on delete cascade,
   score      numeric(3,2) not null check (score between 1 and 5),
+  reason     text,
   primary key (man_id, quality_key)
 );
 
@@ -360,7 +361,7 @@ join profiles w on w.id = ww.woman_id
 join qualities q on q.key = ww.quality_key;
 
 create or replace view man_quiz_scores_named with (security_invoker = true) as
-select p.display_name as man, q.label as quality, ms.score,
+select p.display_name as man, q.label as quality, ms.score, ms.reason,
        ms.man_id, ms.quality_key
 from man_quiz_scores ms
 join profiles p on p.id = ms.man_id

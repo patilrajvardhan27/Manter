@@ -21,7 +21,11 @@ SYSTEM = (
     "non-committal, 5 = a clear, specific green flag. Judge only what the answer "
     "actually shows — reward concrete, respectful, emotionally mature responses; "
     "penalize controlling, dismissive, or self-centered ones. Do not reward "
-    "length or buzzwords. Score every quality_key you are given, and only those."
+    "length or buzzwords. Score every quality_key you are given, and only those. "
+    "For each score, also give a one-sentence reason addressed to the man "
+    "himself (\"You...\"), pointing at the specific thing in his answer that "
+    "drove the score — especially what to change for scores of 1-2, and what "
+    "worked for scores of 4-5. Keep reasons under 160 characters."
 )
 
 _client: Anthropic | None = None
@@ -34,8 +38,11 @@ def _get_client() -> Anthropic:
     return _client
 
 
-def evaluate(answers: list[dict]) -> dict[str, float]:
-    """answers: [{prompt, qualities: [{key,label}], answer}]. Returns key -> 1–5."""
+def evaluate(answers: list[dict]) -> dict[str, dict]:
+    """answers: [{prompt, qualities: [{key,label}], answer}].
+
+    Returns key -> {"score": 1–5, "reason": str}.
+    """
     items = [a for a in answers if (a.get("answer") or "").strip()]
     label_by_key: dict[str, str] = {}
     for a in items:
@@ -48,7 +55,7 @@ def evaluate(answers: list[dict]) -> dict[str, float]:
 
     tool = {
         "name": "report_scores",
-        "description": "Report a 1–5 score for each quality the answers were evaluated against.",
+        "description": "Report a 1–5 score and a short reason for each quality the answers were evaluated against.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -59,8 +66,9 @@ def evaluate(answers: list[dict]) -> dict[str, float]:
                         "properties": {
                             "quality_key": {"type": "string", "enum": keys},
                             "score": {"type": "integer", "minimum": 1, "maximum": 5},
+                            "reason": {"type": "string"},
                         },
-                        "required": ["quality_key", "score"],
+                        "required": ["quality_key", "score", "reason"],
                     },
                 }
             },
@@ -93,11 +101,22 @@ def evaluate(answers: list[dict]) -> dict[str, float]:
                 payload = json.loads(payload)
             raw = payload.get("scores", [])
 
-    # Average across questions that touched the same quality; clamp to [1,5].
+    # Average scores across questions that touched the same quality, clamped to
+    # [1,5]; keep the reason from the lowest-scoring question — that's the one
+    # most worth surfacing to the man.
     agg: dict[str, list[float]] = {}
+    reasons: dict[str, tuple[float, str]] = {}
     for s in raw:
         k = s.get("quality_key")
-        if k in label_by_key:
-            agg.setdefault(k, []).append(max(1.0, min(5.0, float(s["score"]))))
+        if k not in label_by_key:
+            continue
+        score = max(1.0, min(5.0, float(s["score"])))
+        agg.setdefault(k, []).append(score)
+        reason = (s.get("reason") or "").strip()
+        if reason and (k not in reasons or score < reasons[k][0]):
+            reasons[k] = (score, reason)
 
-    return {k: round(sum(v) / len(v), 2) for k, v in agg.items()}
+    return {
+        k: {"score": round(sum(v) / len(v), 2), "reason": reasons.get(k, (0, ""))[1]}
+        for k, v in agg.items()
+    }

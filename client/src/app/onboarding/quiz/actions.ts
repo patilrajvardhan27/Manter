@@ -41,7 +41,11 @@ export async function submitQuiz(answers: Answer[]) {
 
   // Every quality starts neutral; Claude's scores override the ones it judged.
   const scores: Record<string, number> = {};
-  QUALITIES.forEach((q) => (scores[q.key] = 3));
+  const reasons: Record<string, string | null> = {};
+  QUALITIES.forEach((q) => {
+    scores[q.key] = 3;
+    reasons[q.key] = null;
+  });
 
   const measured = new Set<string>();
   const evalPayload = clean.map((a) => {
@@ -58,9 +62,14 @@ export async function submitQuiz(answers: Answer[]) {
       cache: "no-store",
     });
     if (res.ok) {
-      const { scores: judged } = (await res.json()) as { scores: Record<string, number> };
+      const { scores: judged } = (await res.json()) as {
+        scores: Record<string, { score: number; reason: string }>;
+      };
       for (const [key, value] of Object.entries(judged)) {
-        if (key in scores) scores[key] = Math.max(1, Math.min(5, value));
+        if (key in scores) {
+          scores[key] = Math.max(1, Math.min(5, value.score));
+          reasons[key] = value.reason || null;
+        }
       }
     }
   } catch {
@@ -73,6 +82,7 @@ export async function submitQuiz(answers: Answer[]) {
       man_id: user.id,
       quality_key,
       score,
+      reason: reasons[quality_key],
     })),
     { onConflict: "man_id,quality_key" },
   );

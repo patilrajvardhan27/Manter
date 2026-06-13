@@ -16,7 +16,7 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 ## What's built
 
 - **Onboarding** — pick a role (woman/man), fill a profile, take the quiz.
-- **Behavioral quiz** — women author questions; men answer in **free text**, which **Claude scores** (1–5 per quality) instead of multiple choice. Six default questions ship in app code; women can add their own.
+- **Behavioral quiz** — women author questions; men answer in **free text**, which **Claude scores** (1–5 per quality, with a one-sentence reason per score) instead of multiple choice. 14 default situational questions covering all 23 qualities ship in app code; women can add their own.
 - **Swipe discovery** — women browse compatible men ranked by a weighted match score (her 1–5 priority per quality × his quiz scores).
 - **Realtime chat** — matched users message over Supabase Realtime, with a **Claude Haiku red-flag scan** on incoming messages.
 - **Editable profiles + photos** — both roles can edit their details and upload up to **3 photos** (private Storage bucket). Women see men's photos in Discover; a man sees a woman's photos **only after she starts the conversation** (RLS-gated).
