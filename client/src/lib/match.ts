@@ -34,7 +34,7 @@ export interface DiscoverMan {
   verification: string;
   score: number;
   top: string[];
-  photo: string | null; // first photo, signed (if any)
+  photos: string[]; // signed URLs, in order
   matchId: string | null; // set if she already started a conversation
 }
 
@@ -131,12 +131,10 @@ export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
     (quizByMan[r.man_id] ??= {})[r.quality_key] = Number(r.score);
   });
 
-  // Sign each man's first photo in a single batch.
-  const firstPaths = (men ?? [])
-    .map((m) => (m.photos as string[] | null)?.[0])
-    .filter((p): p is string => Boolean(p));
-  const { data: signed } = firstPaths.length
-    ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(firstPaths, 3600)
+  // Sign every man's photos in a single batch.
+  const allPaths = (men ?? []).flatMap((m) => (m.photos as string[] | null) ?? []);
+  const { data: signed } = allPaths.length
+    ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(allPaths, 3600)
     : { data: [] };
   const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
 
@@ -146,7 +144,9 @@ export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
     .filter((m) => !matchByMan[m.id])
     .map((m) => {
       const { score, top } = scoreMan(weights, quizByMan[m.id] ?? {});
-      const first = (m.photos as string[] | null)?.[0];
+      const photos = ((m.photos as string[] | null) ?? [])
+        .map((p) => urlByPath.get(p))
+        .filter((u): u is string => Boolean(u));
       return {
         id: m.id,
         display_name: m.display_name,
@@ -156,7 +156,7 @@ export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
         verification: m.verification,
         score,
         top,
-        photo: (first && urlByPath.get(first)) || null,
+        photos,
         matchId: matchByMan[m.id] ?? null,
       };
     })
