@@ -144,6 +144,20 @@ export default function Landing() {
 
       <footer className="mt-20 border-t border-ink/10 pt-6 text-xs text-ink-soft">
         <p>Manter — pro good men, anti bad ones. Your data stays yours.</p>
+        <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+          <Link href="/about" className="underline-offset-4 hover:text-plum hover:underline">
+            About
+          </Link>
+          <Link href="/safety" className="underline-offset-4 hover:text-plum hover:underline">
+            Safety Center
+          </Link>
+          <Link href="/privacy" className="underline-offset-4 hover:text-plum hover:underline">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="underline-offset-4 hover:text-plum hover:underline">
+            Terms of Service
+          </Link>
+        </nav>
       </footer>
     </main>
   );
