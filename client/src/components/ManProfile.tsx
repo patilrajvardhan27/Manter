@@ -181,7 +181,7 @@ function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
   return (
     <div className="space-y-3">
       {answers.map((a, i) => (
-        <Card key={a.questionId}>
+        <Card key={a.questionId} hover>
           <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-plum">
             Question {i + 1}
           </p>
@@ -215,12 +215,12 @@ function ScoresPanel({ scores }: { scores: QualityScore[] }) {
   return (
     <div className="space-y-5">
       {[...groups.entries()].map(([group, items]) => (
-        <Card key={group}>
+        <Card key={group} hover>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-plum">
             {QUALITY_GROUPS[group].label}
           </h2>
           <ul className="mt-3 space-y-3">
-            {items.map((s) => (
+            {items.map((s, i) => (
               <li key={s.key}>
                 <div className="flex items-center gap-3">
                   <span className="w-36 shrink-0 text-[0.85rem] leading-tight text-ink">
@@ -228,11 +228,12 @@ function ScoresPanel({ scores }: { scores: QualityScore[] }) {
                   </span>
                   <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-plum/10">
                     <span
-                      className="block h-full rounded-full"
+                      className="bar-fill block h-full rounded-full"
                       style={{
-                        width: `${(s.score / 5) * 100}%`,
+                        "--bar-w": `${(s.score / 5) * 100}%`,
+                        animationDelay: `${i * 60}ms`,
                         backgroundColor: QUALITY_GROUPS[group].color,
-                      }}
+                      } as React.CSSProperties}
                     />
                   </span>
                   <span className="w-7 shrink-0 text-right text-[0.8rem] font-medium tabular-nums text-ink-soft">
@@ -280,16 +281,18 @@ function PhotoStrip({ photos }: { photos: string[] }) {
           key={i}
           src={url}
           alt={`Photo ${i + 1}`}
-          className="h-44 w-36 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)]"
+          className="h-44 w-36 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)] transition duration-300 hover:scale-[1.03] active:scale-[0.99]"
         />
       ))}
     </div>
   );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, hover }: { children: React.ReactNode; hover?: boolean }) {
   return (
-    <section className="rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)]">
+    <section
+      className={`rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)] ${hover ? "card-hover" : ""}`}
+    >
       {children}
     </section>
   );
@@ -297,8 +300,8 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)]">
-      <p className="font-display text-2xl font-light text-plum-deep">{value}</p>
+    <div className="card-hover rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)]">
+      <p className="pop-in font-display text-2xl font-light text-plum-deep">{value}</p>
       <p className="mt-0.5 text-[0.72rem] leading-tight text-ink-soft">{label}</p>
     </div>
   );

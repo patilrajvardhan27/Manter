@@ -153,13 +153,13 @@ function ProfilePanel({
       </div>
 
       {profile.bio ? (
-        <Card>
+        <Card hover>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-plum">About</h2>
           <p className="mt-2 text-[0.95rem] leading-relaxed text-ink">{profile.bio}</p>
         </Card>
       ) : null}
 
-      <Card>
+      <Card hover>
         <dl className="space-y-3 text-sm">
           <Row label="Name" value={profile.display_name} />
           {profile.age ? <Row label="Age" value={String(profile.age)} /> : null}
@@ -263,7 +263,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
         const color = QUALITY_GROUPS[group].color;
         const essential = items.filter((q) => values[q.key] >= 4).length;
         return (
-          <Card key={group}>
+          <Card key={group} hover>
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink">
                 <span
@@ -304,8 +304,8 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
                             aria-label={`${q.label}: ${n} (${TIERS[n]})`}
                             aria-pressed={current}
                             onClick={() => set(q.key, n)}
-                            className={`h-8 flex-1 rounded-lg text-[0.72rem] font-semibold transition-all active:scale-95 ${
-                              current ? "ring-2 ring-offset-1 ring-offset-paper" : ""
+                            className={`h-8 flex-1 rounded-lg text-[0.72rem] font-semibold transition-all duration-200 hover:scale-[1.04] active:scale-95 ${
+                              current ? "scale-[1.08] ring-2 ring-offset-1 ring-offset-paper" : ""
                             }`}
                             style={{
                               backgroundColor: on
@@ -370,7 +370,7 @@ function QuestionsPanel({ questions }: { questions: MyQuestion[] }) {
         <Empty>You haven&apos;t written any questions yet.</Empty>
       ) : (
         questions.map((q) => (
-          <Card key={q.id}>
+          <Card key={q.id} hover>
             <div className="flex items-start justify-between gap-3">
               {q.qualityLabel ? (
                 <span className="rounded-full bg-plum/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-plum">
@@ -413,16 +413,18 @@ function PhotoStrip({ photos }: { photos: string[] }) {
           key={i}
           src={url}
           alt={`Photo ${i + 1}`}
-          className="h-44 w-36 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)]"
+          className="h-44 w-36 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)] transition duration-300 hover:scale-[1.03] active:scale-[0.99]"
         />
       ))}
     </div>
   );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, hover }: { children: React.ReactNode; hover?: boolean }) {
   return (
-    <section className="rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)]">
+    <section
+      className={`rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)] ${hover ? "card-hover" : ""}`}
+    >
       {children}
     </section>
   );
@@ -430,8 +432,8 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)]">
-      <p className="font-display text-2xl font-light text-plum-deep">{value}</p>
+    <div className="card-hover rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)]">
+      <p className="pop-in font-display text-2xl font-light text-plum-deep">{value}</p>
       <p className="mt-0.5 text-[0.72rem] leading-tight text-ink-soft">{label}</p>
     </div>
   );

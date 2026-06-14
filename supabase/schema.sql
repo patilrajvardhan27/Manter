@@ -165,6 +165,8 @@ create table quiz_answers (
 alter table quiz_answers enable row level security;
 create policy "answers: man writes own" on quiz_answers
   for all to authenticated using (auth.uid() = man_id) with check (auth.uid() = man_id);
+create policy "answers: women read" on quiz_answers
+  for select to authenticated using (public.is_woman(auth.uid()));
 
 -- ---------------------------------------------------------------------------
 -- ratings : women rate men they've dated. Anonymous to the man.

@@ -8,6 +8,7 @@ import { scoreMan } from "@/lib/scoring";
 import { signPhotoUrls, PHOTO_BUCKET } from "@/lib/photos";
 import { QUALITIES, type QualityGroup } from "@/lib/constants/qualities";
 import { DETAIL_COLUMNS } from "@/lib/profile";
+import { getMyAnswers, type AnsweredQuestion } from "@/lib/quiz-data";
 import type { ProfileDetailFields } from "@/components/ProfileDetails";
 
 /** Pull the detail columns off a profile row into the shared display shape. */
@@ -184,6 +185,7 @@ export interface ManDetail extends ProfileDetailFields {
   qualities: QualityDetail[]; // all 23, canonical order
   strengths: string[]; // labels he scores well on among her priorities
   gaps: string[]; // labels she cares about where he lags
+  answers: AnsweredQuestion[]; // his quiz answers, in his own words
 }
 
 /** Full profile + per-quality breakdown for one man, scored for this woman. */
@@ -199,10 +201,11 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
 
   const photos = await signPhotoUrls(supabase, man.photos as string[] | null);
 
-  const [{ data: weightRows }, { data: quizRows }, { data: existing }] = await Promise.all([
+  const [{ data: weightRows }, { data: quizRows }, { data: existing }, answers] = await Promise.all([
     supabase.from("woman_weights").select("quality_key, weight").eq("woman_id", womanId),
     supabase.from("man_quiz_scores").select("quality_key, score").eq("man_id", manId),
     supabase.from("matches").select("id").eq("woman_id", womanId).eq("man_id", manId).maybeSingle(),
+    getMyAnswers(manId),
   ]);
 
   const weights: Record<string, number> = {};
@@ -245,6 +248,7 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
     qualities,
     strengths,
     gaps,
+    answers,
     ...pickDetails(man),
   };
 }

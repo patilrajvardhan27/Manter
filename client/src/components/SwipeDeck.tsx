@@ -118,7 +118,7 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
           onClick={pass}
           disabled={busy}
           aria-label="Pass"
-          className="flex h-16 w-16 items-center justify-center rounded-full border border-ink/10 bg-paper text-redflag shadow-[var(--shadow-soft)] transition hover:border-redflag/30 active:scale-90 disabled:opacity-40"
+          className="flex h-16 w-16 items-center justify-center rounded-full border border-ink/10 bg-paper text-redflag shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-0.5 hover:border-redflag/30 hover:shadow-lg active:scale-90 disabled:opacity-40"
         >
           <X size={26} strokeWidth={2.4} />
         </button>
@@ -126,7 +126,7 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
           onClick={() => like(current)}
           disabled={busy}
           aria-label="Like and message"
-          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-plum text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-90 disabled:opacity-40"
+          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-plum text-cream shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-0.5 hover:bg-plum-deep hover:shadow-lg active:scale-90 disabled:opacity-40"
         >
           <Heart size={28} strokeWidth={2.2} fill="currentColor" />
         </button>
@@ -157,8 +157,11 @@ function Stamp({
 }) {
   return (
     <span
-      className={`pointer-events-none absolute top-6 rounded-lg border-[3px] px-3 py-1 font-display text-2xl font-bold uppercase tracking-wide ${className}`}
-      style={style}
+      className={`pointer-events-none absolute top-6 rounded-lg border-[3px] px-3 py-1 font-display text-2xl font-bold uppercase tracking-wide transition-transform duration-150 ${className}`}
+      style={{
+        ...style,
+        transform: `scale(${0.85 + 0.15 * (Number(style?.opacity ?? 0))}) rotate(-6deg)`,
+      }}
     >
       {children}
     </span>

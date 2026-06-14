@@ -43,7 +43,7 @@ export default async function ChatsPage() {
           <Link
             key={c.matchId}
             href={`/chats/${c.matchId}`}
-            className="rise flex items-center gap-3 rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)] transition active:scale-[0.99]"
+            className="rise card-hover flex items-center gap-3 rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)] transition active:scale-[0.99]"
             style={{ animationDelay: `${60 + i * 50}ms` }}
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-plum/10 font-display text-lg text-plum">

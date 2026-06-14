@@ -31,7 +31,7 @@ export function ProfileDetails({ details }: { details: ProfileDetailFields }) {
   if (!rows.length && !details.interests.length) return null;
 
   return (
-    <section className="rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)]">
+    <section className="card-hover rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)]">
       <h2 className="text-xs font-semibold uppercase tracking-wider text-plum">Details</h2>
 
       {rows.length ? (
@@ -54,10 +54,11 @@ export function ProfileDetails({ details }: { details: ProfileDetailFields }) {
         <div className="mt-4">
           <p className="text-[0.68rem] font-medium uppercase tracking-wide text-ink-soft/70">Interests</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {details.interests.map((it) => (
+            {details.interests.map((it, i) => (
               <span
                 key={it}
-                className="rounded-full bg-plum/10 px-2.5 py-1 text-[0.72rem] font-medium text-plum"
+                className="pop-in rounded-full bg-plum/10 px-2.5 py-1 text-[0.72rem] font-medium text-plum transition hover:scale-[1.05]"
+                style={{ animationDelay: `${i * 40}ms` }}
               >
                 {it}
               </span>
