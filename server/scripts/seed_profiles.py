@@ -62,7 +62,7 @@ INTEREST_POOL = [
     "Live music", "Board games", "Running", "Painting",
 ]
 
-# Free-text answers to the 6 default behavioral questions so seeded men show
+# Free-text answers to the default behavioral questions so seeded men show
 # real "Your answers" content (question_ids mirror client/src/lib/constants/quiz.ts).
 # Several variants per question; one is picked at random per man.
 SEED_ANSWERS: dict[str, list[str]] = {
@@ -95,6 +95,46 @@ SEED_ANSWERS: dict[str, list[str]] = {
         "I'd actually open up about it. Bottling things up never helped me, and she should know what's going on with me.",
         "I'd tell her honestly that I'm having a rough time. I don't do the 'I'm fine' thing.",
         "I'd share what's weighing on me — being able to be vulnerable with her is the point.",
+    ],
+    "q7_secret": [
+        "I'd tell her even though it's awkward. Hiding it just to avoid an uncomfortable five minutes isn't worth what it'd cost if she found out another way.",
+        "I'd bring it up myself. If I'd want her to tell me the same thing, I should hold myself to that too.",
+        "I'd say something, even casually — 'hey, small thing, but...'. Staying quiet on purpose feels like a lie by omission.",
+    ],
+    "q8_venting": [
+        "I'd actually read the whole thing and respond to how she's feeling, not just the events — sometimes she just needs someone to get it, not fix it.",
+        "I'd ask a follow-up question about the part that seemed to bother her most, and let her keep going if she wants.",
+        "I'd put my phone down for a minute and properly reply — a vent deserves more than a quick reaction.",
+    ],
+    "q9_disrespect": [
+        "I'd say something in the moment, calmly — 'that's not fair' or similar. I'd rather have an awkward few seconds than let it slide.",
+        "I'd address it right there, even if it's uncomfortable, and check in with her afterward too.",
+        "I wouldn't let it go — I'd push back politely but clearly, in front of whoever said it.",
+    ],
+    "q10_ordinary_week": [
+        "She mentioned offhand that a meeting got moved and she was annoyed about losing her gym slot — I remembered and asked how it went later.",
+        "She seemed a bit quieter than usual on Wednesday, didn't say why, but I noticed and checked in.",
+        "Small stuff — she said she was nervous about a call with her landlord, so I texted to ask how it went.",
+    ],
+    "q11_selfdeprecating_joke": [
+        "I'd laugh with her, then gently say something like 'for what it's worth, I don't think it's as bad as you're making it sound.'",
+        "I'd play along with the joke for a second, then ask how she's actually doing with it underneath the humor.",
+        "I'd smile and let the moment lighten things, but follow up properly once we're both more relaxed.",
+    ],
+    "q12_period": [
+        "I'd ask if she wants anything — heating pad, food, just space — and treat it like any other day she's not feeling great.",
+        "I'd just be a bit more attentive, ask what helps, and not make it a big deal either way.",
+        "I'd check what she needs and not act weird about it — it's just part of life.",
+    ],
+    "q13_praise": [
+        "I'd say thanks and mention the people who helped along the way — it wasn't just me.",
+        "I'd enjoy it for a second, then point out that she (or my team) had a lot to do with it too.",
+        "I'd accept the compliment without making a big show of it, and credit whoever pitched in.",
+    ],
+    "q14_coworker": [
+        "I'd be glad she's enjoying the project — it's not really my business unless she wants to tell me more.",
+        "I wouldn't think much of it. People get along with coworkers all the time; it doesn't worry me.",
+        "I'd just say that's great, sounds like the project's going well. No need to dig into it.",
     ],
 }
 
