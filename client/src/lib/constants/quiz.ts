@@ -3,6 +3,7 @@
  * answer (why_manter.md §6). Each option nudges per-quality self-assessment
  * scores. Patterns emerge across answers rather than from any single one.
  */
+import { likertOptions } from "./likert";
 
 export interface QuizOption {
   id: string;
@@ -15,6 +16,11 @@ export interface QuizQuestion {
   id: string;
   prompt: string;
   options: QuizOption[];
+  /** "freetext" (default): answered in his own words, judged by Claude.
+   *  "likert": a fixed agree/disagree scale, scored deterministically from
+   *  the picked option's effects — used for situational attitude questions
+   *  that need to be directly comparable rather than open-ended. */
+  kind?: "freetext" | "likert";
 }
 
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
@@ -144,5 +150,85 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
       { id: "b", text: "Ask a few curious questions about him, mostly to understand the dynamic.", effects: { supportive_not_jealous: 0, protects_not_controls: 0 } },
       { id: "c", text: "Feel uneasy about it and find a reason to bring him up again later.", effects: { supportive_not_jealous: -2, protects_not_controls: -1 } },
     ],
+  },
+  {
+    id: "q15_her_hate",
+    prompt:
+      "She tells you a stranger online sent her sexist, hateful messages just for posting something ordinary — work, an opinion, a photo. She's clearly rattled.",
+    options: [
+      { id: "a", text: "Take it seriously right away — ask how she's doing, then ask what would actually help, even if that's just listening.", effects: { takes_her_side: 2, feels_safe: 2, emotionally_intelligent: 1 } },
+      { id: "b", text: "Tell her to ignore it — strangers online don't matter.", effects: { takes_her_side: -1, feels_safe: -1 } },
+      { id: "c", text: "Get angrier about it than she is and make it about going after the person.", effects: { takes_her_side: 0, no_ego: -1 } },
+    ],
+  },
+  {
+    id: "q16_his_hate",
+    prompt:
+      "A friend, a stranger, even family says something like “men are all the same” right in front of you. How do you actually feel and respond, in the moment and after?",
+    options: [
+      { id: "a", text: "Brush it off in the moment, but it sticks with you — you might mention it to her later.", effects: { expresses_emotions: 1, confident_self_respect: 1 } },
+      { id: "b", text: "Get visibly defensive and argue the point right there.", effects: { no_ego: -1, confident_self_respect: -1 } },
+      { id: "c", text: "Stay quiet and act like it didn't bother you, even if it did.", effects: { expresses_emotions: -2, emotionally_intelligent: -1 } },
+    ],
+  },
+  {
+    id: "q17_bill_no_strings",
+    prompt:
+      "Like the viral ₹370 biryani story — you pay for dinner, she thanks you for the meal, and says she doesn't want anything physical tonight. How much do you agree: “What I paid for dinner doesn't change her answer — it stands no matter what the bill came to.”",
+    kind: "likert",
+    options: likertOptions([
+      { key: "respects_boundaries", positive: true },
+      { key: "no_ego", positive: true },
+    ]),
+  },
+  {
+    id: "q18_seclusion_push",
+    prompt:
+      "She says she's not comfortable going somewhere quiet after dinner, even though you've already paid for the meal. How much do you agree: “If she's not comfortable, the night ends there — what I spent has nothing to do with what happens next.”",
+    kind: "likert",
+    options: likertOptions([
+      { key: "respects_boundaries", positive: true },
+      { key: "patient", positive: true },
+    ]),
+  },
+  {
+    id: "q19_early_end",
+    prompt:
+      "You've covered transport, food, and drinks on a first date, and she wants to call it an early night. How much do you agree: “A bit of disappointment is normal, but she doesn't owe me more time because of what I spent.”",
+    kind: "likert",
+    options: likertOptions([
+      { key: "respects_decisions", positive: true },
+      { key: "no_ego", positive: true },
+    ]),
+  },
+  {
+    id: "q20_declined_kiss",
+    prompt:
+      "After a genuinely good evening, she says she'd rather not kiss and wants to head home. How much do you agree: “A 'no' at the end of a good night is still just a no — I wouldn't read into it or push.”",
+    kind: "likert",
+    options: likertOptions([
+      { key: "respects_boundaries", positive: true },
+      { key: "confident_self_respect", positive: true },
+    ]),
+  },
+  {
+    id: "q21_split_bill",
+    prompt:
+      "After she's made clear nothing more is happening tonight, she offers to split the bill. How much do you agree: “I'd take that as plain fairness, not as an insult or a sign the night was wasted.”",
+    kind: "likert",
+    options: likertOptions([
+      { key: "no_ego", positive: true },
+      { key: "basic_manners", positive: true },
+    ]),
+  },
+  {
+    id: "q22_invested_time",
+    prompt:
+      "You feel like you've put real time and money into getting to know her, but she only sees it going toward friendship. How much do you agree: “If that's where she lands, I'd accept it calmly rather than arguing my case or pulling away to make a point.”",
+    kind: "likert",
+    options: likertOptions([
+      { key: "no_ego", positive: true },
+      { key: "emotionally_intelligent", positive: true },
+    ]),
   },
 ];

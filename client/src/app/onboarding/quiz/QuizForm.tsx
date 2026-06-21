@@ -23,8 +23,14 @@ export function QuizForm({ questions }: { questions: Question[] }) {
   const total = questions.length;
   const isLast = step === total - 1;
   const value = answers[q.id] ?? "";
-  const ready = value.trim().length >= MIN_CHARS;
-  const answeredCount = questions.filter((x) => (answers[x.id] ?? "").trim().length >= MIN_CHARS).length;
+  const isLikert = q.kind === "likert";
+  const ready = isLikert ? value.length > 0 : value.trim().length >= MIN_CHARS;
+
+  function isAnswered(question: Question) {
+    const a = answers[question.id] ?? "";
+    return question.kind === "likert" ? a.length > 0 : a.trim().length >= MIN_CHARS;
+  }
+  const answeredCount = questions.filter(isAnswered).length;
 
   function next() {
     if (!ready) return;
@@ -33,7 +39,7 @@ export function QuizForm({ questions }: { questions: Question[] }) {
       return;
     }
     const payload: Answer[] = questions
-      .filter((question) => (answers[question.id] ?? "").trim().length >= MIN_CHARS)
+      .filter(isAnswered)
       .map((question) => ({ questionId: question.id, answer: answers[question.id] }));
     startTransition(() => {
       submitQuiz(payload);
@@ -63,20 +69,45 @@ export function QuizForm({ questions }: { questions: Question[] }) {
 
         <p className="font-display text-lg leading-snug text-ink">{q.prompt}</p>
 
-        <Textarea
-          value={value}
-          onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-          maxLength={600}
-          rows={5}
-          placeholder="Type your honest answer…"
-          className="min-h-[140px]"
-          autoFocus
-        />
-        <p className="-mt-2 text-right text-xs text-ink-soft/70">
-          {value.trim().length < MIN_CHARS
-            ? `${MIN_CHARS - value.trim().length} more characters`
-            : `${value.trim().length}/600`}
-        </p>
+        {isLikert ? (
+          <div className="space-y-2.5">
+            {q.options?.map((option) => {
+              const active = value === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setAnswers((a) => ({ ...a, [q.id]: option.id }))}
+                  aria-pressed={active}
+                  className={`w-full rounded-2xl border px-4 py-3.5 text-left text-[0.95rem] font-medium transition active:scale-[0.99] ${
+                    active
+                      ? "border-plum bg-plum text-cream shadow-[var(--shadow-soft)]"
+                      : "border-ink/10 bg-paper/60 text-ink"
+                  }`}
+                >
+                  {option.text}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <>
+            <Textarea
+              value={value}
+              onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
+              maxLength={600}
+              rows={5}
+              placeholder="Type your honest answer…"
+              className="min-h-[140px]"
+              autoFocus
+            />
+            <p className="-mt-2 text-right text-xs text-ink-soft/70">
+              {value.trim().length < MIN_CHARS
+                ? `${MIN_CHARS - value.trim().length} more characters`
+                : `${value.trim().length}/600`}
+            </p>
+          </>
+        )}
 
         <div className="flex items-center gap-3">
           {step > 0 ? (

@@ -17,6 +17,9 @@ export interface Question {
   prompt: string;
   qualities: QualityRef[]; // which of the 23 this question measures
   custom: boolean;
+  kind: "freetext" | "likert";
+  /** Only set for likert questions — the 5 agree/disagree levels to pick from. */
+  options?: { id: string; text: string }[];
 }
 
 /** Map quality keys to {key,label}, dropping any that aren't one of the 23. */
@@ -48,6 +51,8 @@ export async function getActiveQuestions(): Promise<Question[]> {
     prompt: q.prompt,
     qualities: toRefs(q.options.flatMap((o) => Object.keys(o.effects))),
     custom: false,
+    kind: q.kind ?? "freetext",
+    options: q.kind === "likert" ? q.options.map((o) => ({ id: o.id, text: o.text })) : undefined,
   }));
 
   const custom: Question[] = (data ?? []).map((r) => ({
@@ -55,6 +60,7 @@ export async function getActiveQuestions(): Promise<Question[]> {
     prompt: r.prompt as string,
     qualities: toRefs(r.quality_key ? [r.quality_key as string] : []),
     custom: true,
+    kind: "freetext",
   }));
 
   return [...defaults, ...custom];
