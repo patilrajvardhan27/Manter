@@ -73,8 +73,8 @@ export default function PrivacyPage() {
         </ul>
         <p>
           To request a data export or deletion, email{" "}
-          <a href="mailto:privacy@manter.app" className="font-medium text-plum underline-offset-4 hover:underline">
-            privacy@manter.app
+          <a href="mailto:privacy@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+            privacy@charms.app
           </a>
           . We&apos;ll act on verified requests within 30 days.
         </p>
@@ -97,7 +97,7 @@ export default function PrivacyPage() {
 
       <StaticSection title="8. Age requirement">
         <p>
-          Manter is for users 18 and older. We don&apos;t knowingly collect data from
+          Charms is for users 18 and older. We don&apos;t knowingly collect data from
           anyone under 18.
         </p>
       </StaticSection>
@@ -112,8 +112,8 @@ export default function PrivacyPage() {
       <StaticSection title="10. Contact">
         <p>
           Questions about this policy? Email{" "}
-          <a href="mailto:privacy@manter.app" className="font-medium text-plum underline-offset-4 hover:underline">
-            privacy@manter.app
+          <a href="mailto:privacy@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+            privacy@charms.app
           </a>
           .
         </p>

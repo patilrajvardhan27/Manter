@@ -1,6 +1,6 @@
 /**
  * Behavioral quiz for men — scenario questions with no obviously "correct"
- * answer (why_manter.md §6). Each option nudges per-quality self-assessment
+ * answer (why_charms.md §6). Each option nudges per-quality self-assessment
  * scores. Patterns emerge across answers rather than from any single one.
  */
 import { likertOptions } from "./likert";

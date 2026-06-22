@@ -5,9 +5,9 @@ import { StaticPage, StaticSection } from "@/components/StaticPage";
 export default function AboutPage() {
   return (
     <StaticPage
-      eyebrow="About Manter"
+      eyebrow="About Charms"
       title="Date by character, not by photos."
-      subtitle="Every major dating app surfaces men based on looks and proximity. Manter surfaces them based on whether they're actually good people — backed by data, not just a gut feeling."
+      subtitle="Every major dating app surfaces men based on looks and proximity. Charms surfaces them based on whether they're actually good people — backed by data, not just a gut feeling."
     >
       <StaticSection title="The problem">
         <p>
@@ -17,7 +17,7 @@ export default function AboutPage() {
           of room to get hurt.
         </p>
         <p>
-          We built Manter for women who aren&apos;t anti-men — they&apos;re
+          We built Charms for women who aren&apos;t anti-men — they&apos;re
           anti-<em className="not-italic font-medium text-ink">bad</em> men,
           and they want a faster, safer way to find the good ones.
         </p>
@@ -25,7 +25,7 @@ export default function AboutPage() {
 
       <StaticSection title="The 23-quality framework">
         <p>
-          Instead of a bio and six photos, every man on Manter is scored across{" "}
+          Instead of a bio and six photos, every man on Charms is scored across{" "}
           <strong className="font-medium text-ink">23 character qualities</strong>{" "}
           — things like respecting boundaries, emotional maturity, reliability,
           and how he treats women when no one&apos;s watching. These aren&apos;t
@@ -65,7 +65,7 @@ export default function AboutPage() {
 
       <StaticSection title="Our commitment">
         <p>
-          Manter doesn&apos;t sell your data, and it doesn&apos;t run on ads.
+          Charms doesn&apos;t sell your data, and it doesn&apos;t run on ads.
           Our incentive is simple: help you find someone genuinely good, and
           keep you safe while you look. Read more in our{" "}
           <Link href="/safety" className="font-medium text-plum underline-offset-4 hover:underline">

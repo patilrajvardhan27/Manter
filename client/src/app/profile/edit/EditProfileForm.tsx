@@ -111,7 +111,7 @@ export function EditProfileForm({
 
     const ageNum = Number(age);
     if (!Number.isInteger(ageNum) || ageNum < 18) {
-      setError("You must be 18 or older to use Manter.");
+      setError("You must be 18 or older to use Charms.");
       return;
     }
     if (!displayName.trim()) {

@@ -1,4 +1,4 @@
-# Manter
+# Charms
 
 > Safety-first dating for women. Match on **verified character** across 23 qualities — not photos.
 > A mobile-first **PWA** (installable from the browser, no app-store fees) on **Next.js + Supabase + FastAPI**.
@@ -79,15 +79,15 @@ python scripts/seed_profiles.py --clean      # delete prior seed users, then res
 
 **Logins** — emails are **deterministic** so you can sign in without reading the
 script output: `woman1`, `woman2`, … and `man1`, `man2`, … each at
-`@seed.manter.test`. Every account shares one password.
+`@seed.charms.test`. Every account shares one password.
 
 | Email | Password |
 |---|---|
-| `woman1@seed.manter.test` | `ManterSeed!23` |
-| `woman2@seed.manter.test` | `ManterSeed!23` |
+| `woman1@seed.charms.test` | `CharmsSeed!23` |
+| `woman2@seed.charms.test` | `CharmsSeed!23` |
 | … | … |
-| `man1@seed.manter.test` | `ManterSeed!23` |
-| `man2@seed.manter.test` | `ManterSeed!23` |
+| `man1@seed.charms.test` | `CharmsSeed!23` |
+| `man2@seed.charms.test` | `CharmsSeed!23` |
 
 (Override the password with `--password`. Display names/ages/cities/bios are still
 Faker-randomized; only the login emails are stable.) The script also prints every

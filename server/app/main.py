@@ -7,8 +7,8 @@ from app.routers import ai, quiz, scoring
 settings = get_settings()
 
 app = FastAPI(
-    title="Manter Service",
-    description="Compatibility scoring + Claude Haiku red-flag detection for Manter.",
+    title="Charms Service",
+    description="Compatibility scoring + Claude Haiku red-flag detection for Charms.",
     version="0.1.0",
 )
 

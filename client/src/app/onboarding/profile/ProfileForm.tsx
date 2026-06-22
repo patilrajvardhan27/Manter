@@ -30,7 +30,7 @@ export function ProfileForm({ role }: { role: Role }) {
 
     const ageNum = Number(age);
     if (!Number.isInteger(ageNum) || ageNum < 18) {
-      setError("You must be 18 or older to use Manter.");
+      setError("You must be 18 or older to use Charms.");
       return;
     }
 

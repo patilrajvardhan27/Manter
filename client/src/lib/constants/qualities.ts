@@ -1,7 +1,7 @@
 /**
- * The 23-quality framework — the core of Manter.
+ * The 23-quality framework — the core of Charms.
  * Sourced from points.txt (1–23) and mapped to the research-backed groupings
- * in why_manter.md §4. `key` is stable and used as the DB quality identifier.
+ * in why_charms.md §4. `key` is stable and used as the DB quality identifier.
  */
 
 export type QualityGroup =

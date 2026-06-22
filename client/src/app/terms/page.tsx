@@ -9,7 +9,7 @@ export default function TermsPage() {
     >
       <StaticSection title="1. Eligibility">
         <p>
-          You must be at least 18 years old to use Manter. By creating an account, you
+          You must be at least 18 years old to use Charms. By creating an account, you
           confirm that you meet this requirement and that the information you provide is
           accurate.
         </p>
@@ -40,7 +40,7 @@ export default function TermsPage() {
           Character scores, quiz results, verification badges, and AI red-flag scans are
           provided as informational tools to help you make decisions — they are{" "}
           <strong className="font-medium text-ink">not a guarantee</strong> of any
-          person&apos;s character, intentions, or safety. Manter does not perform criminal
+          person&apos;s character, intentions, or safety. Charms does not perform criminal
           background checks unless explicitly stated on a profile. You&apos;re always
           responsible for your own judgment and safety decisions, including whether and
           how to meet someone in person.
@@ -50,7 +50,7 @@ export default function TermsPage() {
       <StaticSection title="5. Your content">
         <p>
           You retain ownership of the photos, profile information, and messages you
-          submit. By posting them, you grant Manter a license to store and display them
+          submit. By posting them, you grant Charms a license to store and display them
           as needed to operate the service (e.g. showing your profile to matches,
           processing quiz answers and messages for scoring as described in our{" "}
           <a href="/privacy" className="font-medium text-plum underline-offset-4 hover:underline">Privacy Policy</a>).
@@ -59,9 +59,9 @@ export default function TermsPage() {
 
       <StaticSection title="6. Disclaimers">
         <p>
-          Manter is provided &quot;as is&quot;. We don&apos;t warrant that the service
+          Charms is provided &quot;as is&quot;. We don&apos;t warrant that the service
           will be uninterrupted, error-free, or that any AI-generated assessment is
-          accurate or complete. To the extent permitted by law, Manter is not liable for
+          accurate or complete. To the extent permitted by law, Charms is not liable for
           interactions, relationships, or meetings that occur as a result of using the
           service.
         </p>
@@ -85,8 +85,8 @@ export default function TermsPage() {
       <StaticSection title="9. Contact">
         <p>
           Questions about these terms? Email{" "}
-          <a href="mailto:support@manter.app" className="font-medium text-plum underline-offset-4 hover:underline">
-            support@manter.app
+          <a href="mailto:support@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+            support@charms.app
           </a>
           .
         </p>

@@ -1,4 +1,4 @@
-# Manter — Implementation Plan
+# Charms — Implementation Plan
 
 > Safety-first dating for women. Surfaces men by **verified character** across **23 qualities**, not photos.
 > Built as a **mobile-first PWA** (installable from the browser — no app-store fees), on **Supabase** + **FastAPI**.
@@ -45,7 +45,7 @@
 
 ### Repository layout
 ```
-Manter/
+Charms/
 ├── IMPLEMENTATION_PLAN.md        ← this file
 ├── README.md                     ← run instructions
 ├── client/                       ← Next.js 15 PWA

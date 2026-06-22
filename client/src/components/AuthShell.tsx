@@ -22,7 +22,7 @@ export function AuthShell({
           href="/"
           className="font-display text-xl font-semibold tracking-tight text-plum-deep"
         >
-          Manter
+          Charms
         </Link>
       </header>
 

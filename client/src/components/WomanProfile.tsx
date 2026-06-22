@@ -46,7 +46,7 @@ export function WomanProfile({
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-5 pb-28 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between rise" style={{ animationDelay: "0ms" }}>
         <span className="font-display text-2xl font-semibold tracking-tight text-plum-deep">
-          Manter
+          Charms
         </span>
         <div className="flex items-center gap-1">
           <Link

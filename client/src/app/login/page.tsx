@@ -92,7 +92,7 @@ function LoginForm() {
   return (
     <AuthShell
       eyebrow="Welcome back"
-      title="Sign in to Manter."
+      title="Sign in to Charms."
       footer={
         <>
           New here?{" "}

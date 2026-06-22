@@ -1,5 +1,5 @@
 -- ============================================================================
--- Manter — Postgres schema + Row Level Security (Supabase)
+-- Charms — Postgres schema + Row Level Security (Supabase)
 -- Run in the Supabase SQL editor, or `supabase db push` with the CLI.
 -- Default posture: RLS on, deny by default, grant the minimum each role needs.
 -- ============================================================================

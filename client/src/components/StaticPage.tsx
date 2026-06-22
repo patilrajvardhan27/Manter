@@ -23,7 +23,7 @@ export function StaticPage({
           <ArrowLeft size={20} strokeWidth={2.2} />
         </Link>
         <span className="font-display text-lg font-semibold tracking-tight text-plum-deep">
-          Manter
+          Charms
         </span>
       </header>
 

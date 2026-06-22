@@ -16,11 +16,11 @@ const hanken = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Manter — date by character",
+  title: "Charms — date by character",
   description:
     "Safety-first dating for women. Match on verified character across 23 qualities, not photos.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Manter" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Charms" },
 };
 
 export const viewport: Viewport = {

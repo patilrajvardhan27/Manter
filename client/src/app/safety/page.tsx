@@ -6,7 +6,7 @@ export default function SafetyPage() {
   return (
     <StaticPage
       eyebrow="Safety Center"
-      title="How Manter keeps you safer."
+      title="How Charms keeps you safer."
       subtitle="Here's exactly how the scoring, scanning, and verification works — in plain language, no black box."
     >
       <StaticSection title="The character score">
@@ -83,8 +83,8 @@ export default function SafetyPage() {
           <span>
             If a conversation crosses a line or someone&apos;s behavior worries
             you, reach out to{" "}
-            <a href="mailto:safety@manter.app" className="font-medium text-plum underline-offset-4 hover:underline">
-              safety@manter.app
+            <a href="mailto:safety@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+              safety@charms.app
             </a>{" "}
             — every report is reviewed.
           </span>
@@ -93,7 +93,7 @@ export default function SafetyPage() {
           <IconBadge Icon={Phone} color="var(--color-redflag)" />
           <span>
             If you&apos;re ever in immediate danger, contact local emergency
-            services first — Manter is a tool, not a substitute for that.
+            services first — Charms is a tool, not a substitute for that.
           </span>
         </p>
       </StaticSection>

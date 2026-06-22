@@ -39,8 +39,8 @@ from supabase import Client, create_client  # noqa: E402
 
 from app.config import get_settings  # noqa: E402
 
-SEED_DOMAIN = "seed.manter.test"        # marks accounts this script owns
-DEFAULT_PASSWORD = "ManterSeed!23"      # shared login for all demo accounts
+SEED_DOMAIN = "seed.charms.test"        # marks accounts this script owns
+DEFAULT_PASSWORD = "CharmsSeed!23"      # shared login for all demo accounts
 VERIFICATIONS = ["unverified", "pending", "verified", "rejected"]
 VERIFICATION_WEIGHTS = [3, 1, 5, 1]     # most demo users land "verified"
 
