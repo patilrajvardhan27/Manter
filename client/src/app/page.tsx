@@ -33,8 +33,8 @@ export default function Landing() {
           className="rise mt-3 text-[0.95rem] leading-relaxed text-ink-soft"
           style={{ animationDelay: "120ms" }}
         >
-          Charms turns “is he actually a good man?” from a gut feeling into a
-          verified score — across 23 qualities, with AI red-flag detection and
+          Charms turns “is it actually a good person?” from a gut feeling into a
+          verified score across multiple qualities, with AI red-flag detection and
           real safety built in.
         </p>
 
@@ -50,7 +50,7 @@ export default function Landing() {
       </section>
 
       <footer className="mt-4 border-t border-ink/10 pt-3 text-[0.7rem] text-ink-soft">
-        <p>Charms — pro good men, anti bad ones. Your data stays yours.</p>
+        <p>Charms — pro good people, anti bad ones. Your data stays yours.</p>
         <nav className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
           <Link href="/about" className="underline-offset-4 hover:text-plum hover:underline">
             About

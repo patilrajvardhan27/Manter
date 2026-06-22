@@ -2,12 +2,22 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { LogOut, Compass, IdCard, SlidersHorizontal, SquarePen, Check, Pencil, ImagePlus } from "lucide-react";
+import {
+  LogOut,
+  Compass,
+  IdCard,
+  SlidersHorizontal,
+  SquarePen,
+  MessageSquareQuote,
+  Check,
+  Pencil,
+  ImagePlus,
+} from "lucide-react";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { ProfileDetails } from "@/components/ProfileDetails";
 import { saveWeights } from "@/app/home/actions";
 import type { Profile } from "@/lib/profile";
-import type { QualityWeight } from "@/lib/quiz-data";
+import type { AnsweredQuestion, QualityWeight } from "@/lib/quiz-data";
 import {
   QUALITIES,
   QUALITY_GROUPS,
@@ -21,22 +31,25 @@ export interface MyQuestion {
   active: boolean;
 }
 
-type Tab = "profile" | "priorities" | "questions";
+type Tab = "profile" | "priorities" | "answers" | "questions";
 
 const TABS: { id: Tab; label: string; icon: typeof IdCard }[] = [
   { id: "profile", label: "Profile", icon: IdCard },
   { id: "priorities", label: "Priorities", icon: SlidersHorizontal },
+  { id: "answers", label: "Answers", icon: MessageSquareQuote },
   { id: "questions", label: "Questions", icon: SquarePen },
 ];
 
 export function WomanProfile({
   profile,
   weights,
+  answers,
   questions,
   photos,
 }: {
   profile: Profile;
   weights: QualityWeight[];
+  answers: AnsweredQuestion[];
   questions: MyQuestion[];
   photos: string[];
 }) {
@@ -122,6 +135,7 @@ export function WomanProfile({
           />
         )}
         {tab === "priorities" && <PrioritiesPanel weights={weights} />}
+        {tab === "answers" && <AnswersPanel answers={answers} />}
         {tab === "questions" && <QuestionsPanel questions={questions} />}
       </div>
     </main>
@@ -349,6 +363,29 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
           "Save changes"
         )}
       </button>
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------- Answers tab */
+
+function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
+  if (!answers.length) {
+    return <Empty>You haven&apos;t answered the priorities quiz yet.</Empty>;
+  }
+  return (
+    <div className="space-y-3">
+      {answers.map((a, i) => (
+        <Card key={a.questionId} hover>
+          <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-plum">
+            Question {i + 1}
+          </p>
+          <p className="mt-1.5 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
+          <p className="mt-2.5 border-l-2 border-plum/25 pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
+            {a.answer}
+          </p>
+        </Card>
+      ))}
     </div>
   );
 }

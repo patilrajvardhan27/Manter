@@ -5,6 +5,7 @@
  */
 import { createClient } from "@/lib/supabase/server";
 import { QUIZ_QUESTIONS } from "@/lib/constants/quiz";
+import { WOMAN_QUIZ_QUESTIONS } from "@/lib/constants/woman-quiz";
 import { QUALITIES, QUALITY_BY_KEY } from "@/lib/constants/qualities";
 
 export interface QualityRef {
@@ -117,6 +118,30 @@ export async function getMyAnswers(manId: string): Promise<AnsweredQuestion[]> {
       .in("id", missing);
     for (const c of custom ?? []) prompts.set(c.id as string, c.prompt as string);
   }
+
+  return rows.map((r) => ({
+    questionId: r.question_id as string,
+    prompt: prompts.get(r.question_id as string) ?? "Question",
+    answer: r.answer as string,
+  }));
+}
+
+/**
+ * A woman's answers to her onboarding priorities quiz (the picked option's
+ * label, e.g. "Strongly agree"), paired with the question prompt.
+ */
+export async function getMyWomanAnswers(womanId: string): Promise<AnsweredQuestion[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("woman_quiz_answers")
+    .select("question_id, answer, created_at")
+    .eq("woman_id", womanId)
+    .order("created_at", { ascending: true });
+
+  const rows = data ?? [];
+  if (!rows.length) return [];
+
+  const prompts = new Map<string, string>(WOMAN_QUIZ_QUESTIONS.map((q) => [q.id, q.prompt]));
 
   return rows.map((r) => ({
     questionId: r.question_id as string,

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { LogOut, MessageCircle, IdCard, MessageSquareQuote, BarChart3, Pencil, ImagePlus } from "lucide-react";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { ProfileDetails } from "@/components/ProfileDetails";
+import { QualityScoreBreakdown } from "@/components/QualityScores";
 import type { Profile } from "@/lib/profile";
 import type { AnsweredQuestion, QualityScore } from "@/lib/quiz-data";
-import { QUALITY_BY_KEY, QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
 
 type Tab = "profile" | "answers" | "scores";
 
@@ -201,62 +201,7 @@ function ScoresPanel({ scores }: { scores: QualityScore[] }) {
   if (!scores.length) {
     return <Empty>No quality scores yet — finish the quiz to see them.</Empty>;
   }
-
-  // Group by the 5 quality groups for a scannable mobile layout.
-  const groups = new Map<QualityGroup, QualityScore[]>();
-  for (const s of scores) {
-    const g = QUALITY_BY_KEY[s.key]?.group;
-    if (!g) continue;
-    const bucket = groups.get(g) ?? [];
-    bucket.push(s);
-    groups.set(g, bucket);
-  }
-
-  return (
-    <div className="space-y-5">
-      {[...groups.entries()].map(([group, items]) => (
-        <Card key={group} hover>
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-plum">
-            {QUALITY_GROUPS[group].label}
-          </h2>
-          <ul className="mt-3 space-y-3">
-            {items.map((s, i) => (
-              <li key={s.key}>
-                <div className="flex items-center gap-3">
-                  <span className="w-36 shrink-0 text-[0.85rem] leading-tight text-ink">
-                    {s.label}
-                  </span>
-                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-plum/10">
-                    <span
-                      className="bar-fill block h-full rounded-full"
-                      style={{
-                        "--bar-w": `${(s.score / 5) * 100}%`,
-                        animationDelay: `${i * 60}ms`,
-                        backgroundColor: QUALITY_GROUPS[group].color,
-                      } as React.CSSProperties}
-                    />
-                  </span>
-                  <span className="w-7 shrink-0 text-right text-[0.8rem] font-medium tabular-nums text-ink-soft">
-                    {s.score.toFixed(1)}
-                  </span>
-                </div>
-                {s.reason ? (
-                  <p
-                    className={`mt-1.5 pl-1 text-[0.78rem] leading-snug ${
-                      s.score <= 2.5 ? "text-clay" : "text-ink-soft"
-                    }`}
-                  >
-                    {s.score <= 2.5 ? "What pulled this down: " : "What affected this: "}
-                    {s.reason}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      ))}
-    </div>
-  );
+  return <QualityScoreBreakdown scores={scores} />;
 }
 
 /* ------------------------------------------------------------------- Bits */

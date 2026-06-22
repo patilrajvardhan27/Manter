@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, MapPin, ImageIcon, SlidersHorizontal, SquarePen } from "lucide-react";
+import { ArrowLeft, MapPin, ImageIcon, SlidersHorizontal, SquarePen, MessageSquareQuote, BarChart3 } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
 import { getProfileView } from "@/lib/match";
-import { getMyWeights, getMyQuestions } from "@/lib/quiz-data";
+import { getMyWeights, getMyQuestions, getMyScores, getMyWomanAnswers } from "@/lib/quiz-data";
 import { QUALITY_BY_KEY, QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { ProfileDetails } from "@/components/ProfileDetails";
+import { QualityScoreBreakdown } from "@/components/QualityScores";
 
 export default async function ProfileViewPage({
   params,
@@ -22,11 +23,18 @@ export default async function ProfileViewPage({
   const person = await getProfileView(id);
   if (!person) notFound();
 
-  // Her full profile: priorities + the questions she authored (women only).
-  const [weights, questions] =
+  // Her full profile: priorities, her quiz answers, and the questions she authored (women only).
+  const [weights, womanAnswers, questions] =
     person.role === "woman"
-      ? await Promise.all([getMyWeights(id), getMyQuestions(id)])
-      : [[], []];
+      ? await Promise.all([getMyWeights(id), getMyWomanAnswers(id), getMyQuestions(id)])
+      : [[], [], []];
+
+  // His character score: the same self-assessment shown on Discover and his
+  // own profile, just not weighted to any one woman's priorities here.
+  const scores = person.role === "man" ? await getMyScores(id) : [];
+  const avgScore = scores.length
+    ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length
+    : null;
 
   const groups = new Map<QualityGroup, typeof weights>();
   for (const w of weights) {
@@ -90,6 +98,28 @@ export default async function ProfileViewPage({
         <ProfileDetails details={person} />
       </div>
 
+      {/* His character score */}
+      {scores.length ? (
+        <section className="mt-4">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+              <BarChart3 size={14} strokeWidth={2.4} />
+              Character score
+            </h2>
+            <p className="font-display text-2xl font-light leading-none text-plum-deep">
+              {avgScore!.toFixed(1)}
+              <span className="text-sm text-ink-soft">/5</span>
+            </p>
+          </div>
+          <p className="mt-2 text-[0.8rem] leading-relaxed text-ink-soft">
+            His self-assessment across the 23 qualities, scored by Claude from his quiz answers.
+          </p>
+          <div className="mt-4">
+            <QualityScoreBreakdown scores={scores} />
+          </div>
+        </section>
+      ) : null}
+
       {/* Her priorities */}
       {weights.length ? (
         <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
@@ -133,6 +163,29 @@ export default async function ProfileViewPage({
               );
             })}
           </div>
+        </section>
+      ) : null}
+
+      {/* Her quiz answers */}
+      {womanAnswers.length ? (
+        <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
+          <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+            <MessageSquareQuote size={14} strokeWidth={2.4} />
+            Her answers
+          </h2>
+          <ul className="mt-4 space-y-3">
+            {womanAnswers.map((a, i) => (
+              <li key={a.questionId} className="rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-plum">
+                  Question {i + 1}
+                </p>
+                <p className="mt-1 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
+                <p className="mt-2 border-l-2 border-plum/25 pl-2.5 text-[0.88rem] leading-relaxed text-ink-soft">
+                  {a.answer}
+                </p>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 

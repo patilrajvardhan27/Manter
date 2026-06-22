@@ -107,6 +107,31 @@ create policy "weights: matched man reads" on woman_weights
   );
 
 -- ---------------------------------------------------------------------------
+-- woman_quiz_answers : her free-text answers to the onboarding priorities
+-- quiz (picked option text, e.g. "Strongly agree"). Same visibility as her
+-- priorities: private to her, readable by a matched man.
+-- ---------------------------------------------------------------------------
+create table woman_quiz_answers (
+  woman_id    uuid references profiles(id) on delete cascade,
+  question_id text not null,
+  answer      text not null,
+  created_at  timestamptz not null default now(),
+  primary key (woman_id, question_id)
+);
+
+alter table woman_quiz_answers enable row level security;
+create policy "woman answers: owner all" on woman_quiz_answers
+  for all using (auth.uid() = woman_id) with check (auth.uid() = woman_id);
+create policy "woman answers: matched man reads" on woman_quiz_answers
+  for select to authenticated
+  using (
+    exists (
+      select 1 from matches m
+      where m.woman_id = woman_quiz_answers.woman_id and m.man_id = auth.uid()
+    )
+  );
+
+-- ---------------------------------------------------------------------------
 -- man_quiz_scores : derived self-assessment per quality (1..5).
 -- ---------------------------------------------------------------------------
 create table man_quiz_scores (

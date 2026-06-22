@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/profile";
-import { getMyAnswers, getMyScores, getMyWeights, getMyQuestions } from "@/lib/quiz-data";
+import { getMyAnswers, getMyScores, getMyWeights, getMyQuestions, getMyWomanAnswers } from "@/lib/quiz-data";
 import { signPhotoUrls } from "@/lib/photos";
 import { createClient } from "@/lib/supabase/server";
 import { ManProfile } from "@/components/ManProfile";
@@ -16,13 +16,14 @@ export default async function HomePage() {
   const photos = await signPhotoUrls(supabase, profile.photos);
 
   if (profile.role === "woman") {
-    const [weights, questions] = await Promise.all([
+    const [weights, answers, questions] = await Promise.all([
       getMyWeights(userId),
+      getMyWomanAnswers(userId),
       getMyQuestions(userId),
     ]);
     return (
       <>
-        <WomanProfile profile={profile} weights={weights} questions={questions} photos={photos} />
+        <WomanProfile profile={profile} weights={weights} answers={answers} questions={questions} photos={photos} />
         <TabBar isWoman />
       </>
     );
