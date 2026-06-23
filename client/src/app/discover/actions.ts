@@ -4,10 +4,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Woman-first contact: find-or-create the match with this man, then open the
- * chat. RLS ("matches: woman creates") guarantees only she can initiate.
+ * Find-or-create the match with this profile, then open the chat. RLS
+ * ("matches: seeker creates") guarantees only the viewer can initiate as
+ * seeker — symmetric regardless of gender.
  */
-export async function startConversation(manId: string) {
+export async function startConversation(targetId: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,15 +18,15 @@ export async function startConversation(manId: string) {
   const { data: existing } = await supabase
     .from("matches")
     .select("id")
-    .eq("woman_id", user.id)
-    .eq("man_id", manId)
+    .eq("seeker_id", user.id)
+    .eq("target_id", targetId)
     .maybeSingle();
 
   let matchId = existing?.id;
   if (!matchId) {
     const { data, error } = await supabase
       .from("matches")
-      .insert({ woman_id: user.id, man_id: manId })
+      .insert({ seeker_id: user.id, target_id: targetId })
       .select("id")
       .single();
     if (error || !data) redirect("/discover");

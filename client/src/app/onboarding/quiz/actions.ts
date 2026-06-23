@@ -2,25 +2,22 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveQuestions } from "@/lib/quiz-data";
+import { SITUATIONAL_QUESTIONS } from "@/lib/constants/situational-quiz";
 import { QUALITIES } from "@/lib/constants/qualities";
-import { QUIZ_QUESTIONS } from "@/lib/constants/quiz";
 
-const FASTAPI = process.env.NEXT_PUBLIC_FASTAPI_URL ?? "http://localhost:8000";
 const NEUTRAL = 3;
 
 export interface Answer {
   questionId: string;
-  answer: string;
+  optionId: string;
 }
 
 /**
- * Persist a man's quiz answers and derive his per-quality scores. Free-text
- * answers are judged by Claude (FastAPI /evaluate); likert answers are
- * scored deterministically from the picked option's effects. When both kinds
- * touch the same quality, their scores are averaged. RLS limits both writes
- * to his own rows. Onboarding never hard-fails: if evaluation is
- * unavailable, freetext-only qualities fall back to neutral.
+ * Persist a profile's situational quiz answers and derive their per-quality
+ * character score deterministically from the picked option's effects —
+ * identical mechanic for every gender. Every quality starts neutral (3);
+ * qualities touched by one or more answered questions get the average of
+ * those answers' scores instead.
  */
 export async function submitQuiz(answers: Answer[]) {
   const supabase = await createClient();
@@ -29,73 +26,26 @@ export async function submitQuiz(answers: Answer[]) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const questions = await getActiveQuestions();
-  const byId = new Map(questions.map((q) => [q.id, q]));
-  const defaultById = new Map(QUIZ_QUESTIONS.map((q) => [q.id, q]));
+  const byId = new Map(SITUATIONAL_QUESTIONS.map((q) => [q.id, q]));
+  const resolved = answers.flatMap((a) => {
+    const option = byId.get(a.questionId)?.options.find((o) => o.id === a.optionId);
+    return option ? [{ questionId: a.questionId, option }] : [];
+  });
 
-  const clean = answers
-    .map((a) => ({ ...a, answer: a.answer.trim() }))
-    .filter((a) => a.answer && byId.has(a.questionId));
-
-  if (clean.length) {
+  if (resolved.length) {
     await supabase.from("quiz_answers").upsert(
-      clean.map((a) => {
-        const def = defaultById.get(a.questionId);
-        // Likert answers carry an option id; store its label for readability.
-        const answer =
-          def?.kind === "likert"
-            ? def.options.find((o) => o.id === a.answer)?.text ?? a.answer
-            : a.answer;
-        return { man_id: user.id, question_id: a.questionId, answer };
-      }),
-      { onConflict: "man_id,question_id" },
+      resolved.map((r) => ({ profile_id: user.id, question_id: r.questionId, answer: r.option.text })),
+      { onConflict: "profile_id,question_id" },
     );
   }
 
-  const freetextClean = clean.filter((a) => defaultById.get(a.questionId)?.kind !== "likert");
-  const likertClean = clean.filter((a) => defaultById.get(a.questionId)?.kind === "likert");
-
-  // Collect every score that touches a quality, then average per quality.
   const perQuality: Record<string, number[]> = {};
-  const reasons: Record<string, string | null> = {};
-
-  for (const a of likertClean) {
-    const def = defaultById.get(a.questionId)!;
-    const option = def.options.find((o) => o.id === a.answer);
-    if (!option) continue;
-    for (const [key, delta] of Object.entries(option.effects)) {
+  for (const r of resolved) {
+    for (const [key, delta] of Object.entries(r.option.effects)) {
       (perQuality[key] ??= []).push(Math.max(1, Math.min(5, NEUTRAL + delta)));
     }
   }
 
-  const evalPayload = freetextClean.map((a) => {
-    const q = byId.get(a.questionId)!;
-    return { prompt: q.prompt, qualities: q.qualities, answer: a.answer };
-  });
-
-  if (evalPayload.length) {
-    try {
-      const res = await fetch(`${FASTAPI}/evaluate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: evalPayload }),
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const { scores: judged } = (await res.json()) as {
-          scores: Record<string, { score: number; reason: string }>;
-        };
-        for (const [key, value] of Object.entries(judged)) {
-          (perQuality[key] ??= []).push(Math.max(1, Math.min(5, value.score)));
-          reasons[key] = value.reason || null;
-        }
-      }
-    } catch {
-      // leave freetext-only qualities at neutral if the evaluator is unreachable
-    }
-  }
-
-  // Every quality starts neutral; qualities any source touched get averaged in.
   const scores: Record<string, number> = {};
   QUALITIES.forEach((q) => {
     const values = perQuality[q.key];
@@ -104,15 +54,15 @@ export async function submitQuiz(answers: Answer[]) {
       : NEUTRAL;
   });
 
-  await supabase.from("man_quiz_scores").upsert(
+  await supabase.from("quiz_scores").upsert(
     Object.entries(scores).map(([quality_key, score]) => ({
-      man_id: user.id,
+      profile_id: user.id,
       quality_key,
       score,
-      reason: reasons[quality_key] ?? null,
+      reason: null,
     })),
-    { onConflict: "man_id,quality_key" },
+    { onConflict: "profile_id,quality_key" },
   );
 
-  redirect("/home");
+  redirect("/onboarding/priorities");
 }

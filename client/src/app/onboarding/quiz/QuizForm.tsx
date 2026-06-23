@@ -1,20 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Sparkles } from "lucide-react";
 import { AuthShell } from "@/components/AuthShell";
-import { Textarea } from "@/components/ui/Field";
-import type { Question } from "@/lib/quiz-data";
+import type { SituationalQuestion } from "@/lib/constants/situational-quiz";
 import { submitQuiz, type Answer } from "./actions";
 
-const MIN_CHARS = 15;
-
 /**
- * One-question-at-a-time behavioral quiz. The man answers in his own words;
- * Claude scores the writing afterward. He can't skip, and answers need a little
- * substance before "Next" unlocks.
+ * One-question-at-a-time situational quiz, answered by every profile
+ * regardless of gender. Each pick is scored deterministically against the 23
+ * qualities (see actions.ts) — no free text, no AI call needed for this step.
  */
-export function QuizForm({ questions }: { questions: Question[] }) {
+export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
@@ -22,25 +18,22 @@ export function QuizForm({ questions }: { questions: Question[] }) {
   const q = questions[step];
   const total = questions.length;
   const isLast = step === total - 1;
-  const value = answers[q.id] ?? "";
-  const isLikert = q.kind === "likert";
-  const ready = isLikert ? value.length > 0 : value.trim().length >= MIN_CHARS;
+  const selected = answers[q.id];
+  const answeredCount = questions.filter((x) => answers[x.id]).length;
 
-  function isAnswered(question: Question) {
-    const a = answers[question.id] ?? "";
-    return question.kind === "likert" ? a.length > 0 : a.trim().length >= MIN_CHARS;
+  function choose(optionId: string) {
+    setAnswers((a) => ({ ...a, [q.id]: optionId }));
   }
-  const answeredCount = questions.filter(isAnswered).length;
 
   function next() {
-    if (!ready) return;
+    if (!selected) return;
     if (!isLast) {
       setStep((s) => s + 1);
       return;
     }
     const payload: Answer[] = questions
-      .filter(isAnswered)
-      .map((question) => ({ questionId: question.id, answer: answers[question.id] }));
+      .filter((question) => answers[question.id])
+      .map((question) => ({ questionId: question.id, optionId: answers[question.id] }));
     startTransition(() => {
       submitQuiz(payload);
     });
@@ -50,7 +43,7 @@ export function QuizForm({ questions }: { questions: Question[] }) {
     <AuthShell
       eyebrow={`Question ${step + 1} of ${total}`}
       title="The character quiz."
-      subtitle="Answer in your own words — there are no right answers. Claude reads your responses to build your score; women see the score, not the raw text."
+      subtitle="Real situations, no right answers — just how much you agree. This builds the score on your profile."
     >
       <div className="space-y-5">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper">
@@ -60,54 +53,28 @@ export function QuizForm({ questions }: { questions: Question[] }) {
           />
         </div>
 
-        {q.custom ? (
-          <p className="flex items-center gap-1.5 text-xs font-medium text-plum">
-            <Sparkles size={13} strokeWidth={2.2} />
-            A woman added this question
-          </p>
-        ) : null}
-
         <p className="font-display text-lg leading-snug text-ink">{q.prompt}</p>
 
-        {isLikert ? (
-          <div className="space-y-2.5">
-            {q.options?.map((option) => {
-              const active = value === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setAnswers((a) => ({ ...a, [q.id]: option.id }))}
-                  aria-pressed={active}
-                  className={`w-full rounded-2xl border px-4 py-3.5 text-left text-[0.95rem] font-medium transition active:scale-[0.99] ${
-                    active
-                      ? "border-plum bg-plum text-cream shadow-[var(--shadow-soft)]"
-                      : "border-ink/10 bg-paper/60 text-ink"
-                  }`}
-                >
-                  {option.text}
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <>
-            <Textarea
-              value={value}
-              onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-              maxLength={600}
-              rows={5}
-              placeholder="Type your honest answer…"
-              className="min-h-[140px]"
-              autoFocus
-            />
-            <p className="-mt-2 text-right text-xs text-ink-soft/70">
-              {value.trim().length < MIN_CHARS
-                ? `${MIN_CHARS - value.trim().length} more characters`
-                : `${value.trim().length}/600`}
-            </p>
-          </>
-        )}
+        <div className="space-y-2.5">
+          {q.options.map((option) => {
+            const active = selected === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => choose(option.id)}
+                aria-pressed={active}
+                className={`w-full rounded-2xl border px-4 py-3.5 text-left text-[0.95rem] font-medium transition active:scale-[0.99] ${
+                  active
+                    ? "border-plum bg-plum text-cream shadow-[var(--shadow-soft)]"
+                    : "border-ink/10 bg-paper/60 text-ink"
+                }`}
+              >
+                {option.text}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="flex items-center gap-3">
           {step > 0 ? (
@@ -121,10 +88,10 @@ export function QuizForm({ questions }: { questions: Question[] }) {
           ) : null}
           <button
             onClick={next}
-            disabled={!ready || pending}
+            disabled={!selected || pending}
             className="flex h-14 flex-1 items-center justify-center rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98] disabled:opacity-50"
           >
-            {pending ? "Scoring your answers…" : isLast ? "Finish & build my score" : "Next"}
+            {pending ? "Scoring your answers…" : isLast ? "Next: set your priorities" : "Next"}
           </button>
         </div>
       </div>

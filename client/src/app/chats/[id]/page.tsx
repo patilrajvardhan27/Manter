@@ -14,12 +14,12 @@ export default async function ChatThreadPage({
   const { id } = await params;
   const { userId, profile } = await getMyProfile();
   if (!userId) redirect("/login");
-  if (!profile) redirect("/onboarding/role");
+  if (!profile) redirect("/onboarding/gender");
 
   const thread = await getThread(id, userId);
   if (!thread) notFound();
 
-  const isWoman = profile.role === "woman";
+  const isSeeker = thread.seekerId === userId;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
@@ -40,25 +40,18 @@ export default async function ChatThreadPage({
           </span>
           <div className="min-w-0">
             <p className="truncate font-medium leading-tight text-ink">{thread.other.display_name}</p>
-            {isWoman ? (
-              <p className="flex items-center gap-1 text-xs text-sage">
-                <ShieldCheck size={13} strokeWidth={2.2} />
-                Red-flag scanning on
-              </p>
-            ) : (
-              <p className="text-xs text-plum">View profile</p>
-            )}
+            <p className="flex items-center gap-1 text-xs text-sage">
+              <ShieldCheck size={13} strokeWidth={2.2} />
+              Red-flag scanning on
+            </p>
           </div>
         </Link>
-        {isWoman ? (
-          <UnmatchButton matchId={thread.matchId} otherName={thread.other.display_name} />
-        ) : null}
+        {isSeeker ? <UnmatchButton matchId={thread.matchId} otherName={thread.other.display_name} /> : null}
       </header>
 
       <Chat
         matchId={thread.matchId}
         meId={userId}
-        isWoman={isWoman}
         otherName={thread.other.display_name}
         initial={thread.messages}
       />

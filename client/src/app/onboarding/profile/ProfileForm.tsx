@@ -12,9 +12,9 @@ import {
   detailsPayload,
   type DetailsState,
 } from "@/components/ProfileDetailsFields";
-import type { Role } from "@/lib/profile";
+import type { Gender } from "@/lib/profile";
 
-export function ProfileForm({ role }: { role: Role }) {
+export function ProfileForm({ gender, interestedIn }: { gender: Gender; interestedIn: Gender[] }) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [age, setAge] = useState("");
@@ -48,7 +48,8 @@ export function ProfileForm({ role }: { role: Role }) {
     // RLS: a user may only insert a profile row with their own id.
     const { error } = await supabase.from("profiles").insert({
       id: user.id,
-      role,
+      gender,
+      interested_in: interestedIn.length ? interestedIn : null,
       display_name: displayName.trim(),
       age: ageNum,
       city: city.trim() || null,
@@ -62,20 +63,16 @@ export function ProfileForm({ role }: { role: Role }) {
       return;
     }
 
-    // Men take the behavioral quiz next; women take two quick priority questions.
-    router.replace(role === "man" ? "/onboarding/quiz" : "/onboarding/priorities");
+    // Everyone takes the same situational quiz next, then sets priorities.
+    router.replace("/onboarding/quiz");
     router.refresh();
   }
 
   return (
     <AuthShell
-      eyebrow="Step 2 of 2"
+      eyebrow="Step 3 of 3"
       title="Tell us about you."
-      subtitle={
-        role === "woman"
-          ? "The basics for your profile. Next, you'll set which qualities matter most."
-          : "The basics for your profile. Next, you'll take the character quiz."
-      }
+      subtitle="The basics for your profile. Next, you'll take the character quiz."
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="Display name">
@@ -113,11 +110,7 @@ export function ProfileForm({ role }: { role: Role }) {
             maxLength={300}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder={
-              role === "woman"
-                ? "What you're looking for, in your words."
-                : "Who you are beyond a checklist."
-            }
+            placeholder="Who you are beyond a checklist."
           />
         </Field>
 

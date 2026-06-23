@@ -8,11 +8,9 @@ import { SwipeDeck } from "@/components/SwipeDeck";
 export default async function DiscoverPage() {
   const { userId, profile } = await getMyProfile();
   if (!userId) redirect("/login");
-  if (!profile) redirect("/onboarding/role");
-  // Discovery is women-first; men go straight to their conversations.
-  if (profile.role !== "woman") redirect("/chats");
+  if (!profile) redirect("/onboarding/gender");
 
-  const men = await getDiscovery(userId);
+  const people = await getDiscovery(userId);
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-28 pt-[max(2rem,env(safe-area-inset-top))]">
@@ -29,15 +27,15 @@ export default async function DiscoverPage() {
         </p>
       </header>
 
-      {men.length === 0 ? (
+      {people.length === 0 ? (
         <p className="mt-8 rounded-[var(--radius-card)] bg-paper/70 p-6 text-sm text-ink-soft shadow-[var(--shadow-soft)]">
-          No men to show yet. Seed some demo profiles and check back.
+          No one to show yet. Seed some demo profiles and check back.
         </p>
       ) : (
-        <SwipeDeck men={men} />
+        <SwipeDeck people={people} />
       )}
 
-      <TabBar isWoman />
+      <TabBar />
     </main>
   );
 }

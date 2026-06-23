@@ -1,87 +1,12 @@
 /**
- * Quiz data access (server). The default behavioral questions come from
- * lib/constants/quiz.ts; women's custom questions come from the DB. Men answer
- * both, and their choices derive per-quality self-assessment scores.
+ * Quiz data access (server). Every profile answers the same situational quiz
+ * (lib/constants/situational-quiz.ts) and is scored against the 23 qualities;
+ * every profile also sets priority weights for what they want in a partner.
+ * Both mechanics are symmetric across gender.
  */
 import { createClient } from "@/lib/supabase/server";
-import { QUIZ_QUESTIONS } from "@/lib/constants/quiz";
-import { WOMAN_QUIZ_QUESTIONS } from "@/lib/constants/woman-quiz";
-import { QUALITIES, QUALITY_BY_KEY } from "@/lib/constants/qualities";
-
-export interface QualityRef {
-  key: string;
-  label: string;
-}
-
-export interface Question {
-  id: string;
-  prompt: string;
-  qualities: QualityRef[]; // which of the 23 this question measures
-  custom: boolean;
-  kind: "freetext" | "likert";
-  /** Only set for likert questions — the 5 agree/disagree levels to pick from. */
-  options?: { id: string; text: string }[];
-}
-
-/** Map quality keys to {key,label}, dropping any that aren't one of the 23. */
-function toRefs(keys: string[]): QualityRef[] {
-  const seen = new Set<string>();
-  const refs: QualityRef[] = [];
-  for (const key of keys) {
-    const q = QUALITY_BY_KEY[key];
-    if (q && !seen.has(key)) {
-      seen.add(key);
-      refs.push({ key, label: q.label });
-    }
-  }
-  return refs;
-}
-
-/** Default questions first, then every active woman-authored question. */
-export async function getActiveQuestions(): Promise<Question[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("quiz_questions")
-    .select("id, prompt, quality_key")
-    .eq("active", true)
-    .order("created_at", { ascending: true });
-
-  // A default question measures the union of qualities its options touched.
-  const defaults: Question[] = QUIZ_QUESTIONS.map((q) => ({
-    id: q.id,
-    prompt: q.prompt,
-    qualities: toRefs(q.options.flatMap((o) => Object.keys(o.effects))),
-    custom: false,
-    kind: q.kind ?? "freetext",
-    options: q.kind === "likert" ? q.options.map((o) => ({ id: o.id, text: o.text })) : undefined,
-  }));
-
-  const custom: Question[] = (data ?? []).map((r) => ({
-    id: r.id as string,
-    prompt: r.prompt as string,
-    qualities: toRefs(r.quality_key ? [r.quality_key as string] : []),
-    custom: true,
-    kind: "freetext",
-  }));
-
-  return [...defaults, ...custom];
-}
-
-/** Questions a given woman has authored. */
-export async function getMyQuestions(womanId: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("quiz_questions")
-    .select("id, prompt, quality_key, created_at, active")
-    .eq("created_by", womanId)
-    .order("created_at", { ascending: false });
-  return (data ?? []).map((r) => ({
-    id: r.id as string,
-    prompt: r.prompt as string,
-    qualityLabel: r.quality_key ? QUALITY_BY_KEY[r.quality_key as string]?.label ?? r.quality_key : null,
-    active: r.active as boolean,
-  }));
-}
+import { SITUATIONAL_QUESTIONS } from "@/lib/constants/situational-quiz";
+import { QUALITIES } from "@/lib/constants/qualities";
 
 export interface AnsweredQuestion {
   questionId: string;
@@ -89,59 +14,19 @@ export interface AnsweredQuestion {
   answer: string;
 }
 
-/**
- * A man's written quiz answers paired with the question prompt. question_id can
- * reference a code-defined default ("q1_decision") or a custom question's uuid,
- * so prompts are resolved from both QUIZ_QUESTIONS and the quiz_questions table.
- */
-export async function getMyAnswers(manId: string): Promise<AnsweredQuestion[]> {
+/** A profile's answers to the situational quiz (the picked level's label, e.g. "Strongly agree"). */
+export async function getMyAnswers(profileId: string): Promise<AnsweredQuestion[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("quiz_answers")
     .select("question_id, answer, created_at")
-    .eq("man_id", manId)
+    .eq("profile_id", profileId)
     .order("created_at", { ascending: true });
 
   const rows = data ?? [];
   if (!rows.length) return [];
 
-  // Default prompts from app code; the rest are custom-question uuids.
-  const prompts = new Map<string, string>(QUIZ_QUESTIONS.map((q) => [q.id, q.prompt]));
-  const missing = rows
-    .map((r) => r.question_id as string)
-    .filter((id) => !prompts.has(id));
-
-  if (missing.length) {
-    const { data: custom } = await supabase
-      .from("quiz_questions")
-      .select("id, prompt")
-      .in("id", missing);
-    for (const c of custom ?? []) prompts.set(c.id as string, c.prompt as string);
-  }
-
-  return rows.map((r) => ({
-    questionId: r.question_id as string,
-    prompt: prompts.get(r.question_id as string) ?? "Question",
-    answer: r.answer as string,
-  }));
-}
-
-/**
- * A woman's answers to her onboarding priorities quiz (the picked option's
- * label, e.g. "Strongly agree"), paired with the question prompt.
- */
-export async function getMyWomanAnswers(womanId: string): Promise<AnsweredQuestion[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("woman_quiz_answers")
-    .select("question_id, answer, created_at")
-    .eq("woman_id", womanId)
-    .order("created_at", { ascending: true });
-
-  const rows = data ?? [];
-  if (!rows.length) return [];
-
-  const prompts = new Map<string, string>(WOMAN_QUIZ_QUESTIONS.map((q) => [q.id, q.prompt]));
+  const prompts = new Map<string, string>(SITUATIONAL_QUESTIONS.map((q) => [q.id, q.prompt]));
 
   return rows.map((r) => ({
     questionId: r.question_id as string,
@@ -158,16 +43,17 @@ export interface QualityScore {
 }
 
 /**
- * A man's Claude-derived per-quality self-assessment scores (1–5), ordered by
- * the canonical 23-quality order. Unknown keys are skipped. `reason` is
- * Claude's one-sentence explanation of what drove that score.
+ * A profile's per-quality score (1–5), derived deterministically from their
+ * situational quiz answers, ordered by the canonical 23-quality order.
+ * Unknown keys are skipped. `reason` is a short explanation of what drove
+ * that score.
  */
-export async function getMyScores(manId: string): Promise<QualityScore[]> {
+export async function getMyScores(profileId: string): Promise<QualityScore[]> {
   const supabase = await createClient();
   const { data } = await supabase
-    .from("man_quiz_scores")
+    .from("quiz_scores")
     .select("quality_key, score, reason")
-    .eq("man_id", manId);
+    .eq("profile_id", profileId);
 
   const byKey = new Map(
     (data ?? []).map((r) => [r.quality_key as string, { score: r.score as number, reason: r.reason as string | null }]),
@@ -187,15 +73,15 @@ export interface QualityWeight {
 }
 
 /**
- * A woman's 1–5 priority for each quality, ordered by the canonical 23-quality
- * order. Unknown keys are skipped.
+ * A profile's 1–5 priority for each quality, ordered by the canonical
+ * 23-quality order. Unknown keys are skipped.
  */
-export async function getMyWeights(womanId: string): Promise<QualityWeight[]> {
+export async function getMyWeights(profileId: string): Promise<QualityWeight[]> {
   const supabase = await createClient();
   const { data } = await supabase
-    .from("woman_weights")
+    .from("priority_weights")
     .select("quality_key, weight")
-    .eq("woman_id", womanId);
+    .eq("profile_id", profileId);
 
   const byKey = new Map((data ?? []).map((r) => [r.quality_key as string, r.weight as number]));
   const weights: QualityWeight[] = [];
@@ -206,12 +92,12 @@ export async function getMyWeights(womanId: string): Promise<QualityWeight[]> {
   return weights;
 }
 
-/** Has this man completed the quiz yet? */
-export async function hasAnsweredQuiz(manId: string): Promise<boolean> {
+/** Has this profile completed the situational quiz yet? */
+export async function hasAnsweredQuiz(profileId: string): Promise<boolean> {
   const supabase = await createClient();
   const { count } = await supabase
     .from("quiz_answers")
     .select("question_id", { count: "exact", head: true })
-    .eq("man_id", manId);
+    .eq("profile_id", profileId);
   return (count ?? 0) > 0;
 }

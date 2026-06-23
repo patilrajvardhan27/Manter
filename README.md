@@ -1,6 +1,6 @@
 # Charms
 
-> Safety-first dating for women. Match on **verified character** across 23 qualities — not photos.
+> Safety-first dating for everyone — male, female, and LGBTQ+. Match on **verified character** across 23 qualities — not photos.
 > A mobile-first **PWA** (installable from the browser, no app-store fees) on **Next.js + Supabase + FastAPI**.
 
 See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased plan, data model, design system, and cost breakdown.
@@ -11,15 +11,15 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 |---|---|---|
 | `client/` | Next.js 15 · TypeScript · Tailwind v4 · PWA | Vercel (free) |
 | Supabase | Postgres · Auth · Storage · Realtime · RLS | Supabase (free) |
-| `server/` | FastAPI · Claude Haiku · scoring engine | Render/Fly (free) |
+| `server/` | FastAPI · Claude Haiku red-flag scan | Render/Fly (free) |
 
 ## What's built
 
-- **Onboarding** — pick a role (woman/man), fill a profile, take the quiz.
-- **Behavioral quiz** — women author questions; men answer in **free text**, which **Claude scores** (1–5 per quality, with a one-sentence reason per score) instead of multiple choice. 14 default situational questions covering all 23 qualities ship in app code; women can add their own.
-- **Swipe discovery** — women browse compatible men ranked by a weighted match score (her 1–5 priority per quality × his quiz scores).
-- **Realtime chat** — matched users message over Supabase Realtime, with a **Claude Haiku red-flag scan** on incoming messages.
-- **Editable profiles + photos** — both roles can edit their details and upload up to **3 photos** (private Storage bucket). Women see men's photos in Discover; a man sees a woman's photos **only after she starts the conversation** (RLS-gated).
+- **Onboarding** — pick a gender (male / female / LGBTQ+), who you're interested in, fill a profile, take the quiz, set your priorities.
+- **Situational character quiz** — every profile answers the same 14 real-incident-grounded questions on a 5-point agree/disagree scale (consent & entitlement scenarios inspired by the viral ₹370 biryani story, plus LGBTQ+-specific situations like workplace/family discrimination and outing without consent). Scored deterministically per quality (1–5, with a short reason) — same mechanic for everyone, no AI call needed.
+- **Swipe discovery** — every profile browses compatible candidates ranked by a weighted match score (your 1–5 priority per quality × their quiz score), filtered by mutual `interested_in`.
+- **Realtime chat** — matched users message over Supabase Realtime, with a **Claude Haiku red-flag scan** on incoming messages, surfaced to whoever received them.
+- **Editable profiles + photos** — every profile can edit their details and upload up to **3 photos** (private Storage bucket). Any signed-in user can browse any other profile's photos — Discover is open browsing by design.
 - **Verification badges** — profiles carry an `unverified / pending / verified / rejected` state.
 
 ## Getting started
@@ -29,17 +29,23 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 2. In the SQL editor, run, in order:
    - `supabase/schema.sql` (tables, RLS, helpers)
    - `supabase/seed.sql` (the 23 qualities)
-   - each file in `supabase/migrations/` in numeric order (`0001` → `0009`)
+   - each file in `supabase/migrations/` in numeric order (`0001` → `0013`)
 3. Copy the Project URL + anon key (Settings → API).
 
 > `supabase/migrations/0006_profile_photos.sql` creates the private
 > `profile-photos` Storage bucket and its RLS (fresh installs get it from
-> `schema.sql`). Photo reads mirror profile visibility: women see men's photos,
-> and matched participants see each other's.
+> `schema.sql`). Photo reads are open to any signed-in user, same as profiles.
 
-> `supabase/migrations/0005_named_views.sql` adds read-only `*_named` views
-> (`matches_named`, `messages_named`, `woman_weights_named`, …) that join in
-> display names so you can read the data in the dashboard without chasing UUIDs.
+> `supabase/migrations/0013_gender_symmetric_model.sql` is the big one: it
+> replaces the old binary woman/man model with three genders (male/female/
+> lgbtq), generic `priority_weights`/`quiz_scores`/`quiz_answers` tables used
+> by every profile, and `matches.seeker_id`/`target_id` in place of
+> `woman_id`/`man_id`. Run it after `0001`–`0012` on existing databases.
+
+> `supabase/migrations/0005_named_views.sql` (superseded by `0013` for the
+> per-gender views) adds read-only `*_named` views (`matches_named`,
+> `messages_named`, `priority_weights_named`, …) that join in display names so
+> you can read the data in the dashboard without chasing UUIDs.
 
 ### 2. Client (Next.js)
 ```bash
@@ -58,36 +64,36 @@ cp .env.example .env         # fill in service-role key + ANTHROPIC_API_KEY
 uvicorn app.main:app --reload --port 8000   # http://localhost:8000/health
 ```
 
-Endpoints: `/health`, plus the `scoring`, `ai` (red-flag scan), and `quiz` (Claude scoring) routers.
+Endpoints: `/health`, plus the `ai` (red-flag scan) router.
 
 ## Seed demo profiles & logins
 
-`server/scripts/seed_profiles.py` creates demo women and men directly in Supabase
-Auth (via the service-role key), each with a profile row plus role-specific data
-(women → `woman_weights`, men → `man_quiz_scores`). Names, ages, cities and bios
-are generated with Faker; the 23 quality keys are read from the `qualities` table,
-so run `supabase/seed.sql` first.
+`server/scripts/seed_profiles.py` creates demo profiles directly in Supabase
+Auth (via the service-role key) across all three genders, each with a profile
+row plus the same gender-symmetric data every profile gets (`priority_weights`,
+`quiz_scores`, `quiz_answers`). Names, ages, cities and bios are generated with
+Faker; the 23 quality keys are read from the `qualities` table, so run
+`supabase/seed.sql` first.
 
 ```bash
 cd server && source .venv/bin/activate
 pip install -r requirements-dev.txt          # Faker, etc.
 
-python scripts/seed_profiles.py              # 5 women + 5 men (default)
-python scripts/seed_profiles.py --women 3 --men 8
-python scripts/seed_profiles.py --clean      # delete prior seed users, then reseed
+python scripts/seed_profiles.py                          # 4 of each gender (default)
+python scripts/seed_profiles.py --male 3 --female 3 --lgbtq 6
+python scripts/seed_profiles.py --clean                  # delete prior seed users, then reseed
 ```
 
 **Logins** — emails are **deterministic** so you can sign in without reading the
-script output: `woman1`, `woman2`, … and `man1`, `man2`, … each at
-`@seed.charms.test`. Every account shares one password.
+script output: `male1`, `male2`, …, `female1`, `female2`, …, `lgbtq1`, `lgbtq2`, …
+each at `@seed.charms.test`. Every account shares one password.
 
 | Email | Password |
 |---|---|
-| `woman1@seed.charms.test` | `CharmsSeed!23` |
-| `woman2@seed.charms.test` | `CharmsSeed!23` |
+| `male1@seed.charms.test` | `CharmsSeed!23` |
+| `female1@seed.charms.test` | `CharmsSeed!23` |
+| `lgbtq1@seed.charms.test` | `CharmsSeed!23` |
 | … | … |
-| `man1@seed.charms.test` | `CharmsSeed!23` |
-| `man2@seed.charms.test` | `CharmsSeed!23` |
 
 (Override the password with `--password`. Display names/ages/cities/bios are still
 Faker-randomized; only the login emails are stable.) The script also prints every

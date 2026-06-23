@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Heart, X, Info, Sparkles, MapPin, PartyPopper } from "lucide-react";
-import type { DiscoverMan } from "@/lib/match";
+import type { DiscoverProfile } from "@/lib/match";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { startConversation } from "@/app/discover/actions";
 
@@ -13,10 +13,10 @@ const THRESHOLD = 110; // px past which a release commits the swipe
  * Tinder-style deck: drag the top card (or use the buttons). Right commits a
  * "like" — find-or-create the match and open the chat (server action). Left
  * passes and reveals the next card. Tap the left/right edge of the photo to
- * step through a man's photos; tap the center (or the info badge) to open his
- * full profile. Built on pointer events, no deps.
+ * step through a person's photos; tap the center (or the info badge) to open
+ * their full profile. Built on pointer events, no deps.
  */
-export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
+export function SwipeDeck({ people }: { people: DiscoverProfile[] }) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -25,8 +25,8 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
   const [busy, setBusy] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
 
-  const current = men[index];
-  const next = men[index + 1];
+  const current = people[index];
+  const next = people[index + 1];
 
   function pass() {
     if (busy) return;
@@ -41,12 +41,12 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
     }, 280);
   }
 
-  async function like(man: DiscoverMan) {
+  async function like(person: DiscoverProfile) {
     if (busy) return;
     setBusy(true);
     setFlyOut("right");
     // Let the card fly, then hand off to the server action (it redirects to chat).
-    setTimeout(() => startConversation(man.id), 240);
+    setTimeout(() => startConversation(person.id), 240);
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -107,10 +107,10 @@ export function SwipeDeck({ men }: { men: DiscoverMan[] }) {
   return (
     <div className="mt-6 select-none">
       <div className="relative h-[560px]">
-        {next ? <Card man={next} className="scale-[0.96] opacity-70" /> : null}
+        {next ? <Card person={next} className="scale-[0.96] opacity-70" /> : null}
 
         <Card
-          man={current}
+          person={current}
           photoIndex={photoIndex}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -187,20 +187,20 @@ function Stamp({
 }
 
 function Card({
-  man,
+  person,
   photoIndex = 0,
   children,
   className = "",
   style,
   ...handlers
 }: {
-  man: DiscoverMan;
+  person: DiscoverProfile;
   photoIndex?: number;
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const photo = man.photos[photoIndex] ?? man.photos[0];
+  const photo = person.photos[photoIndex] ?? person.photos[0];
 
   return (
     <div
@@ -213,7 +213,7 @@ function Card({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={photo}
-          alt={man.display_name}
+          alt={person.display_name}
           draggable={false}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         />
@@ -224,9 +224,9 @@ function Card({
       )}
 
       {/* photo progress dots */}
-      {man.photos.length > 1 ? (
+      {person.photos.length > 1 ? (
         <div className="pointer-events-none absolute inset-x-3 top-3 flex gap-1.5">
-          {man.photos.map((_, i) => (
+          {person.photos.map((_, i) => (
             <span
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors ${
@@ -241,7 +241,7 @@ function Card({
       <div className="pointer-events-none absolute right-3 top-7 flex flex-col items-center rounded-2xl bg-ink/35 px-3 py-2 backdrop-blur-sm">
         <Sparkles size={14} className="text-rose" strokeWidth={2.2} />
         <div className="font-display text-2xl font-light leading-tight text-cream">
-          {man.score}
+          {person.score}
           <span className="text-sm text-cream/70">%</span>
         </div>
         <p className="text-[0.55rem] uppercase tracking-wider text-cream/70">match</p>
@@ -252,17 +252,17 @@ function Card({
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
             <h2 className="font-display text-2xl font-medium text-cream">
-              {man.display_name}
-              {man.age ? <span className="text-cream/70">, {man.age}</span> : null}
+              {person.display_name}
+              {person.age ? <span className="text-cream/70">, {person.age}</span> : null}
             </h2>
-            {man.city ? (
+            {person.city ? (
               <p className="flex items-center gap-1 text-sm text-cream/80">
                 <MapPin size={13} strokeWidth={2} />
-                {man.city}
+                {person.city}
               </p>
             ) : null}
-            {man.bio ? <p className="mt-1 line-clamp-2 text-[0.85rem] leading-relaxed text-cream/75">{man.bio}</p> : null}
-            <VerifyBadge status={man.verification} className="mt-1.5 brightness-0 invert" />
+            {person.bio ? <p className="mt-1 line-clamp-2 text-[0.85rem] leading-relaxed text-cream/75">{person.bio}</p> : null}
+            <VerifyBadge status={person.verification} className="mt-1.5 brightness-0 invert" />
           </div>
           <span
             data-info-link
@@ -273,9 +273,9 @@ function Card({
           </span>
         </div>
 
-        {man.top.length ? (
+        {person.top.length ? (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {man.top.map((t) => (
+            {person.top.map((t) => (
               <span
                 key={t}
                 className="rounded-full bg-cream/15 px-2.5 py-1 text-[0.72rem] font-medium text-cream backdrop-blur-sm"

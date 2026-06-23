@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, MapPin, ImageIcon, SlidersHorizontal, SquarePen, MessageSquareQuote, BarChart3 } from "lucide-react";
+import { ArrowLeft, MapPin, ImageIcon, SlidersHorizontal, MessageSquareQuote, BarChart3 } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
 import { getProfileView } from "@/lib/match";
-import { getMyWeights, getMyQuestions, getMyScores, getMyWomanAnswers } from "@/lib/quiz-data";
+import { getMyWeights, getMyAnswers, getMyScores } from "@/lib/quiz-data";
 import { QUALITY_BY_KEY, QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { ProfileDetails } from "@/components/ProfileDetails";
@@ -19,22 +19,17 @@ export default async function ProfileViewPage({
   if (!userId) redirect("/login");
   if (id === userId) redirect("/home"); // your own profile lives at /home
 
-  // RLS gates this: a man only sees a woman's profile once she's matched with him.
   const person = await getProfileView(id);
   if (!person) notFound();
 
-  // Her full profile: priorities, her quiz answers, and the questions she authored (women only).
-  const [weights, womanAnswers, questions] =
-    person.role === "woman"
-      ? await Promise.all([getMyWeights(id), getMyWomanAnswers(id), getMyQuestions(id)])
-      : [[], [], []];
-
-  // His character score: the same self-assessment shown on Discover and his
-  // own profile, just not weighted to any one woman's priorities here.
-  const scores = person.role === "man" ? await getMyScores(id) : [];
-  const avgScore = scores.length
-    ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length
-    : null;
+  // Every profile has the same three things, regardless of gender: a
+  // character score + quiz answers, and priority weights for what they want.
+  const [weights, answers, scores] = await Promise.all([
+    getMyWeights(id),
+    getMyAnswers(id),
+    getMyScores(id),
+  ]);
+  const avgScore = scores.length ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length : null;
 
   const groups = new Map<QualityGroup, typeof weights>();
   for (const w of weights) {
@@ -98,7 +93,7 @@ export default async function ProfileViewPage({
         <ProfileDetails details={person} />
       </div>
 
-      {/* His character score */}
+      {/* Character score */}
       {scores.length ? (
         <section className="mt-4">
           <div className="flex items-center justify-between gap-4">
@@ -112,7 +107,7 @@ export default async function ProfileViewPage({
             </p>
           </div>
           <p className="mt-2 text-[0.8rem] leading-relaxed text-ink-soft">
-            His self-assessment across the 23 qualities, scored by Claude from his quiz answers.
+            Their self-assessment across the 23 qualities, scored from their quiz answers.
           </p>
           <div className="mt-4">
             <QualityScoreBreakdown scores={scores} />
@@ -120,12 +115,12 @@ export default async function ProfileViewPage({
         </section>
       ) : null}
 
-      {/* Her priorities */}
+      {/* Priorities */}
       {weights.length ? (
         <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
           <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
             <SlidersHorizontal size={14} strokeWidth={2.4} />
-            What she's looking for
+            What they're looking for
           </h2>
           <div className="mt-4 space-y-5">
             {[...groups.entries()].map(([group, items]) => {
@@ -166,15 +161,15 @@ export default async function ProfileViewPage({
         </section>
       ) : null}
 
-      {/* Her quiz answers */}
-      {womanAnswers.length ? (
+      {/* Quiz answers */}
+      {answers.length ? (
         <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
           <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
             <MessageSquareQuote size={14} strokeWidth={2.4} />
-            Her answers
+            Their answers
           </h2>
           <ul className="mt-4 space-y-3">
-            {womanAnswers.map((a, i) => (
+            {answers.map((a, i) => (
               <li key={a.questionId} className="rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
                 <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-plum">
                   Question {i + 1}
@@ -183,28 +178,6 @@ export default async function ProfileViewPage({
                 <p className="mt-2 border-l-2 border-plum/25 pl-2.5 text-[0.88rem] leading-relaxed text-ink-soft">
                   {a.answer}
                 </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {/* Questions she authored */}
-      {questions.length ? (
-        <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
-          <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
-            <SquarePen size={14} strokeWidth={2.4} />
-            Her questions
-          </h2>
-          <ul className="mt-4 space-y-3">
-            {questions.map((q) => (
-              <li key={q.id} className="rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
-                {q.qualityLabel ? (
-                  <span className="inline-block rounded-full bg-plum/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-plum">
-                    {q.qualityLabel}
-                  </span>
-                ) : null}
-                <p className="mt-2 text-sm leading-snug text-ink">{q.prompt}</p>
               </li>
             ))}
           </ul>

@@ -8,9 +8,8 @@ import { TabBar } from "@/components/TabBar";
 export default async function ChatsPage() {
   const { userId, profile } = await getMyProfile();
   if (!userId) redirect("/login");
-  if (!profile) redirect("/onboarding/role");
+  if (!profile) redirect("/onboarding/gender");
 
-  const isWoman = profile.role === "woman";
   const conversations = await getConversations(userId);
 
   return (
@@ -28,13 +27,9 @@ export default async function ChatsPage() {
             <MessagesSquare size={30} className="mx-auto text-plum/70" strokeWidth={1.8} />
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
               No conversations yet.{" "}
-              {isWoman ? (
-                <Link href="/discover" className="font-medium text-plum underline-offset-4 hover:underline">
-                  Find someone in Discover.
-                </Link>
-              ) : (
-                "When a woman starts a conversation with you, it'll show up here."
-              )}
+              <Link href="/discover" className="font-medium text-plum underline-offset-4 hover:underline">
+                Find someone in Discover.
+              </Link>
             </p>
           </div>
         ) : null}
@@ -60,7 +55,7 @@ export default async function ChatsPage() {
         ))}
       </section>
 
-      <TabBar isWoman={isWoman} />
+      <TabBar />
     </main>
   );
 }

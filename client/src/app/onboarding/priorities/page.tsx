@@ -1,14 +1,11 @@
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/profile";
-import { WOMAN_QUIZ_QUESTIONS } from "@/lib/constants/woman-quiz";
-import { PrioritiesQuizForm } from "./PrioritiesQuizForm";
+import { PrioritiesForm } from "./PrioritiesForm";
 
-export default async function PrioritiesQuizPage() {
+export default async function PrioritiesPage() {
   const { userId, profile } = await getMyProfile();
   if (!userId) redirect("/login");
-  if (!profile) redirect("/onboarding/role");
-  // This quiz is for women; men take the behavioral quiz instead.
-  if (profile.role !== "woman") redirect("/home");
+  if (!profile) redirect("/onboarding/gender");
 
-  return <PrioritiesQuizForm questions={WOMAN_QUIZ_QUESTIONS} />;
+  return <PrioritiesForm />;
 }

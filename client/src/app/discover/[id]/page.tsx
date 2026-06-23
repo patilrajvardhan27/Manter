@@ -2,13 +2,13 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MapPin, ThumbsUp, TriangleAlert, MessageCircle, X } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
-import { getManDetail } from "@/lib/match";
+import { getProfileDetail } from "@/lib/match";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { ProfileDetails } from "@/components/ProfileDetails";
 import { ManDetailTabs } from "@/components/ManDetailTabs";
 import { startConversation } from "../actions";
 
-export default async function ManDetailPage({
+export default async function CandidateDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -16,31 +16,30 @@ export default async function ManDetailPage({
   const { id } = await params;
   const { userId, profile } = await getMyProfile();
   if (!userId) redirect("/login");
-  if (!profile) redirect("/onboarding/role");
-  if (profile.role !== "woman") redirect("/chats");
+  if (!profile) redirect("/onboarding/gender");
 
-  const man = await getManDetail(userId, id);
-  if (!man) notFound();
+  const person = await getProfileDetail(userId, id);
+  if (!person) notFound();
 
   const profilePanel = (
     <div className="space-y-4">
-      {man.bio ? (
+      {person.bio ? (
         <section className="card-hover rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
           <h2 className="text-[0.68rem] font-semibold uppercase tracking-wider text-plum">About</h2>
-          <p className="mt-1.5 text-[0.92rem] leading-relaxed text-ink-soft">{man.bio}</p>
+          <p className="mt-1.5 text-[0.92rem] leading-relaxed text-ink-soft">{person.bio}</p>
         </section>
       ) : null}
 
-      {man.strengths.length || man.gaps.length ? (
+      {person.strengths.length || person.gaps.length ? (
         <section className="card-hover rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
-          {man.strengths.length ? (
+          {person.strengths.length ? (
             <div>
               <p className="flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-sage">
                 <ThumbsUp size={13} strokeWidth={2.4} />
-                Why he ranks for you
+                Why they rank for you
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {man.strengths.map((s) => (
+                {person.strengths.map((s) => (
                   <span key={s} className="rounded-full bg-sage/15 px-2.5 py-1 text-[0.72rem] font-medium text-sage">
                     {s}
                   </span>
@@ -49,14 +48,14 @@ export default async function ManDetailPage({
             </div>
           ) : null}
 
-          {man.gaps.length ? (
-            <div className={man.strengths.length ? "mt-3" : ""}>
+          {person.gaps.length ? (
+            <div className={person.strengths.length ? "mt-3" : ""}>
               <p className="flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-clay">
                 <TriangleAlert size={13} strokeWidth={2.4} />
-                Where he falls short
+                Where they fall short
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {man.gaps.map((s) => (
+                {person.gaps.map((s) => (
                   <span key={s} className="rounded-full bg-clay/15 px-2.5 py-1 text-[0.72rem] font-medium text-clay">
                     {s}
                   </span>
@@ -67,7 +66,7 @@ export default async function ManDetailPage({
         </section>
       ) : null}
 
-      <ProfileDetails details={man} />
+      <ProfileDetails details={person} />
     </div>
   );
 
@@ -84,14 +83,14 @@ export default async function ManDetailPage({
         <span className="text-sm font-medium text-ink-soft">Profile</span>
       </header>
 
-      {man.photos.length ? (
+      {person.photos.length ? (
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none]">
-          {man.photos.map((url, i) => (
+          {person.photos.map((url, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={i}
               src={url}
-              alt={`${man.display_name} photo ${i + 1}`}
+              alt={`${person.display_name} photo ${i + 1}`}
               className="h-44 w-36 shrink-0 rounded-[var(--radius-card)] object-cover shadow-[var(--shadow-soft)] transition duration-300 hover:scale-[1.03] active:scale-[0.99]"
             />
           ))}
@@ -103,20 +102,20 @@ export default async function ManDetailPage({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="truncate font-display text-[1.7rem] font-light leading-tight tracking-tight text-ink">
-              {man.display_name}
-              {man.age ? <span className="text-ink-soft">, {man.age}</span> : null}
+              {person.display_name}
+              {person.age ? <span className="text-ink-soft">, {person.age}</span> : null}
             </h1>
-            {man.city ? (
+            {person.city ? (
               <p className="flex items-center gap-1 text-sm text-ink-soft">
                 <MapPin size={14} strokeWidth={2} />
-                {man.city}
+                {person.city}
               </p>
             ) : null}
-            <VerifyBadge status={man.verification} className="mt-1" />
+            <VerifyBadge status={person.verification} className="mt-1" />
           </div>
           <div className="shrink-0 text-right">
             <div className="font-display text-4xl font-light leading-none text-plum">
-              {man.score}
+              {person.score}
               <span className="text-lg text-ink-soft">%</span>
             </div>
             <p className="text-[0.65rem] uppercase tracking-wider text-ink-soft">match for you</p>
@@ -124,7 +123,7 @@ export default async function ManDetailPage({
         </div>
       </section>
 
-      <ManDetailTabs profilePanel={profilePanel} answers={man.answers} qualities={man.qualities} />
+      <ManDetailTabs profilePanel={profilePanel} answers={person.answers} qualities={person.qualities} />
 
       {/* Actions */}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] border-t border-ink/10 bg-cream/90 px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
@@ -136,10 +135,10 @@ export default async function ManDetailPage({
             <X size={17} strokeWidth={2.4} />
             Pass
           </Link>
-          <form action={startConversation.bind(null, man.id)} className="flex-[1.4]">
+          <form action={startConversation.bind(null, person.id)} className="flex-[1.4]">
             <button className="flex h-12 w-full items-center justify-center gap-1.5 rounded-2xl bg-plum text-sm font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98]">
               <MessageCircle size={17} strokeWidth={2.2} />
-              {man.matchId ? "Open chat" : "Message " + man.display_name}
+              {person.matchId ? "Open chat" : "Message " + person.display_name}
             </button>
           </form>
         </div>

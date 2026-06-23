@@ -5,7 +5,8 @@ import { MoreVertical, UserMinus, X } from "lucide-react";
 import { unmatch } from "@/app/chats/actions";
 
 /**
- * Overflow menu in the chat header (women only). Opens a confirmation before
+ * Overflow menu in the chat header, shown only to whoever initiated the
+ * match (RLS only lets the seeker unmatch). Opens a confirmation before
  * unmatching, since it permanently deletes the conversation for both people.
  */
 export function UnmatchButton({ matchId, otherName }: { matchId: string; otherName: string }) {
@@ -41,7 +42,7 @@ export function UnmatchButton({ matchId, otherName }: { matchId: string; otherNa
                   Unmatch {otherName}?
                 </h2>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                  This permanently deletes your conversation for both of you. He&apos;ll
+                  This permanently deletes your conversation for both of you. They&apos;ll
                   reappear in Discover, and you can always start over.
                 </p>
               </div>

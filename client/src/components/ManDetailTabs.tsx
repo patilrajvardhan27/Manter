@@ -42,9 +42,9 @@ function Dots({ value, color }: { value: number; color: string }) {
 }
 
 /**
- * Segmented tabs for a man's detail page (Profile / Answers / Match). Keeps the
- * page short on mobile by showing one panel at a time instead of one long
- * scroll of photos + score + 23 quality cards + answers.
+ * Segmented tabs for a candidate's detail page (Profile / Answers / Match).
+ * Keeps the page short on mobile by showing one panel at a time instead of
+ * one long scroll of photos + score + 23 quality cards + answers.
  */
 export function ManDetailTabs({
   profilePanel,
@@ -98,7 +98,7 @@ function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
   if (!answers.length) {
     return (
       <div className="rounded-[var(--radius-card)] border border-dashed border-ink/10 bg-paper/30 p-8 text-center text-sm text-ink-soft">
-        He hasn&apos;t answered the quiz yet.
+        They haven&apos;t answered the quiz yet.
       </div>
     );
   }
@@ -127,7 +127,7 @@ function CompatibilityPanel({
   return (
     <div className="space-y-4">
       <p className="text-[0.78rem] text-ink-soft">
-        <span className="font-medium text-plum">●</span> his self-assessment ·{" "}
+        <span className="font-medium text-plum">●</span> their self-assessment ·{" "}
         <span className="font-medium text-ink-soft">●</span> your priority
       </p>
       {byGroup.map((sec) => (
@@ -140,7 +140,7 @@ function CompatibilityPanel({
               <div key={q.key} className="flex items-center justify-between gap-3 py-2">
                 <span className="min-w-0 flex-1 truncate text-[0.82rem] text-ink">{q.label}</span>
                 <div className="flex shrink-0 flex-col items-end gap-1">
-                  <Dots value={q.manScore} color="var(--color-plum)" />
+                  <Dots value={q.candidateScore} color="var(--color-plum)" />
                   <Dots value={q.weight} color="color-mix(in srgb, var(--color-ink) 45%, transparent)" />
                 </div>
               </div>

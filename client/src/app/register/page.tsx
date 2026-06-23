@@ -26,7 +26,7 @@ export default function RegisterPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding/role`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding/gender`,
       },
     });
 
@@ -37,7 +37,7 @@ export default function RegisterPage() {
     }
     // If email confirmation is disabled, a session exists immediately.
     if (data.session) {
-      router.replace("/onboarding/role");
+      router.replace("/onboarding/gender");
       router.refresh();
     } else {
       setSent(true);

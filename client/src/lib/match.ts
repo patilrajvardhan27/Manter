@@ -2,12 +2,16 @@
  * Server-only data access for discovery + chat. Runs as the signed-in user
  * (anon key + their session cookie), so every read here is RLS-enforced.
  * Imports next/headers via the server client, so it can only run on the server.
+ *
+ * Matching is gender-symmetric: any profile can discover and be discovered by
+ * any other, filtered by mutual `interested_in`, and ranked by the viewer's
+ * priority weights against the candidate's quiz scores.
  */
 import { createClient } from "@/lib/supabase/server";
-import { scoreMan } from "@/lib/scoring";
+import { scoreCandidate } from "@/lib/scoring";
 import { signPhotoUrls, PHOTO_BUCKET } from "@/lib/photos";
 import { QUALITIES, type QualityGroup } from "@/lib/constants/qualities";
-import { DETAIL_COLUMNS } from "@/lib/profile";
+import { DETAIL_COLUMNS, type Gender } from "@/lib/profile";
 import { getMyAnswers, type AnsweredQuestion } from "@/lib/quiz-data";
 import type { ProfileDetailFields } from "@/components/ProfileDetails";
 
@@ -25,17 +29,30 @@ function pickDetails(row: Record<string, unknown>): ProfileDetailFields {
   };
 }
 
-export interface DiscoverMan {
+/** True if `viewer` is open to seeing `candidateGender`, and vice versa. */
+function mutuallyInterested(
+  viewerGender: Gender,
+  viewerInterestedIn: Gender[],
+  candidateGender: Gender,
+  candidateInterestedIn: Gender[],
+): boolean {
+  const viewerOk = viewerInterestedIn.length === 0 || viewerInterestedIn.includes(candidateGender);
+  const candidateOk = candidateInterestedIn.length === 0 || candidateInterestedIn.includes(viewerGender);
+  return viewerOk && candidateOk;
+}
+
+export interface DiscoverProfile {
   id: string;
   display_name: string;
   age: number | null;
   city: string | null;
   bio: string | null;
+  gender: Gender;
   verification: string;
   score: number;
   top: string[];
   photos: string[]; // signed URLs, in order
-  matchId: string | null; // set if she already started a conversation
+  matchId: string | null; // set if a conversation already exists
 }
 
 export interface LastMessage {
@@ -60,8 +77,8 @@ export interface ChatMessage {
 export interface Thread {
   matchId: string;
   status: string;
-  womanId: string;
-  manId: string;
+  seekerId: string;
+  targetId: string;
   other: { id: string; display_name: string; age: number | null; city: string | null; verification: string };
   messages: ChatMessage[];
 }
@@ -73,20 +90,16 @@ export interface ProfileView extends ProfileDetailFields {
   city: string | null;
   bio: string | null;
   verification: string;
-  role: string;
+  gender: Gender;
   photos: string[]; // signed URLs
 }
 
-/**
- * Another user's profile + photos, for a standalone profile page. RLS decides
- * visibility: a man can only read a woman's profile (and her photos) once she's
- * matched with him, so this returns null until she's liked him.
- */
+/** Another user's profile + photos, for a standalone profile page. */
 export async function getProfileView(profileId: string): Promise<ProfileView | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select(`id, display_name, age, city, bio, verification, role, photos, ${DETAIL_COLUMNS}`)
+    .select(`id, display_name, age, city, bio, verification, gender, photos, ${DETAIL_COLUMNS}`)
     .eq("id", profileId)
     .maybeSingle();
   if (!data) return null;
@@ -98,66 +111,84 @@ export async function getProfileView(profileId: string): Promise<ProfileView | n
     city: data.city,
     bio: data.bio,
     verification: data.verification,
-    role: data.role,
+    gender: data.gender,
     photos,
     ...pickDetails(data),
   };
 }
 
-/** Men ranked by compatibility for the given woman. */
-export async function getDiscovery(womanId: string): Promise<DiscoverMan[]> {
+/** Profiles ranked by compatibility for the given viewer, filtered by mutual interest. */
+export async function getDiscovery(viewerId: string): Promise<DiscoverProfile[]> {
   const supabase = await createClient();
 
-  const [{ data: weightRows }, { data: men }, { data: existing }] = await Promise.all([
-    supabase.from("woman_weights").select("quality_key, weight").eq("woman_id", womanId),
-    supabase.from("profiles").select("id, display_name, age, city, bio, verification, photos").eq("role", "man"),
-    supabase.from("matches").select("id, man_id").eq("woman_id", womanId),
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("gender, interested_in")
+    .eq("id", viewerId)
+    .maybeSingle();
+  if (!viewer) return [];
+  const viewerInterestedIn = (viewer.interested_in as Gender[] | null) ?? [];
+
+  const [{ data: weightRows }, { data: candidates }, { data: existing }] = await Promise.all([
+    supabase.from("priority_weights").select("quality_key, weight").eq("profile_id", viewerId),
+    supabase
+      .from("profiles")
+      .select("id, display_name, age, city, bio, gender, interested_in, verification, photos")
+      .neq("id", viewerId),
+    supabase.from("matches").select("id, seeker_id, target_id").or(`seeker_id.eq.${viewerId},target_id.eq.${viewerId}`),
   ]);
 
   const weights: Record<string, number> = {};
   (weightRows ?? []).forEach((r) => (weights[r.quality_key] = r.weight));
 
-  const matchByMan: Record<string, string> = {};
-  (existing ?? []).forEach((m) => (matchByMan[m.man_id] = m.id));
-
-  const manIds = (men ?? []).map((m) => m.id);
-  const { data: quizRows } = await supabase
-    .from("man_quiz_scores")
-    .select("man_id, quality_key, score")
-    .in("man_id", manIds.length ? manIds : ["00000000-0000-0000-0000-000000000000"]);
-
-  const quizByMan: Record<string, Record<string, number>> = {};
-  (quizRows ?? []).forEach((r) => {
-    (quizByMan[r.man_id] ??= {})[r.quality_key] = Number(r.score);
+  const matchByOther: Record<string, string> = {};
+  (existing ?? []).forEach((m) => {
+    const otherId = m.seeker_id === viewerId ? m.target_id : m.seeker_id;
+    matchByOther[otherId] = m.id;
   });
 
-  // Sign every man's photos in a single batch.
-  const allPaths = (men ?? []).flatMap((m) => (m.photos as string[] | null) ?? []);
+  const eligible = (candidates ?? []).filter((c) =>
+    mutuallyInterested(viewer.gender, viewerInterestedIn, c.gender, (c.interested_in as Gender[] | null) ?? []),
+  );
+
+  const candidateIds = eligible.map((c) => c.id);
+  const { data: quizRows } = await supabase
+    .from("quiz_scores")
+    .select("profile_id, quality_key, score")
+    .in("profile_id", candidateIds.length ? candidateIds : ["00000000-0000-0000-0000-000000000000"]);
+
+  const quizByProfile: Record<string, Record<string, number>> = {};
+  (quizRows ?? []).forEach((r) => {
+    (quizByProfile[r.profile_id] ??= {})[r.quality_key] = Number(r.score);
+  });
+
+  // Sign every candidate's photos in a single batch.
+  const allPaths = eligible.flatMap((c) => (c.photos as string[] | null) ?? []);
   const { data: signed } = allPaths.length
     ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(allPaths, 3600)
     : { data: [] };
   const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
 
-  return (men ?? [])
-    // Drop men she's already started a conversation with — once matched, they
-    // live in Chats, not the discovery deck.
-    .filter((m) => !matchByMan[m.id])
-    .map((m) => {
-      const { score, top } = scoreMan(weights, quizByMan[m.id] ?? {});
-      const photos = ((m.photos as string[] | null) ?? [])
+  return eligible
+    // Drop profiles already matched/conversing — once matched, they live in Chats.
+    .filter((c) => !matchByOther[c.id])
+    .map((c) => {
+      const { score, top } = scoreCandidate(weights, quizByProfile[c.id] ?? {});
+      const photos = ((c.photos as string[] | null) ?? [])
         .map((p) => urlByPath.get(p))
         .filter((u): u is string => Boolean(u));
       return {
-        id: m.id,
-        display_name: m.display_name,
-        age: m.age,
-        city: m.city,
-        bio: m.bio,
-        verification: m.verification,
+        id: c.id,
+        display_name: c.display_name,
+        age: c.age,
+        city: c.city,
+        bio: c.bio,
+        gender: c.gender,
+        verification: c.verification,
         score,
         top,
         photos,
-        matchId: matchByMan[m.id] ?? null,
+        matchId: matchByOther[c.id] ?? null,
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -168,44 +199,49 @@ export interface QualityDetail {
   label: string;
   blurb: string;
   group: QualityGroup;
-  manScore: number; // his self-assessment, 0–5 (0 = not answered)
-  weight: number; // her priority, 0–5 (0 = not weighted)
+  candidateScore: number; // their self-assessment, 0–5 (0 = not answered)
+  weight: number; // viewer's priority, 0–5 (0 = not weighted)
 }
 
-export interface ManDetail extends ProfileDetailFields {
+export interface ProfileDetail extends ProfileDetailFields {
   id: string;
   display_name: string;
   age: number | null;
   city: string | null;
   bio: string | null;
+  gender: Gender;
   verification: string;
   score: number;
   matchId: string | null;
   photos: string[]; // signed URLs
   qualities: QualityDetail[]; // all 23, canonical order
-  strengths: string[]; // labels he scores well on among her priorities
-  gaps: string[]; // labels she cares about where he lags
-  answers: AnsweredQuestion[]; // his quiz answers, in his own words
+  strengths: string[]; // labels they score well on among the viewer's priorities
+  gaps: string[]; // labels the viewer cares about where they lag
+  answers: AnsweredQuestion[]; // their situational quiz answers, in their own words
 }
 
-/** Full profile + per-quality breakdown for one man, scored for this woman. */
-export async function getManDetail(womanId: string, manId: string): Promise<ManDetail | null> {
+/** Full profile + per-quality breakdown for one candidate, scored for this viewer. */
+export async function getProfileDetail(viewerId: string, candidateId: string): Promise<ProfileDetail | null> {
   const supabase = await createClient();
 
-  const { data: man } = await supabase
+  const { data: candidate } = await supabase
     .from("profiles")
-    .select(`id, display_name, age, city, bio, verification, role, photos, ${DETAIL_COLUMNS}`)
-    .eq("id", manId)
+    .select(`id, display_name, age, city, bio, verification, gender, photos, ${DETAIL_COLUMNS}`)
+    .eq("id", candidateId)
     .maybeSingle();
-  if (!man || man.role !== "man") return null;
+  if (!candidate) return null;
 
-  const photos = await signPhotoUrls(supabase, man.photos as string[] | null);
+  const photos = await signPhotoUrls(supabase, candidate.photos as string[] | null);
 
   const [{ data: weightRows }, { data: quizRows }, { data: existing }, answers] = await Promise.all([
-    supabase.from("woman_weights").select("quality_key, weight").eq("woman_id", womanId),
-    supabase.from("man_quiz_scores").select("quality_key, score").eq("man_id", manId),
-    supabase.from("matches").select("id").eq("woman_id", womanId).eq("man_id", manId).maybeSingle(),
-    getMyAnswers(manId),
+    supabase.from("priority_weights").select("quality_key, weight").eq("profile_id", viewerId),
+    supabase.from("quiz_scores").select("quality_key, score").eq("profile_id", candidateId),
+    supabase
+      .from("matches")
+      .select("id")
+      .or(`and(seeker_id.eq.${viewerId},target_id.eq.${candidateId}),and(seeker_id.eq.${candidateId},target_id.eq.${viewerId})`)
+      .maybeSingle(),
+    getMyAnswers(candidateId),
   ]);
 
   const weights: Record<string, number> = {};
@@ -218,30 +254,31 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
     label: q.label,
     blurb: q.blurb,
     group: q.group,
-    manScore: quiz[q.key] ?? 0,
+    candidateScore: quiz[q.key] ?? 0,
     weight: weights[q.key] ?? 0,
   }));
 
-  const { score } = scoreMan(weights, quiz);
+  const { score } = scoreCandidate(weights, quiz);
 
   const weighted = qualities.filter((q) => q.weight > 0);
   const strengths = [...weighted]
-    .sort((a, b) => b.weight * b.manScore - a.weight * a.manScore)
+    .sort((a, b) => b.weight * b.candidateScore - a.weight * a.candidateScore)
     .slice(0, 3)
     .map((q) => q.label);
   const gaps = [...weighted]
-    .filter((q) => q.manScore < 5)
-    .sort((a, b) => b.weight * (5 - b.manScore) - a.weight * (5 - a.manScore))
+    .filter((q) => q.candidateScore < 5)
+    .sort((a, b) => b.weight * (5 - b.candidateScore) - a.weight * (5 - a.candidateScore))
     .slice(0, 3)
     .map((q) => q.label);
 
   return {
-    id: man.id,
-    display_name: man.display_name,
-    age: man.age,
-    city: man.city,
-    bio: man.bio,
-    verification: man.verification,
+    id: candidate.id,
+    display_name: candidate.display_name,
+    age: candidate.age,
+    city: candidate.city,
+    bio: candidate.bio,
+    gender: candidate.gender,
+    verification: candidate.verification,
     score,
     matchId: existing?.id ?? null,
     photos,
@@ -249,7 +286,7 @@ export async function getManDetail(womanId: string, manId: string): Promise<ManD
     strengths,
     gaps,
     answers,
-    ...pickDetails(man),
+    ...pickDetails(candidate),
   };
 }
 
@@ -259,13 +296,13 @@ export async function getConversations(userId: string): Promise<Conversation[]> 
 
   const { data: matches } = await supabase
     .from("matches")
-    .select("id, woman_id, man_id, created_at")
-    .or(`woman_id.eq.${userId},man_id.eq.${userId}`)
+    .select("id, seeker_id, target_id, created_at")
+    .or(`seeker_id.eq.${userId},target_id.eq.${userId}`)
     .order("created_at", { ascending: false });
 
   if (!matches || matches.length === 0) return [];
 
-  const otherIds = matches.map((m) => (m.woman_id === userId ? m.man_id : m.woman_id));
+  const otherIds = matches.map((m) => (m.seeker_id === userId ? m.target_id : m.seeker_id));
   const matchIds = matches.map((m) => m.id);
 
   const [{ data: profs }, { data: msgs }] = await Promise.all([
@@ -289,7 +326,7 @@ export async function getConversations(userId: string): Promise<Conversation[]> 
 
   return matches
     .map((m) => {
-      const otherId = m.woman_id === userId ? m.man_id : m.woman_id;
+      const otherId = m.seeker_id === userId ? m.target_id : m.seeker_id;
       return {
         matchId: m.id,
         other: profById[otherId] ?? { id: otherId, display_name: "Someone", verification: "unverified" },
@@ -309,13 +346,13 @@ export async function getThread(matchId: string, userId: string): Promise<Thread
 
   const { data: match } = await supabase
     .from("matches")
-    .select("id, woman_id, man_id, status")
+    .select("id, seeker_id, target_id, status")
     .eq("id", matchId)
     .maybeSingle();
 
-  if (!match || (match.woman_id !== userId && match.man_id !== userId)) return null;
+  if (!match || (match.seeker_id !== userId && match.target_id !== userId)) return null;
 
-  const otherId = match.woman_id === userId ? match.man_id : match.woman_id;
+  const otherId = match.seeker_id === userId ? match.target_id : match.seeker_id;
 
   const [{ data: other }, { data: messages }] = await Promise.all([
     supabase
@@ -333,8 +370,8 @@ export async function getThread(matchId: string, userId: string): Promise<Thread
   return {
     matchId: match.id,
     status: match.status,
-    womanId: match.woman_id,
-    manId: match.man_id,
+    seekerId: match.seeker_id,
+    targetId: match.target_id,
     other: other ?? { id: otherId, display_name: "Someone", age: null, city: null, verification: "unverified" },
     messages: messages ?? [],
   };

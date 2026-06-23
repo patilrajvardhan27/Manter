@@ -15,19 +15,18 @@ const SEVERITY_STYLE: Record<string, string> = {
 /**
  * Realtime conversation. Messages stream in via Supabase Postgres changes;
  * sending writes straight to the messages table (RLS guards participation).
- * For women, the man's messages are run through the FastAPI red-flag scan and
- * any hits are surfaced inline — exactly the "catch what you'd miss" promise.
+ * Every participant's incoming messages are run through the FastAPI red-flag
+ * scan and any hits are surfaced inline — symmetric protection regardless of
+ * gender.
  */
 export function Chat({
   matchId,
   meId,
-  isWoman,
   otherName,
   initial,
 }: {
   matchId: string;
   meId: string;
-  isWoman: boolean;
   otherName: string;
   initial: ChatMessage[];
 }) {
@@ -37,9 +36,9 @@ export function Chat({
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Only the woman scans, and only the other person's messages.
+  // Only scan the other person's incoming messages.
   function maybeScan(msg: ChatMessage) {
-    if (!isWoman || msg.sender_id === meId) return;
+    if (msg.sender_id === meId) return;
     scanMessage(msg.id, msg.body)
       .then((r) => r.flagged && setFlags((f) => ({ ...f, [msg.id]: r })))
       .catch(() => {});

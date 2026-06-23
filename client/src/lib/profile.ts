@@ -1,10 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 
-export type Role = "woman" | "man";
+export type Gender = "male" | "female" | "lgbtq";
+
+export const GENDER_LABEL: Record<Gender, string> = {
+  male: "Male",
+  female: "Female",
+  lgbtq: "LGBTQ+",
+};
 
 export interface Profile {
   id: string;
-  role: Role;
+  gender: Gender;
+  /** Who they want to see in Discover. Empty/null = everyone. */
+  interested_in: Gender[];
   display_name: string;
   age: number | null;
   city: string | null;
@@ -40,16 +48,16 @@ export async function getMyProfile(): Promise<{
 
   const { data } = await supabase
     .from("profiles")
-    .select(`id, role, display_name, age, city, bio, photos, verification, ${DETAIL_COLUMNS}`)
+    .select(`id, gender, interested_in, display_name, age, city, bio, photos, verification, ${DETAIL_COLUMNS}`)
     .eq("id", user.id)
     .maybeSingle();
 
   return { userId: user.id, profile: normalizeProfile(data) };
 }
 
-/** Coerce array columns (interests, photos) to [] when null, so callers needn't. */
+/** Coerce array columns (interests, photos, interested_in) to [] when null, so callers needn't. */
 function normalizeProfile(data: unknown): Profile | null {
   if (!data) return null;
   const p = data as Profile;
-  return { ...p, photos: p.photos ?? [], interests: p.interests ?? [] };
+  return { ...p, photos: p.photos ?? [], interests: p.interests ?? [], interested_in: p.interested_in ?? [] };
 }

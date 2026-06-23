@@ -1,11 +1,12 @@
-"""Seed demo profiles (women + men) into Supabase for local development.
+"""Seed demo profiles (male, female, lgbtq) into Supabase for local development.
 
 Profiles are 1:1 with auth.users, so each one is created via the Auth Admin API
-(service-role key) and then given a profile row plus the role-specific data the
-app needs to be useful:
+(service-role key) and then given a profile row plus the same data every
+gender gets in the gender-symmetric model:
 
-  * women -> woman_weights   (her 1..5 priority for each of the 23 qualities)
-  * men   -> man_quiz_scores (his 1..5 self-assessment for each quality)
+  * priority_weights -> their 1..5 priority for each of the 23 qualities
+  * quiz_scores       -> their 1..5 character score for each quality
+  * quiz_answers      -> their picked Likert label per situational question
 
 Nothing about the people is hardcoded: names, ages, cities and bios are generated
 with Faker, and the quality keys are read back from the `qualities` table (which
@@ -13,13 +14,13 @@ must already be seeded via supabase/seed.sql).
 
 Usage (from the server/ directory, venv active):
 
-    python scripts/seed_profiles.py                 # 5 women + 5 men
-    python scripts/seed_profiles.py --women 3 --men 8
-    python scripts/seed_profiles.py --clean         # delete prior seed users first
+    python scripts/seed_profiles.py                          # 4 of each gender
+    python scripts/seed_profiles.py --male 3 --female 3 --lgbtq 3
+    python scripts/seed_profiles.py --clean                  # delete prior seed users first
 
 Every generated account uses the SEED_DOMAIN email suffix so a re-run with
 --clean can find and remove exactly what this script created (deleting the auth
-user cascades to its profile, weights and scores).
+user cascades to its profile, weights, scores and answers).
 """
 
 from __future__ import annotations
@@ -41,6 +42,7 @@ from app.config import get_settings  # noqa: E402
 
 SEED_DOMAIN = "seed.charms.test"        # marks accounts this script owns
 DEFAULT_PASSWORD = "CharmsSeed!23"      # shared login for all demo accounts
+GENDERS = ["male", "female", "lgbtq"]
 VERIFICATIONS = ["unverified", "pending", "verified", "rejected"]
 VERIFICATION_WEIGHTS = [3, 1, 5, 1]     # most demo users land "verified"
 
@@ -62,81 +64,18 @@ INTEREST_POOL = [
     "Live music", "Board games", "Running", "Painting",
 ]
 
-# Free-text answers to the default behavioral questions so seeded men show
-# real "Your answers" content (question_ids mirror client/src/lib/constants/quiz.ts).
-# Several variants per question; one is picked at random per man.
-SEED_ANSWERS: dict[str, list[str]] = {
-    "q1_decision": [
-        "It's your career and your call — go for it. We'll figure out the distance together and I'll visit every chance I get.",
-        "Honestly that's a huge opportunity. I'd be proud of you. A year apart is hard but we can make it work.",
-        "Let's talk it through, but I don't want to be the reason you pass on something this big.",
-    ],
-    "q2_conflict": [
-        "I'd stop, admit I was wrong, and apologize properly. Being right matters less than being fair to her.",
-        "I'd own it in the moment — 'you're right, I shouldn't have said that' — and ask how to make it better.",
-        "I'd take a breath, acknowledge my part, and not let pride drag the argument out.",
-    ],
-    "q3_boundary": [
-        "Completely her pace, no pressure ever. I'd rather she feel safe than rushed, and I'd tell her that clearly.",
-        "That's totally fine. I'd never bring it up to push — I'd just ask what helps her feel comfortable with me.",
-        "No clock here. Whenever she's ready, or not — both are okay.",
-    ],
-    "q4_chores": [
-        "I'd cook tonight and take the dishes tomorrow, or we split it however's easier. It's both our home.",
-        "I'd just start cleaning and tell her to rest — we trade off, no keeping score.",
-        "Let's divide it 50-50. I'd handle the kitchen, she takes the laundry, done in twenty minutes together.",
-    ],
-    "q5_friends": [
-        "I'd call it out, even if it's awkward. 'Not funny, drop it.' I'm not laughing at women to fit in.",
-        "I'd shut it down in the moment. My friends know I don't find that stuff funny.",
-        "I'd say something there and then — staying silent feels like agreeing.",
-    ],
-    "q6_emotion": [
-        "I'd actually open up about it. Bottling things up never helped me, and she should know what's going on with me.",
-        "I'd tell her honestly that I'm having a rough time. I don't do the 'I'm fine' thing.",
-        "I'd share what's weighing on me — being able to be vulnerable with her is the point.",
-    ],
-    "q7_secret": [
-        "I'd tell her even though it's awkward. Hiding it just to avoid an uncomfortable five minutes isn't worth what it'd cost if she found out another way.",
-        "I'd bring it up myself. If I'd want her to tell me the same thing, I should hold myself to that too.",
-        "I'd say something, even casually — 'hey, small thing, but...'. Staying quiet on purpose feels like a lie by omission.",
-    ],
-    "q8_venting": [
-        "I'd actually read the whole thing and respond to how she's feeling, not just the events — sometimes she just needs someone to get it, not fix it.",
-        "I'd ask a follow-up question about the part that seemed to bother her most, and let her keep going if she wants.",
-        "I'd put my phone down for a minute and properly reply — a vent deserves more than a quick reaction.",
-    ],
-    "q9_disrespect": [
-        "I'd say something in the moment, calmly — 'that's not fair' or similar. I'd rather have an awkward few seconds than let it slide.",
-        "I'd address it right there, even if it's uncomfortable, and check in with her afterward too.",
-        "I wouldn't let it go — I'd push back politely but clearly, in front of whoever said it.",
-    ],
-    "q10_ordinary_week": [
-        "She mentioned offhand that a meeting got moved and she was annoyed about losing her gym slot — I remembered and asked how it went later.",
-        "She seemed a bit quieter than usual on Wednesday, didn't say why, but I noticed and checked in.",
-        "Small stuff — she said she was nervous about a call with her landlord, so I texted to ask how it went.",
-    ],
-    "q11_selfdeprecating_joke": [
-        "I'd laugh with her, then gently say something like 'for what it's worth, I don't think it's as bad as you're making it sound.'",
-        "I'd play along with the joke for a second, then ask how she's actually doing with it underneath the humor.",
-        "I'd smile and let the moment lighten things, but follow up properly once we're both more relaxed.",
-    ],
-    "q12_period": [
-        "I'd ask if she wants anything — heating pad, food, just space — and treat it like any other day she's not feeling great.",
-        "I'd just be a bit more attentive, ask what helps, and not make it a big deal either way.",
-        "I'd check what she needs and not act weird about it — it's just part of life.",
-    ],
-    "q13_praise": [
-        "I'd say thanks and mention the people who helped along the way — it wasn't just me.",
-        "I'd enjoy it for a second, then point out that she (or my team) had a lot to do with it too.",
-        "I'd accept the compliment without making a big show of it, and credit whoever pitched in.",
-    ],
-    "q14_coworker": [
-        "I'd be glad she's enjoying the project — it's not really my business unless she wants to tell me more.",
-        "I wouldn't think much of it. People get along with coworkers all the time; it doesn't worry me.",
-        "I'd just say that's great, sounds like the project's going well. No need to dig into it.",
-    ],
-}
+# The 14 situational quiz question ids (mirrors client/src/lib/constants/
+# situational-quiz.ts) and the 5-point scale every profile answers with.
+SITUATIONAL_QUESTION_IDS = [
+    "s1_online_hate", "s2_stereotyped_in_front_of_partner", "s3_bill_no_strings",
+    "s4_seclusion_deserves", "s5_early_end_owed_time", "s6_upset_at_declined_kiss",
+    "s7_recover_money_framing", "s8_boundary_pushed_to_stay", "s9_workplace_discrimination",
+    "s10_family_rejection", "s11_outed_without_consent", "s12_dating_app_bait_harassment",
+    "s13_public_harassment_holding_hands", "s14_conversion_pressure",
+]
+LIKERT_LABELS = ["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"]
+# Most demo profiles land on the "green flag" side of these statements.
+LIKERT_WEIGHTS = [4, 3, 1, 0.5, 0.5]
 
 fake = Faker()
 
@@ -176,18 +115,20 @@ def make_details() -> dict:
     }
 
 
-def upload_photos(sb: Client, uid: str, role: str) -> list[str]:
+def upload_photos(sb: Client, uid: str, gender: str) -> list[str]:
     """Download 1-3 face portraits and upload them to the private photo bucket.
 
     Returns the storage paths (to write into profiles.photos). Network failures
     are non-fatal: the person just ends up with fewer/no photos. The service-role
     client bypasses RLS, so the demo gating is exercised only on the read side.
     """
-    gender = "women" if role == "woman" else "men"
+    # randomuser.me only has two portrait sets; lgbtq demo profiles draw from
+    # either at random since gender identity isn't tied to a single look.
+    portrait_set = {"male": "men", "female": "women"}.get(gender, random.choice(["men", "women"]))
     paths: list[str] = []
     for idx in random.sample(range(0, 90), random.randint(1, 3)):
         try:
-            with urllib.request.urlopen(f"{PORTRAIT_BASE}/{gender}/{idx}.jpg", timeout=20) as r:
+            with urllib.request.urlopen(f"{PORTRAIT_BASE}/{portrait_set}/{idx}.jpg", timeout=20) as r:
                 data = r.read()
         except Exception as exc:  # noqa: BLE001 — best-effort seeding
             print(f"    (skipped a photo: {exc})")
@@ -204,22 +145,28 @@ def upload_photos(sb: Client, uid: str, role: str) -> list[str]:
 
 
 def create_person(
-    sb: Client, role: str, keys: list[str], password: str, n: int, with_photos: bool
+    sb: Client, gender: str, keys: list[str], password: str, n: int, with_photos: bool
 ) -> dict:
-    """Create one auth user + profile (+ role-specific data). Returns a summary.
+    """Create one auth user + profile + quiz/priority data. Returns a summary.
 
-    Emails are deterministic (woman1@, man1@, ...) so the demo logins are
-    predictable without reading this script's output.
+    Emails are deterministic (male1@, female1@, lgbtq1@, ...) so the demo
+    logins are predictable without reading this script's output.
     """
-    first = fake.first_name_female() if role == "woman" else fake.first_name_male()
-    email = f"{role}{n}@{SEED_DOMAIN}"
+    first = {
+        "male": fake.first_name_male,
+        "female": fake.first_name_female,
+    }.get(gender, fake.first_name)()
+    email = f"{gender}{n}@{SEED_DOMAIN}"
+
+    # Random, occasionally-empty interest set ("empty" = open to everyone).
+    interested_in = random.sample(GENDERS, random.randint(0, len(GENDERS)))
 
     user = sb.auth.admin.create_user(
         {
             "email": email,
             "password": password,
             "email_confirm": True,
-            "user_metadata": {"seed": True, "role": role},
+            "user_metadata": {"seed": True, "gender": gender},
         }
     )
     uid = user.user.id
@@ -227,7 +174,8 @@ def create_person(
     sb.table("profiles").insert(
         {
             "id": uid,
-            "role": role,
+            "gender": gender,
+            "interested_in": interested_in or None,
             "display_name": first,
             "age": random.randint(22, 38),
             "city": fake.city(),
@@ -237,31 +185,32 @@ def create_person(
         }
     ).execute()
 
-    if role == "woman":
-        sb.table("woman_weights").insert(
-            [{"woman_id": uid, "quality_key": k, "weight": random.randint(1, 5)} for k in keys]
-        ).execute()
-    else:
-        sb.table("man_quiz_scores").insert(
-            [
-                {"man_id": uid, "quality_key": k, "score": round(random.uniform(1, 5), 2)}
-                for k in keys
-            ]
-        ).execute()
-        # Free-text answers to the default questions, so his profile has content.
-        sb.table("quiz_answers").insert(
-            [
-                {"man_id": uid, "question_id": qid, "answer": random.choice(variants)}
-                for qid, variants in SEED_ANSWERS.items()
-            ]
-        ).execute()
+    sb.table("priority_weights").insert(
+        [{"profile_id": uid, "quality_key": k, "weight": random.randint(1, 5)} for k in keys]
+    ).execute()
+    sb.table("quiz_scores").insert(
+        [
+            {"profile_id": uid, "quality_key": k, "score": round(random.uniform(1, 5), 2)}
+            for k in keys
+        ]
+    ).execute()
+    sb.table("quiz_answers").insert(
+        [
+            {
+                "profile_id": uid,
+                "question_id": qid,
+                "answer": random.choices(LIKERT_LABELS, weights=LIKERT_WEIGHTS)[0],
+            }
+            for qid in SITUATIONAL_QUESTION_IDS
+        ]
+    ).execute()
 
     if with_photos:
-        paths = upload_photos(sb, uid, role)
+        paths = upload_photos(sb, uid, gender)
         if paths:
             sb.table("profiles").update({"photos": paths}).eq("id", uid).execute()
 
-    return {"email": email, "role": role, "name": first, "id": uid}
+    return {"email": email, "gender": gender, "name": first, "id": uid}
 
 
 def remove_photos(sb: Client, uid: str) -> None:
@@ -295,8 +244,9 @@ def clean(sb: Client) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed demo profiles into Supabase.")
-    parser.add_argument("--women", type=int, default=5, help="number of women (default 5)")
-    parser.add_argument("--men", type=int, default=5, help="number of men (default 5)")
+    parser.add_argument("--male", type=int, default=4, help="number of male profiles (default 4)")
+    parser.add_argument("--female", type=int, default=4, help="number of female profiles (default 4)")
+    parser.add_argument("--lgbtq", type=int, default=4, help="number of LGBTQ+ profiles (default 4)")
     parser.add_argument("--password", default=DEFAULT_PASSWORD, help="shared login password")
     parser.add_argument("--clean", action="store_true", help="delete prior seed users first")
     parser.add_argument(
@@ -312,17 +262,18 @@ def main() -> None:
         print(f"  deleted {clean(sb)} account(s).\n")
 
     keys = quality_keys(sb)
+    counts = {"male": args.male, "female": args.female, "lgbtq": args.lgbtq}
     photo_note = "with demo photos" if with_photos else "no photos"
-    print(f"Seeding {args.women} women + {args.men} men ({photo_note}) against {len(keys)} qualities...\n")
+    total = sum(counts.values())
+    print(f"Seeding {total} profiles {counts} ({photo_note}) against {len(keys)} qualities...\n")
 
     created = []
-    for i in range(1, args.women + 1):
-        created.append(create_person(sb, "woman", keys, args.password, i, with_photos))
-    for i in range(1, args.men + 1):
-        created.append(create_person(sb, "man", keys, args.password, i, with_photos))
+    for gender, count in counts.items():
+        for i in range(1, count + 1):
+            created.append(create_person(sb, gender, keys, args.password, i, with_photos))
 
     for p in created:
-        print(f"  {p['role']:<5}  {p['name']:<12}  {p['email']}")
+        print(f"  {p['gender']:<7}  {p['name']:<12}  {p['email']}")
 
     print(f"\nDone. {len(created)} profiles created. Shared password: {args.password}")
 

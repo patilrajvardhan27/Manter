@@ -6,51 +6,49 @@ import {
   LogOut,
   Compass,
   IdCard,
-  SlidersHorizontal,
-  SquarePen,
   MessageSquareQuote,
+  BarChart3,
+  SlidersHorizontal,
   Check,
   Pencil,
   ImagePlus,
+  MessageCircle,
 } from "lucide-react";
 import { VerifyBadge } from "@/components/VerifyBadge";
 import { ProfileDetails } from "@/components/ProfileDetails";
+import { QualityScoreBreakdown } from "@/components/QualityScores";
 import { saveWeights } from "@/app/home/actions";
-import type { Profile } from "@/lib/profile";
-import type { AnsweredQuestion, QualityWeight } from "@/lib/quiz-data";
-import {
-  QUALITIES,
-  QUALITY_GROUPS,
-  type QualityGroup,
-} from "@/lib/constants/qualities";
+import type { Profile, Gender } from "@/lib/profile";
+import type { AnsweredQuestion, QualityScore, QualityWeight } from "@/lib/quiz-data";
+import { QUALITIES, QUALITY_GROUPS, type QualityGroup } from "@/lib/constants/qualities";
 
-export interface MyQuestion {
-  id: string;
-  prompt: string;
-  qualityLabel: string | null;
-  active: boolean;
-}
+const GENDER_LABEL: Record<Gender, string> = { male: "Male", female: "Female", lgbtq: "LGBTQ+" };
 
-type Tab = "profile" | "priorities" | "answers" | "questions";
+type Tab = "profile" | "answers" | "scores" | "priorities";
 
 const TABS: { id: Tab; label: string; icon: typeof IdCard }[] = [
   { id: "profile", label: "Profile", icon: IdCard },
-  { id: "priorities", label: "Priorities", icon: SlidersHorizontal },
   { id: "answers", label: "Answers", icon: MessageSquareQuote },
-  { id: "questions", label: "Questions", icon: SquarePen },
+  { id: "scores", label: "Scores", icon: BarChart3 },
+  { id: "priorities", label: "Priorities", icon: SlidersHorizontal },
 ];
 
-export function WomanProfile({
+/**
+ * One profile component for every gender: the quiz score, situational quiz
+ * answers, and priority weights all work the same way regardless of who's
+ * looking at their own page.
+ */
+export function UserProfile({
   profile,
-  weights,
   answers,
-  questions,
+  scores,
+  weights,
   photos,
 }: {
   profile: Profile;
-  weights: QualityWeight[];
   answers: AnsweredQuestion[];
-  questions: MyQuestion[];
+  scores: QualityScore[];
+  weights: QualityWeight[];
   photos: string[];
 }) {
   const [tab, setTab] = useState<Tab>("profile");
@@ -58,9 +56,7 @@ export function WomanProfile({
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-5 pb-28 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between rise" style={{ animationDelay: "0ms" }}>
-        <span className="font-display text-2xl font-semibold tracking-tight text-plum-deep">
-          Charms
-        </span>
+        <span className="font-display text-2xl font-semibold tracking-tight text-plum-deep">Charms</span>
         <div className="flex items-center gap-1">
           <Link
             href="/profile/edit"
@@ -92,8 +88,9 @@ export function WomanProfile({
               {profile.display_name}
             </h1>
             <p className="mt-0.5 truncate text-sm text-ink-soft">
-              {[profile.age ? `${profile.age}` : null, profile.city].filter(Boolean).join(" · ") ||
-                "Your profile"}
+              {[profile.age ? `${profile.age}` : null, profile.city, GENDER_LABEL[profile.gender]]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
             <VerifyBadge status={profile.verification} className="mt-1.5" />
           </div>
@@ -101,10 +98,7 @@ export function WomanProfile({
       </section>
 
       {/* Segmented tabs */}
-      <div
-        className="mt-6 flex gap-1 rounded-full bg-paper/70 p-1 rise"
-        style={{ animationDelay: "140ms" }}
-      >
+      <div className="mt-6 flex gap-1 rounded-full bg-paper/70 p-1 rise" style={{ animationDelay: "140ms" }}>
         {TABS.map((t) => {
           const active = tab === t.id;
           const Icon = t.icon;
@@ -127,16 +121,11 @@ export function WomanProfile({
       {/* Panels */}
       <div key={tab} className="mt-5 rise" style={{ animationDelay: "0ms" }}>
         {tab === "profile" && (
-          <ProfilePanel
-            profile={profile}
-            weights={weights}
-            questions={questions}
-            photos={photos}
-          />
+          <ProfilePanel profile={profile} scores={scores} weights={weights} photos={photos} />
         )}
-        {tab === "priorities" && <PrioritiesPanel weights={weights} />}
         {tab === "answers" && <AnswersPanel answers={answers} />}
-        {tab === "questions" && <QuestionsPanel questions={questions} />}
+        {tab === "scores" && <ScoresPanel scores={scores} />}
+        {tab === "priorities" && <PrioritiesPanel weights={weights} />}
       </div>
     </main>
   );
@@ -146,15 +135,16 @@ export function WomanProfile({
 
 function ProfilePanel({
   profile,
+  scores,
   weights,
-  questions,
   photos,
 }: {
   profile: Profile;
+  scores: QualityScore[];
   weights: QualityWeight[];
-  questions: MyQuestion[];
   photos: string[];
 }) {
+  const avg = scores.length ? scores.reduce((s, q) => s + q.score, 0) / scores.length : null;
   const topCount = weights.filter((w) => w.weight >= 4).length;
 
   return (
@@ -162,8 +152,8 @@ function ProfilePanel({
       <PhotoStrip photos={photos} />
 
       <div className="grid grid-cols-2 gap-3">
+        <Stat label="Character score" value={avg ? avg.toFixed(1) : "—"} />
         <Stat label="Top priorities (4–5)" value={String(topCount)} />
-        <Stat label="Questions authored" value={String(questions.length)} />
       </div>
 
       {profile.bio ? (
@@ -188,27 +178,66 @@ function ProfilePanel({
         className="group flex items-center justify-between rounded-[var(--radius-card)] border border-plum/15 bg-paper/30 p-5 transition hover:border-plum/30 active:scale-[0.99]"
       >
         <span>
-          <span className="block font-display text-base font-medium text-ink">
-            Discover your matches
-          </span>
+          <span className="block font-display text-base font-medium text-ink">Discover your matches</span>
           <span className="mt-0.5 block text-[0.85rem] text-ink-soft">
-            Men ranked by the qualities that matter to you.
+            People ranked by the qualities that matter to you.
           </span>
         </span>
         <Compass size={20} strokeWidth={2} className="shrink-0 text-plum" />
+      </Link>
+
+      <Link
+        href="/chats"
+        className="group flex items-center justify-between rounded-[var(--radius-card)] border border-plum/15 bg-paper/30 p-5 transition hover:border-plum/30 active:scale-[0.99]"
+      >
+        <span>
+          <span className="block font-display text-base font-medium text-ink">Your conversations</span>
+          <span className="mt-0.5 block text-[0.85rem] text-ink-soft">When you match, it lands here.</span>
+        </span>
+        <MessageCircle size={20} strokeWidth={2} className="shrink-0 text-plum" />
       </Link>
     </div>
   );
 }
 
-/* -------------------------------------------------------------- Priorities tab */
+/* ---------------------------------------------------------------- Answers tab */
+
+function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
+  if (!answers.length) {
+    return <Empty>You haven&apos;t answered the character quiz yet.</Empty>;
+  }
+  return (
+    <div className="space-y-3">
+      {answers.map((a, i) => (
+        <Card key={a.questionId} hover>
+          <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-plum">Question {i + 1}</p>
+          <p className="mt-1.5 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
+          <p className="mt-2.5 border-l-2 border-plum/25 pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
+            {a.answer}
+          </p>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------- Scores tab */
+
+function ScoresPanel({ scores }: { scores: QualityScore[] }) {
+  if (!scores.length) {
+    return <Empty>No quality scores yet — finish the quiz to see them.</Empty>;
+  }
+  return <QualityScoreBreakdown scores={scores} />;
+}
+
+/* ------------------------------------------------------------- Priorities tab */
 
 const DEFAULT_WEIGHT = 3;
 const TIERS = ["", "Optional", "Minor", "Matters", "Important", "Essential"];
 
 function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
-  // Start from every quality (default neutral) so she can rate any of the 23,
-  // then overlay whatever she's already set.
+  // Start from every quality (default neutral) so any of the 23 can be rated,
+  // then overlay whatever's already set.
   const initial = useMemo(() => {
     const map: Record<string, number> = {};
     for (const q of QUALITIES) map[q.key] = DEFAULT_WEIGHT;
@@ -221,10 +250,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const dirty = useMemo(
-    () => QUALITIES.some((q) => values[q.key] !== initial[q.key]),
-    [values, initial],
-  );
+  const dirty = useMemo(() => QUALITIES.some((q) => values[q.key] !== initial[q.key]), [values, initial]);
 
   // Auto-dismiss the "Saved" confirmation.
   useEffect(() => {
@@ -241,9 +267,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
 
   function onSave() {
     startTransition(async () => {
-      const res = await saveWeights(
-        QUALITIES.map((q) => ({ quality_key: q.key, weight: values[q.key] })),
-      );
+      const res = await saveWeights(QUALITIES.map((q) => ({ quality_key: q.key, weight: values[q.key] })));
       if (res.ok) {
         setJustSaved(true);
       } else {
@@ -280,10 +304,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
           <Card key={group} hover>
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: color }}
-                />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                 {QUALITY_GROUPS[group].label}
               </h2>
               <span className="text-[0.68rem] font-medium text-ink-soft/70">
@@ -297,9 +318,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
                 return (
                   <li key={q.key}>
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-[0.9rem] font-medium leading-tight text-ink">
-                        {q.label}
-                      </span>
+                      <span className="text-[0.9rem] font-medium leading-tight text-ink">{q.label}</span>
                       <span
                         className="shrink-0 text-[0.72rem] font-semibold"
                         style={{ color: value >= 4 ? color : "var(--color-ink-soft)" }}
@@ -322,9 +341,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
                               current ? "scale-[1.08] ring-2 ring-offset-1 ring-offset-paper" : ""
                             }`}
                             style={{
-                              backgroundColor: on
-                                ? color
-                                : "color-mix(in srgb, var(--color-ink) 6%, transparent)",
+                              backgroundColor: on ? color : "color-mix(in srgb, var(--color-ink) 6%, transparent)",
                               color: on ? "var(--color-cream)" : "var(--color-ink-soft)",
                               ["--tw-ring-color" as string]: color,
                             }}
@@ -342,11 +359,8 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
         );
       })}
 
-      {error ? (
-        <p className="rounded-xl bg-redflag/10 px-4 py-2.5 text-sm text-redflag">{error}</p>
-      ) : null}
+      {error ? <p className="rounded-xl bg-redflag/10 px-4 py-2.5 text-sm text-redflag">{error}</p> : null}
 
-      {/* Save sits at the end of the list, in normal flow. */}
       <button
         type="button"
         onClick={onSave}
@@ -363,67 +377,6 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
           "Save changes"
         )}
       </button>
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------------- Answers tab */
-
-function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
-  if (!answers.length) {
-    return <Empty>You haven&apos;t answered the priorities quiz yet.</Empty>;
-  }
-  return (
-    <div className="space-y-3">
-      {answers.map((a, i) => (
-        <Card key={a.questionId} hover>
-          <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-plum">
-            Question {i + 1}
-          </p>
-          <p className="mt-1.5 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
-          <p className="mt-2.5 border-l-2 border-plum/25 pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
-            {a.answer}
-          </p>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-/* --------------------------------------------------------------- Questions tab */
-
-function QuestionsPanel({ questions }: { questions: MyQuestion[] }) {
-  return (
-    <div className="space-y-3">
-      <Link
-        href="/questions"
-        className="flex items-center justify-center gap-1.5 rounded-full bg-plum px-4 py-2.5 text-xs font-semibold text-cream transition active:scale-[0.99]"
-      >
-        <SquarePen size={15} strokeWidth={2.2} />
-        Manage your questions
-      </Link>
-
-      {!questions.length ? (
-        <Empty>You haven&apos;t written any questions yet.</Empty>
-      ) : (
-        questions.map((q) => (
-          <Card key={q.id} hover>
-            <div className="flex items-start justify-between gap-3">
-              {q.qualityLabel ? (
-                <span className="rounded-full bg-plum/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-plum">
-                  {q.qualityLabel}
-                </span>
-              ) : (
-                <span />
-              )}
-              {!q.active ? (
-                <span className="text-[0.7rem] font-medium text-ink-soft/70">Inactive</span>
-              ) : null}
-            </div>
-            <p className="mt-2 text-sm leading-snug text-ink">{q.prompt}</p>
-          </Card>
-        ))
-      )}
     </div>
   );
 }
@@ -459,9 +412,7 @@ function PhotoStrip({ photos }: { photos: string[] }) {
 
 function Card({ children, hover }: { children: React.ReactNode; hover?: boolean }) {
   return (
-    <section
-      className={`rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)] ${hover ? "card-hover" : ""}`}
-    >
+    <section className={`rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)] ${hover ? "card-hover" : ""}`}>
       {children}
     </section>
   );
