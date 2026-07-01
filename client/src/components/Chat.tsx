@@ -37,9 +37,14 @@ export function Chat({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Only scan the other person's incoming messages.
-  function maybeScan(msg: ChatMessage) {
+  async function maybeScan(msg: ChatMessage) {
     if (msg.sender_id === meId) return;
-    scanMessage(msg.id, msg.body)
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return;
+    scanMessage(msg.id, session.access_token)
       .then((r) => r.flagged && setFlags((f) => ({ ...f, [msg.id]: r })))
       .catch(() => {});
   }

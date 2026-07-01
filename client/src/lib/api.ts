@@ -7,14 +7,20 @@ export interface RedFlagResult {
   flags: { category: string; severity: "low" | "medium" | "high"; rationale: string }[];
 }
 
+/** `accessToken` is the caller's Supabase session token — the FastAPI
+ * service verifies it and re-fetches the message itself, rather than
+ * trusting message text supplied by the client. */
 export async function scanMessage(
   messageId: string,
-  text: string,
+  accessToken: string,
 ): Promise<RedFlagResult> {
   const res = await fetch(`${BASE}/scan`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message_id: messageId, text }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ message_id: messageId }),
   });
   if (!res.ok) throw new Error(`scan failed: ${res.status}`);
   return res.json();

@@ -29,7 +29,7 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 2. In the SQL editor, run, in order:
    - `supabase/schema.sql` (tables, RLS, helpers)
    - `supabase/seed.sql` (the 23 qualities)
-   - each file in `supabase/migrations/` in numeric order (`0001` → `0013`)
+   - each file in `supabase/migrations/` in numeric order (`0001` → `0014`)
 3. Copy the Project URL + anon key (Settings → API).
 
 > `supabase/migrations/0006_profile_photos.sql` creates the private
@@ -41,6 +41,11 @@ See [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) for the full phased pla
 > lgbtq), generic `priority_weights`/`quiz_scores`/`quiz_answers` tables used
 > by every profile, and `matches.seeker_id`/`target_id` in place of
 > `woman_id`/`man_id`. Run it after `0001`–`0012` on existing databases.
+
+> `supabase/migrations/0014_message_scan_tracking.sql` adds `messages.scanned`
+> so the FastAPI `/scan` endpoint is idempotent per message — it also now
+> requires the caller's Supabase access token and re-fetches the message
+> server-side instead of trusting client-supplied text.
 
 > `supabase/migrations/0005_named_views.sql` (superseded by `0013` for the
 > per-gender views) adds read-only `*_named` views (`matches_named`,

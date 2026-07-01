@@ -175,6 +175,9 @@ create table messages (
   match_id   uuid not null references matches(id) on delete cascade,
   sender_id  uuid not null references profiles(id) on delete cascade,
   body       text not null,
+  -- set by the FastAPI service (service role) once /scan has run on this
+  -- message, so re-fetches don't re-bill Anthropic for the same message.
+  scanned    boolean not null default false,
   created_at timestamptz not null default now()
 );
 
