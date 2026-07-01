@@ -8,9 +8,25 @@ gender gets in the gender-symmetric model:
   * quiz_scores       -> their 1..5 character score for each quality
   * quiz_answers      -> their picked Likert label per situational question
 
-Nothing about the people is hardcoded: names, ages, cities and bios are generated
-with Faker, and the quality keys are read back from the `qualities` table (which
-must already be seeded via supabase/seed.sql).
+Rather than randomizing every quality independently (which produces
+incoherent people — high on "respects boundaries" and low on "trustworthy"
+with no story behind either), each profile is drawn from a small set of
+named character archetypes per gender (PERSONAS below). An archetype pins a
+handful of standout-high and standout-low qualities and a priorities
+skew; everything else gets a light random jitter around a baseline so
+repeated instances of the same archetype aren't identical twins.
+
+quiz_answers are then derived FROM the generated quiz_scores rather than
+picked independently: the situational quiz only exercises 9 of the 23
+qualities (see QUESTION_QUALITIES, mirrored from client/src/lib/constants/
+situational-quiz.ts), so each answer is whichever Likert label that
+archetype's scores on those two qualities would actually justify. This
+keeps a profile's stated attitudes consistent with its character score
+instead of the two being generated independently.
+
+Names, ages, cities, professions and other flavor details are generated
+with Faker; the quality keys are read back from the `qualities` table
+(which must already be seeded via supabase/seed.sql).
 
 Usage (from the server/ directory, venv active):
 
@@ -65,17 +81,174 @@ INTEREST_POOL = [
 ]
 
 # The 14 situational quiz question ids (mirrors client/src/lib/constants/
-# situational-quiz.ts) and the 5-point scale every profile answers with.
-SITUATIONAL_QUESTION_IDS = [
-    "s1_online_hate", "s2_stereotyped_in_front_of_partner", "s3_bill_no_strings",
-    "s4_seclusion_deserves", "s5_early_end_owed_time", "s6_upset_at_declined_kiss",
-    "s7_recover_money_framing", "s8_boundary_pushed_to_stay", "s9_workplace_discrimination",
-    "s10_family_rejection", "s11_outed_without_consent", "s12_dating_app_bait_harassment",
-    "s13_public_harassment_holding_hands", "s14_conversion_pressure",
-]
+# situational-quiz.ts) mapped to the two quality keys each answer affects.
+# Every question in the bank has `positive: true` on both keys, i.e.
+# agreeing with the statement reflects well on both qualities.
+QUESTION_QUALITIES: dict[str, tuple[str, str]] = {
+    "s1_online_hate": ("takes_her_side", "feels_safe"),
+    "s2_stereotyped_in_front_of_partner": ("takes_her_side", "confident_self_respect"),
+    "s3_bill_no_strings": ("respects_boundaries", "no_ego"),
+    "s4_seclusion_deserves": ("respects_boundaries", "no_ego"),
+    "s5_early_end_owed_time": ("respects_decisions", "no_ego"),
+    "s6_upset_at_declined_kiss": ("respects_boundaries", "patient"),
+    "s7_recover_money_framing": ("trustworthy", "no_ego"),
+    "s8_boundary_pushed_to_stay": ("respects_boundaries", "respects_decisions"),
+    "s9_workplace_discrimination": ("takes_her_side", "emotionally_intelligent"),
+    "s10_family_rejection": ("trustworthy", "feels_safe"),
+    "s11_outed_without_consent": ("trustworthy", "respects_decisions"),
+    "s12_dating_app_bait_harassment": ("feels_safe", "emotionally_intelligent"),
+    "s13_public_harassment_holding_hands": ("takes_her_side", "confident_self_respect"),
+    "s14_conversion_pressure": ("respects_decisions", "no_ego"),
+}
 LIKERT_LABELS = ["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"]
-# Most demo profiles land on the "green flag" side of these statements.
-LIKERT_WEIGHTS = [4, 3, 1, 0.5, 0.5]
+
+# ---------------------------------------------------------------------------
+# Character archetypes. Each pins a few standout-high/standout-low qualities
+# (everything else jitters around `baseline`) plus a priorities skew for what
+# they look for in a partner, and a couple of "about you" details that fit
+# the character. `label` and `tagline` become the profile's bio.
+# ---------------------------------------------------------------------------
+PERSONAS: dict[str, list[dict]] = {
+    "male": [
+        {
+            "label": "The Steady One",
+            "tagline": "shows up, keeps his word, and never makes you guess where you stand",
+            "baseline": 4,
+            "high": ["trustworthy", "respects_boundaries", "respects_decisions", "reliable",
+                     "no_anger_issues", "emotionally_intelligent", "feels_safe"],
+            "low": [],
+            "priority_baseline": 3,
+            "priority_high": ["emotionally_intelligent", "vibe_match", "supportive_not_jealous"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Long-term relationship", "exercise": "Often", "drinking": "Socially"},
+        },
+        {
+            "label": "The Charmer",
+            "tagline": "the first one to make the whole table laugh, slower to take no for an answer",
+            "baseline": 3,
+            "high": ["sense_of_humour", "confident_self_respect", "vibe_match"],
+            "low": ["respects_boundaries", "no_ego", "patient", "no_anger_issues"],
+            "priority_baseline": 3,
+            "priority_high": ["sense_of_humour", "vibe_match"],
+            "priority_low": ["patient"],
+            "details": {"relationship_goal": "Short-term", "drinking": "Often"},
+        },
+        {
+            "label": "The Workhorse",
+            "tagline": "married to the hustle — reliable with deadlines, harder to reach emotionally",
+            "baseline": 3,
+            "high": ["ambitious", "reliable", "trustworthy"],
+            "low": ["expresses_emotions", "notices_small_things", "shares_chores"],
+            "priority_baseline": 3,
+            "priority_high": ["ambitious", "reliable", "basic_manners"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Marriage", "exercise": "Rarely"},
+        },
+        {
+            "label": "The Old-School Traditionalist",
+            "tagline": "opens every door and pays every bill, bristles when she doesn't need saving",
+            "baseline": 3,
+            "high": ["reliable", "basic_manners", "protects_not_controls"],
+            "low": ["no_womanhood_taboo", "humble", "no_ego", "supportive_not_jealous"],
+            "priority_baseline": 3,
+            "priority_high": ["reliable", "trustworthy"],
+            "priority_low": ["ambitious"],
+            "details": {"relationship_goal": "Marriage", "exercise": "Sometimes"},
+        },
+    ],
+    "female": [
+        {
+            "label": "The Grounded Realist",
+            "tagline": "steady, direct, and done wasting time on anything less than mutual respect",
+            "baseline": 4,
+            "high": ["trustworthy", "emotionally_intelligent", "feels_safe", "reliable"],
+            "low": [],
+            "priority_baseline": 3,
+            "priority_high": ["respects_boundaries", "trustworthy", "emotionally_intelligent", "no_anger_issues"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Long-term relationship"},
+        },
+        {
+            "label": "The Free Spirit",
+            "tagline": "quick wit, big plans, allergic to anyone who tries to dim her down",
+            "baseline": 3,
+            "high": ["sense_of_humour", "vibe_match", "confident_self_respect"],
+            "low": ["patient"],
+            "priority_baseline": 3,
+            "priority_high": ["supportive_not_jealous", "no_ego", "ambitious"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Still figuring it out"},
+        },
+        {
+            "label": "The Guarded Achiever",
+            "tagline": "built her own life after one too many disappointments, doesn't hand over the keys easily",
+            "baseline": 3,
+            "high": ["ambitious", "reliable", "confident_self_respect"],
+            "low": ["expresses_emotions", "patient"],
+            "priority_baseline": 3,
+            "priority_high": ["no_anger_issues", "respects_boundaries", "reliable", "trustworthy"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Marriage", "exercise": "Daily"},
+        },
+        {
+            "label": "The Recovering People-Pleaser",
+            "tagline": "learning that noticing what she needs isn't the same as asking for too much",
+            "baseline": 3,
+            "high": ["notices_small_things", "expresses_emotions", "trustworthy"],
+            "low": ["confident_self_respect"],
+            "priority_baseline": 3,
+            "priority_high": ["takes_her_side", "protects_not_controls", "respects_decisions"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Long-term relationship"},
+        },
+    ],
+    "lgbtq": [
+        {
+            "label": "The Out & Proud Advocate",
+            "tagline": "vocal about who they are, and won't shrink for anyone's comfort",
+            "baseline": 4,
+            "high": ["confident_self_respect", "no_ego", "trustworthy", "takes_her_side"],
+            "low": [],
+            "priority_baseline": 3,
+            "priority_high": ["trustworthy", "feels_safe", "respects_decisions"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Long-term relationship"},
+        },
+        {
+            "label": "The Still-Guarded One",
+            "tagline": "out to some, careful with the rest, still working out who's safe to trust",
+            "baseline": 3,
+            "high": ["patient", "emotionally_intelligent", "trustworthy"],
+            "low": ["confident_self_respect"],
+            "priority_baseline": 3,
+            "priority_high": ["feels_safe", "trustworthy", "patient", "respects_decisions"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Still figuring it out"},
+        },
+        {
+            "label": "The Playful Connector",
+            "tagline": "leads with humor and feeling, less bothered about five-year plans",
+            "baseline": 3,
+            "high": ["sense_of_humour", "vibe_match", "expresses_emotions"],
+            "low": ["reliable", "ambitious"],
+            "priority_baseline": 3,
+            "priority_high": ["vibe_match", "sense_of_humour", "supportive_not_jealous"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Short-term"},
+        },
+        {
+            "label": "The One Who's Been Burned",
+            "tagline": "keeps a wall up after getting hurt before, tests people before trusting them",
+            "baseline": 3,
+            "high": ["confident_self_respect", "no_anger_issues"],
+            "low": ["expresses_emotions", "respects_decisions"],
+            "priority_baseline": 3,
+            "priority_high": ["trustworthy", "respects_boundaries", "no_anger_issues"],
+            "priority_low": [],
+            "details": {"relationship_goal": "Still figuring it out"},
+        },
+    ],
+}
 
 fake = Faker()
 
@@ -96,14 +269,72 @@ def quality_keys(sb: Client) -> list[str]:
     return [r["key"] for r in rows]
 
 
-def make_bio() -> str:
+def scaled_scores(keys: list[str], baseline: int, high: list[str], low: list[str]) -> dict[str, float]:
+    """A profile's 1..5 character score per quality, built from an archetype.
+
+    Standout qualities land near the top/bottom of the scale; everything
+    else jitters around the archetype's baseline so repeats of the same
+    archetype aren't identical.
+    """
+    scores = {}
+    for k in keys:
+        if k in high:
+            scores[k] = round(random.uniform(4.2, 5.0), 2)
+        elif k in low:
+            scores[k] = round(random.uniform(1.0, 2.3), 2)
+        else:
+            scores[k] = round(min(5.0, max(1.0, random.uniform(baseline - 0.7, baseline + 0.7))), 2)
+    return scores
+
+
+def scaled_weights(keys: list[str], baseline: int, high: list[str], low: list[str]) -> dict[str, int]:
+    """A profile's 1..5 priority weight per quality, built from an archetype."""
+    weights = {}
+    for k in keys:
+        if k in high:
+            weights[k] = 5
+        elif k in low:
+            weights[k] = random.choice([1, 2])
+        else:
+            weights[k] = min(5, max(1, baseline + random.choice([-1, 0, 0, 1])))
+    return weights
+
+
+def likert_answers_from_scores(scores: dict[str, float]) -> dict[str, str]:
+    """Derive each situational-quiz answer from the two qualities it affects.
+
+    Keeps stated attitudes consistent with character score instead of
+    generating the two independently — an archetype low on respects_boundaries
+    lands on "Disagree"/"Neutral" for the boundary-pushing scenarios, etc.
+    """
+    answers = {}
+    for qid, (k1, k2) in QUESTION_QUALITIES.items():
+        avg = (scores[k1] + scores[k2]) / 2
+        if avg >= 4.3:
+            label = "Strongly agree"
+        elif avg >= 3.4:
+            label = "Agree"
+        elif avg >= 2.5:
+            label = "Neutral"
+        elif avg >= 1.6:
+            label = "Disagree"
+        else:
+            label = "Strongly disagree"
+        answers[qid] = label
+    return answers
+
+
+def make_bio(persona: dict) -> str:
     interests = ", ".join(fake.words(nb=3, unique=True))
-    return f"{fake.job()}. Into {interests}. {fake.sentence(nb_words=10)}"
+    tagline = persona["tagline"]
+    tagline = tagline[0].upper() + tagline[1:]
+    return f"{tagline}. {fake.job()} by day, into {interests}."
 
 
-def make_details() -> dict:
-    """Random values for the optional profile-detail columns."""
-    return {
+def make_details(persona: dict) -> dict:
+    """Random values for the optional profile-detail columns, with the
+    archetype's own overrides (e.g. relationship_goal) applied on top."""
+    d = {
         "profession": fake.job(),
         "education": random.choice(EDUCATIONS),
         "height_cm": random.randint(155, 198),
@@ -113,6 +344,8 @@ def make_details() -> dict:
         "relationship_goal": random.choice(RELATIONSHIP_GOALS),
         "interests": random.sample(INTEREST_POOL, random.randint(3, 6)),
     }
+    d.update(persona.get("details", {}))
+    return d
 
 
 def upload_photos(sb: Client, uid: str, gender: str) -> list[str]:
@@ -145,7 +378,7 @@ def upload_photos(sb: Client, uid: str, gender: str) -> list[str]:
 
 
 def create_person(
-    sb: Client, gender: str, keys: list[str], password: str, n: int, with_photos: bool
+    sb: Client, gender: str, keys: list[str], password: str, n: int, with_photos: bool, persona: dict
 ) -> dict:
     """Create one auth user + profile + quiz/priority data. Returns a summary.
 
@@ -179,30 +412,26 @@ def create_person(
             "display_name": first,
             "age": random.randint(22, 38),
             "city": fake.city(),
-            "bio": make_bio(),
+            "bio": make_bio(persona),
             "verification": random.choices(VERIFICATIONS, weights=VERIFICATION_WEIGHTS)[0],
-            **make_details(),
+            **make_details(persona),
         }
     ).execute()
 
+    scores = scaled_scores(keys, persona["baseline"], persona["high"], persona["low"])
+    weights = scaled_weights(
+        keys, persona["priority_baseline"], persona["priority_high"], persona["priority_low"]
+    )
+    answers = likert_answers_from_scores(scores)
+
     sb.table("priority_weights").insert(
-        [{"profile_id": uid, "quality_key": k, "weight": random.randint(1, 5)} for k in keys]
+        [{"profile_id": uid, "quality_key": k, "weight": w} for k, w in weights.items()]
     ).execute()
     sb.table("quiz_scores").insert(
-        [
-            {"profile_id": uid, "quality_key": k, "score": round(random.uniform(1, 5), 2)}
-            for k in keys
-        ]
+        [{"profile_id": uid, "quality_key": k, "score": s} for k, s in scores.items()]
     ).execute()
     sb.table("quiz_answers").insert(
-        [
-            {
-                "profile_id": uid,
-                "question_id": qid,
-                "answer": random.choices(LIKERT_LABELS, weights=LIKERT_WEIGHTS)[0],
-            }
-            for qid in SITUATIONAL_QUESTION_IDS
-        ]
+        [{"profile_id": uid, "question_id": qid, "answer": a} for qid, a in answers.items()]
     ).execute()
 
     if with_photos:
@@ -210,7 +439,7 @@ def create_person(
         if paths:
             sb.table("profiles").update({"photos": paths}).eq("id", uid).execute()
 
-    return {"email": email, "gender": gender, "name": first, "id": uid}
+    return {"email": email, "gender": gender, "name": first, "id": uid, "persona": persona["label"]}
 
 
 def remove_photos(sb: Client, uid: str) -> None:
@@ -242,6 +471,61 @@ def clean(sb: Client) -> int:
     return removed
 
 
+def seed_users(sb: Client) -> list[tuple[str, str, int]]:
+    """Return (profile_id, gender, n) for every @SEED_DOMAIN auth user,
+    parsed from its deterministic genderN@ email (see create_person)."""
+    out = []
+    page = 1
+    while True:
+        result = sb.auth.admin.list_users(page=page, per_page=200)
+        users = result if isinstance(result, list) else getattr(result, "users", [])
+        if not users:
+            break
+        for u in users:
+            email = u.email or ""
+            if not email.endswith(f"@{SEED_DOMAIN}"):
+                continue
+            local = email.split("@", 1)[0]
+            gender = next((g for g in GENDERS if local.startswith(g)), None)
+            if gender is None:
+                continue
+            out.append((u.id, gender, int(local[len(gender):])))
+        page += 1
+    return out
+
+
+def quiz_completeness(sb: Client, users: list[tuple[str, str, int]], keys: list[str]) -> None:
+    """Print, per seed profile, how many of the 23 quiz_scores and 14
+    quiz_answers rows it actually has."""
+    for uid, gender, n in sorted(users, key=lambda u: (u[1], u[2])):
+        n_scores = sb.table("quiz_scores").select("quality_key", count="exact").eq("profile_id", uid).execute().count
+        n_answers = sb.table("quiz_answers").select("question_id", count="exact").eq("profile_id", uid).execute().count
+        flag = "OK" if n_scores == len(keys) and n_answers == len(QUESTION_QUALITIES) else "INCOMPLETE"
+        print(f"  {gender}{n:<7} scores {n_scores}/{len(keys)}  answers {n_answers}/{len(QUESTION_QUALITIES)}  [{flag}]")
+
+
+def requiz(sb: Client, keys: list[str], users: list[tuple[str, str, int]]) -> int:
+    """Wipe and regenerate quiz_scores/quiz_answers for every seed profile,
+    re-deriving both fresh from that profile's original archetype.
+    Leaves priority_weights, the profile row, and photos untouched.
+    """
+    for uid, gender, n in users:
+        persona = PERSONAS[gender][(n - 1) % len(PERSONAS[gender])]
+        sb.table("quiz_scores").delete().eq("profile_id", uid).execute()
+        sb.table("quiz_answers").delete().eq("profile_id", uid).execute()
+
+        scores = scaled_scores(keys, persona["baseline"], persona["high"], persona["low"])
+        answers = likert_answers_from_scores(scores)
+
+        sb.table("quiz_scores").insert(
+            [{"profile_id": uid, "quality_key": k, "score": s} for k, s in scores.items()]
+        ).execute()
+        sb.table("quiz_answers").insert(
+            [{"profile_id": uid, "question_id": qid, "answer": a} for qid, a in answers.items()]
+        ).execute()
+    return len(users)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed demo profiles into Supabase.")
     parser.add_argument("--male", type=int, default=4, help="number of male profiles (default 4)")
@@ -252,16 +536,30 @@ def main() -> None:
     parser.add_argument(
         "--no-photos", action="store_true", help="skip downloading/uploading demo photos"
     )
+    parser.add_argument(
+        "--requiz", action="store_true",
+        help="wipe and regenerate quiz_scores/quiz_answers for existing seed profiles, then exit "
+             "(does not touch accounts, priority_weights, or photos)",
+    )
     args = parser.parse_args()
 
     sb = client()
     with_photos = not args.no_photos
+    keys = quality_keys(sb)
+
+    if args.requiz:
+        users = seed_users(sb)
+        print(f"Found {len(users)} seed profile(s) under @{SEED_DOMAIN}.\n")
+        print("Before:")
+        quiz_completeness(sb, users, keys)
+        requiz(sb, keys, users)
+        print("\nAfter:")
+        quiz_completeness(sb, users, keys)
+        return
 
     if args.clean:
         print(f"Removing existing @{SEED_DOMAIN} accounts...")
         print(f"  deleted {clean(sb)} account(s).\n")
-
-    keys = quality_keys(sb)
     counts = {"male": args.male, "female": args.female, "lgbtq": args.lgbtq}
     photo_note = "with demo photos" if with_photos else "no photos"
     total = sum(counts.values())
@@ -269,11 +567,13 @@ def main() -> None:
 
     created = []
     for gender, count in counts.items():
+        personas = PERSONAS[gender]
         for i in range(1, count + 1):
-            created.append(create_person(sb, gender, keys, args.password, i, with_photos))
+            persona = personas[(i - 1) % len(personas)]
+            created.append(create_person(sb, gender, keys, args.password, i, with_photos, persona))
 
     for p in created:
-        print(f"  {p['gender']:<7}  {p['name']:<12}  {p['email']}")
+        print(f"  {p['gender']:<7}  {p['name']:<12}  {p['email']:<24}  {p['persona']}")
 
     print(f"\nDone. {len(created)} profiles created. Shared password: {args.password}")
 
