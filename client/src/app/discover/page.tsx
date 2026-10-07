@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Compass } from "lucide-react";
 import { getMyProfile } from "@/lib/profile";
@@ -23,7 +24,10 @@ export default async function DiscoverPage() {
           Ranked for you, {profile.display_name}.
         </h1>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">
-          Every score is built from the 23 qualities you weighted, not photos.
+          Every score is built from the 23 qualities you weighted, not photos.{" "}
+          <Link href="/safety/cases" className="font-medium text-brand underline underline-offset-4">
+            Read this before you meet anyone.
+          </Link>
         </p>
       </header>
 

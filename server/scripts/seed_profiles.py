@@ -33,6 +33,10 @@ Usage (from the server/ directory, venv active):
     python scripts/seed_profiles.py                          # 4 of each gender
     python scripts/seed_profiles.py --male 3 --female 3 --lgbtq 3
     python scripts/seed_profiles.py --clean                  # delete prior seed users first
+    python scripts/seed_profiles.py --chats 5                # also open 5 sample conversations
+
+Every run writes the demo logins (name, email, password, profile id) to
+seed_logins.txt at the repo root. That file is gitignored; keep it that way.
 
 Every generated account uses the SEED_DOMAIN email suffix so a re-run with
 --clean can find and remove exactly what this script created (deleting the auth
@@ -42,7 +46,9 @@ user cascades to its profile, weights, scores and answers).
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import random
+import secrets
 import sys
 import urllib.request
 import uuid
@@ -57,10 +63,11 @@ from supabase import Client, create_client  # noqa: E402
 from app.config import get_settings  # noqa: E402
 
 SEED_DOMAIN = "seed.charms.test"        # marks accounts this script owns
-DEFAULT_PASSWORD = "CharmsSeed!23"      # shared login for all demo accounts
 GENDERS = ["male", "female", "lgbtq"]
 VERIFICATIONS = ["unverified", "pending", "verified", "rejected"]
 VERIFICATION_WEIGHTS = [3, 1, 5, 1]     # most demo users land "verified"
+
+LOGINS_FILE = Path(__file__).resolve().parents[2] / "seed_logins.txt"  # gitignored
 
 PHOTO_BUCKET = "profile-photos"         # must match client/src/lib/photos.ts
 PORTRAIT_BASE = "https://randomuser.me/api/portraits"  # free face photos
@@ -100,6 +107,29 @@ QUESTION_QUALITIES: dict[str, tuple[str, str]] = {
     "s13_public_harassment_holding_hands": ("takes_her_side", "confident_self_respect"),
     "s14_conversion_pressure": ("respects_decisions", "no_ego"),
 }
+# Opening lines for the sample conversations (--chats). Alternates between the
+# two people, starting with whoever initiated the match.
+SAMPLE_CHATS: list[list[str]] = [
+    [
+        "Hi! Your profile made me smile. How's your week going?",
+        "Hey, thank you! Busy but good. Yours?",
+        "Pretty calm. I finally tried that new cafe near the station.",
+        "Was it worth the hype? I've been meaning to go.",
+    ],
+    [
+        "Hello! I saw we both like hiking. Any favourite trail?",
+        "Hi! There's a ridge walk an hour out of town I keep going back to.",
+        "That sounds great. I'm more of a slow walker with snacks.",
+        "Snacks are the whole point, honestly.",
+    ],
+    [
+        "Hey, nice to meet you here.",
+        "You too! What made you sign up?",
+        "I liked that it isn't about photos first. You?",
+        "Same. Happy to take it slow and see how the chat goes.",
+    ],
+]
+
 LIKERT_LABELS = ["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"]
 
 # ---------------------------------------------------------------------------
@@ -439,7 +469,82 @@ def create_person(
         if paths:
             sb.table("profiles").update({"photos": paths}).eq("id", uid).execute()
 
-    return {"email": email, "gender": gender, "name": first, "id": uid, "persona": persona["label"]}
+    return {
+        "email": email,
+        "gender": gender,
+        "name": first,
+        "id": uid,
+        "persona": persona["label"],
+        "interested_in": interested_in,
+    }
+
+
+def mutually_interested(a: dict, b: dict) -> bool:
+    """Same rule as the client's Discover filter: an empty interested_in
+    means open to everyone."""
+    return (not a["interested_in"] or b["gender"] in a["interested_in"]) and (
+        not b["interested_in"] or a["gender"] in b["interested_in"]
+    )
+
+
+def seed_chats(sb: Client, people: list[dict], count: int) -> list[tuple[dict, dict]]:
+    """Open up to `count` conversations between seed profiles who would see
+    each other in Discover, each with a few opening messages, so the Chats
+    tab has something in it when you log in as one of them."""
+    pairs = [
+        (a, b) for i, a in enumerate(people) for b in people[i + 1:] if mutually_interested(a, b)
+    ]
+    random.shuffle(pairs)
+    opened: list[tuple[dict, dict]] = []
+    busy: set[str] = set()
+    for a, b in pairs:
+        if len(opened) >= count:
+            break
+        if a["id"] in busy or b["id"] in busy:
+            continue  # one sample chat per person
+        match = sb.table("matches").insert({"seeker_id": a["id"], "target_id": b["id"]}).execute().data[0]
+        lines = SAMPLE_CHATS[len(opened) % len(SAMPLE_CHATS)]
+        # The chat orders by created_at, so space the lines a minute apart
+        # instead of letting one insert stamp them all with the same now().
+        # scanned stays false, so the red-flag scan still runs on first view.
+        start = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=len(lines))
+        sb.table("messages").insert(
+            [
+                {
+                    "match_id": match["id"],
+                    "sender_id": (a if n % 2 == 0 else b)["id"],
+                    "body": line,
+                    "created_at": (start + dt.timedelta(minutes=n)).isoformat(),
+                }
+                for n, line in enumerate(lines)
+            ]
+        ).execute()
+        busy |= {a["id"], b["id"]}
+        opened.append((a, b))
+    return opened
+
+
+def write_logins(people: list[dict], password: str, chats: list[tuple[dict, dict]]) -> None:
+    """Write the demo logins as a plain-text table. Overwrites the last run's file."""
+    header = ("Name", "Gender", "Email", "Password", "Persona", "Profile ID")
+    rows = [(p["name"], p["gender"], p["email"], password, p["persona"], p["id"]) for p in people]
+    widths = [max(len(str(r[i])) for r in [header, *rows]) for i in range(len(header))]
+
+    def line(r: tuple) -> str:
+        return "  ".join(str(v).ljust(w) for v, w in zip(r, widths)).rstrip()
+
+    out = [
+        "Charms demo logins. Generated by server/scripts/seed_profiles.py.",
+        "Demo accounts only. This file is gitignored; do not commit or share it.",
+        "",
+        line(header),
+        line(tuple("-" * w for w in widths)),
+        *[line(r) for r in rows],
+    ]
+    if chats:
+        out += ["", "Sample conversations (log in as either person to see the chat):"]
+        out += [f"  {a['name']} ({a['email']})  <->  {b['name']} ({b['email']})" for a, b in chats]
+    LOGINS_FILE.write_text("\n".join(out) + "\n")
 
 
 def remove_photos(sb: Client, uid: str) -> None:
@@ -531,10 +636,17 @@ def main() -> None:
     parser.add_argument("--male", type=int, default=4, help="number of male profiles (default 4)")
     parser.add_argument("--female", type=int, default=4, help="number of female profiles (default 4)")
     parser.add_argument("--lgbtq", type=int, default=4, help="number of LGBTQ+ profiles (default 4)")
-    parser.add_argument("--password", default=DEFAULT_PASSWORD, help="shared login password")
+    parser.add_argument(
+        "--password", default=None,
+        help="shared login password (default: a random one, written to seed_logins.txt)",
+    )
     parser.add_argument("--clean", action="store_true", help="delete prior seed users first")
     parser.add_argument(
         "--no-photos", action="store_true", help="skip downloading/uploading demo photos"
+    )
+    parser.add_argument(
+        "--chats", type=int, default=3,
+        help="sample conversations to open between seed profiles (default 3, 0 for none)",
     )
     parser.add_argument(
         "--requiz", action="store_true",
@@ -560,22 +672,34 @@ def main() -> None:
     if args.clean:
         print(f"Removing existing @{SEED_DOMAIN} accounts...")
         print(f"  deleted {clean(sb)} account(s).\n")
+    # This repo is public, so a fixed default password would let anyone sign
+    # in to the demo accounts of a deployed project.
+    password = args.password or secrets.token_urlsafe(12)
     counts = {"male": args.male, "female": args.female, "lgbtq": args.lgbtq}
     photo_note = "with demo photos" if with_photos else "no photos"
     total = sum(counts.values())
     print(f"Seeding {total} profiles {counts} ({photo_note}) against {len(keys)} qualities...\n")
 
-    created = []
-    for gender, count in counts.items():
-        personas = PERSONAS[gender]
-        for i in range(1, count + 1):
-            persona = personas[(i - 1) % len(personas)]
-            created.append(create_person(sb, gender, keys, args.password, i, with_photos, persona))
+    created: list[dict] = []
+    chats: list[tuple[dict, dict]] = []
+    try:
+        for gender, count in counts.items():
+            personas = PERSONAS[gender]
+            for i in range(1, count + 1):
+                persona = personas[(i - 1) % len(personas)]
+                created.append(create_person(sb, gender, keys, password, i, with_photos, persona))
+        if args.chats > 0:
+            chats = seed_chats(sb, created, args.chats)
+    finally:
+        # Always record what was created, so a failure part-way through
+        # doesn't leave accounts whose random password was never saved.
+        write_logins(created, password, chats)
 
     for p in created:
         print(f"  {p['gender']:<7}  {p['name']:<12}  {p['email']:<24}  {p['persona']}")
 
-    print(f"\nDone. {len(created)} profiles created. Shared password: {args.password}")
+    print(f"\nDone. {len(created)} profiles and {len(chats)} sample chat(s) created.")
+    print(f"Logins written to {LOGINS_FILE}")
 
 
 if __name__ == "__main__":

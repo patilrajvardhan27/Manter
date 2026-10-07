@@ -44,14 +44,12 @@ export function UserProfile({
   scores,
   weights,
   photos,
-  interviewed = false,
 }: {
   profile: Profile;
   answers: AnsweredQuestion[];
   scores: QualityScore[];
   weights: QualityWeight[];
   photos: string[];
-  interviewed?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("profile");
 
@@ -98,15 +96,6 @@ export function UserProfile({
           </div>
         </div>
       </section>
-
-      <Link
-        href="/onboarding/voice?from=home"
-        className="mt-4 block rounded-lg border border-ink/10 px-4 py-3 text-sm text-ink focus-visible:outline-2 focus-visible:outline-brand"
-      >
-        {interviewed
-          ? "Retake your matchmaker interview. It replaces what the last one showed."
-          : "Talk to your matchmaker for five minutes. It covers the qualities the quiz can't."}
-      </Link>
 
       {/* Segmented tabs */}
       <div className="mt-6 flex gap-1 rounded-full bg-paper/70 p-1 rise" style={{ animationDelay: "140ms" }}>
@@ -299,7 +288,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
     <div className="space-y-4 pb-2">
       <div className="rounded-[var(--radius-card)] bg-paper/60 px-4 py-3">
         <p className="text-[0.82rem] leading-relaxed text-ink-soft">
-          Set how much each quality matters. This shapes who you're introduced to.
+          Set how much each quality matters. This shapes who you see in Discover.
         </p>
         <div className="mt-2.5 flex items-center justify-between text-[0.62rem] font-semibold uppercase tracking-wide text-ink-soft/70">
           <span>Optional</span>

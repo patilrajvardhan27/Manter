@@ -30,9 +30,3 @@ def test_field_options_match_client():
         block = re.search(rf"{const} = \[(.*?)\]", ts, re.S).group(1)
         assert tuple(re.findall(r'"([^"]+)"', block)) == FIELD_OPTIONS[field]
 
-
-def test_interviewer_probes_exactly_what_the_quiz_misses():
-    from app.services.interviewer import _PROBE_ORDER
-
-    assert set(_PROBE_ORDER) == set(KEYS) - QUIZ_COVERED
-    assert len(_PROBE_ORDER) == len(set(_PROBE_ORDER))

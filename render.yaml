@@ -1,0 +1,27 @@
+# Render Blueprint for the FastAPI service. The client deploys on Vercel.
+services:
+  - type: web
+    name: charms-api
+    runtime: python
+    plan: free
+    rootDir: server
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-4-5-20251001
+      # Set these in the Render dashboard; they are never committed.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Comma-separated; the Vercel URL of the client.
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: MATCHMAKER_SECRET
+        generateValue: true

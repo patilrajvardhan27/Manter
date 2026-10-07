@@ -18,11 +18,10 @@ const TIERS = ["", "Optional", "Minor", "Matters", "Important", "Essential"];
  * qualities matters in a partner. Defaults to neutral (3); she/he/they can
  * adjust any of them later from their profile's Priorities tab.
  */
-export function PrioritiesForm({ initial = {} }: { initial?: Record<string, number> }) {
-  const fromInterview = Object.keys(initial).length > 0;
+export function PrioritiesForm() {
   const [values, setValues] = useState<Record<string, number>>(() => {
     const map: Record<string, number> = {};
-    for (const q of QUALITIES) map[q.key] = initial[q.key] ?? DEFAULT_WEIGHT;
+    for (const q of QUALITIES) map[q.key] = DEFAULT_WEIGHT;
     return map;
   });
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +37,7 @@ export function PrioritiesForm({ initial = {} }: { initial?: Record<string, numb
     startTransition(async () => {
       const res = await saveWeights(QUALITIES.map((q) => ({ quality_key: q.key, weight: values[q.key] })));
       if (res.ok) {
-        router.replace("/intro");
+        router.replace("/discover");
         router.refresh();
       } else {
         setError(res.error ?? "Could not save.");
@@ -60,11 +59,7 @@ export function PrioritiesForm({ initial = {} }: { initial?: Record<string, numb
     <AuthShell
       eyebrow="Step 3 of 3"
       title="What matters to you?"
-      subtitle={
-        fromInterview
-          ? "Rate how much each quality matters in a partner. The ones you mentioned in your interview are already set. This shapes who you're introduced to, and you can change it later."
-          : "Rate how much each quality matters in a partner. This shapes who you're introduced to, and you can change it later."
-      }
+      subtitle="Rate how much each quality matters in a partner. This shapes who you see in Discover, and you can change it later."
     >
       <div className="space-y-4 pb-2">
         {groups.map(([group, items]) => {

@@ -10,11 +10,6 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-haiku-4-5-20251001"
     allowed_origins: str = "http://localhost:3000"
 
-    # Voice matchmaker
-    voice_max_turns: int = 9  # agent turns per interview, opener and wrap-up included
-    voice_max_sessions_per_day: int = 5  # per user, caps model spend
-    voice_max_chars_per_turn: int = 1500
-
     # Introductions
     matchmaker_secret: str = ""  # required header for POST /matchmaker/run
     intro_min_score: float = 60.0  # below this, no intro beats a bad one

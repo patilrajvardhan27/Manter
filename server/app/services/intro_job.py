@@ -70,7 +70,6 @@ def run_round(sb: Client, *, dry_run: bool = False, now: datetime | None = None)
     traits = _grouped(fetch_all(sb, "character_scores", "profile_id, quality_key, score"), "profile_id", "quality_key", "score")
     weights = _grouped(fetch_all(sb, "priority_weights", "profile_id, quality_key, weight"), "profile_id", "quality_key", "weight")
     quizzed = {r["profile_id"] for r in fetch_all(sb, "quiz_scores", "profile_id")}
-    voice = {r["profile_id"]: r for r in fetch_all(sb, "voice_profiles", "profile_id, dealbreakers")}
     intros = fetch_all(
         sb, "introductions", "id, a_id, b_id, status, expires_at, a_decision, b_decision"
     )
@@ -119,9 +118,6 @@ def run_round(sb: Client, *, dry_run: bool = False, now: datetime | None = None)
             smoking=p.get("smoking"),
             drinking=p.get("drinking"),
             interests=frozenset(p.get("interests") or []),
-            dealbreakers=frozenset(
-                (d["field"], d["value"]) for d in (voice.get(p["id"], {}).get("dealbreakers") or [])
-            ),
         )
         for p in profiles
         if p["id"] in weights and p["id"] in quizzed and p["id"] not in busy

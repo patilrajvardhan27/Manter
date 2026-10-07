@@ -67,5 +67,5 @@ export async function submitQuiz(answers: Answer[]) {
     { onConflict: "profile_id,quality_key" },
   );
 
-  redirect("/onboarding/voice");
+  redirect("/onboarding/priorities");
 }

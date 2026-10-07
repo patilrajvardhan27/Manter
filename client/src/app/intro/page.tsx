@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/profile";
-import { getLearnedPreferences, getMyIntros, hasVoiceProfile } from "@/lib/intros";
+import { getLearnedPreferences, getMyIntros } from "@/lib/intros";
 import { IntroCard, PastIntro } from "@/components/IntroCard";
 import { TabBar } from "@/components/TabBar";
 
@@ -15,11 +14,7 @@ export default async function IntroPage() {
   if (!userId) redirect("/login");
   if (!profile) redirect("/onboarding/gender");
 
-  const [{ current, past }, learned, interviewed] = await Promise.all([
-    getMyIntros(),
-    getLearnedPreferences(userId),
-    hasVoiceProfile(userId),
-  ]);
+  const [{ current, past }, learned] = await Promise.all([getMyIntros(), getLearnedPreferences(userId)]);
   const now = Date.now();
   const hoursLeft = current
     ? Math.max(1, Math.ceil((new Date(current.expiresAt).getTime() - now) / 3_600_000))
@@ -41,21 +36,6 @@ export default async function IntroPage() {
 
       <div className="mt-6 space-y-8">
         {current ? <IntroCard intro={current} hoursLeft={hoursLeft} /> : null}
-
-        {!interviewed ? (
-          <section className="rounded-lg border border-ink/10 p-4">
-            <p className="text-[0.95rem] leading-relaxed text-ink">
-              A five-minute talk with your matchmaker covers the qualities the quiz can&apos;t, which makes your
-              introductions sharper.
-            </p>
-            <Link
-              href="/onboarding/voice?from=home"
-              className="mt-3 inline-block text-sm font-medium text-brand underline underline-offset-4"
-            >
-              Talk to your matchmaker
-            </Link>
-          </section>
-        ) : null}
 
         {learned.length ? (
           <section>

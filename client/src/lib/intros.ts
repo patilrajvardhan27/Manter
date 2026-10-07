@@ -110,10 +110,3 @@ export async function getLearnedPreferences(userId: string): Promise<LearnedPref
     .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
     .slice(0, 3);
 }
-
-/** Has this person done the voice interview? */
-export async function hasVoiceProfile(userId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("voice_profiles").select("profile_id").eq("profile_id", userId).maybeSingle();
-  return Boolean(data);
-}

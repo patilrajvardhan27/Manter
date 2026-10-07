@@ -15,24 +15,28 @@ vs. what `points.txt` calls for. Update this file as items are picked up.
   `messages.scanned` (migration `0014`) makes this idempotent per
   message so a re-fetch/reconnect doesn't re-bill the model API.
 
-- [x] **Voice matchmaker interview**: browser speech-to-text and
-  text-to-speech, server-planned questions targeting the 14 qualities the
-  quiz never measures, structured extraction, confidence-weighted fusion
-  with quiz scores (`character_scores` view). Owner-only transcript,
-  deletable. Migration `0015`.
 - [x] **Known-style introductions**: reciprocal scoring, one intro per
   person per round, mutual opt-in via RPC + trigger, 24h expiry, pair
   introduced at most once, post-match feedback, learned preference
   offsets. Migration `0016`.
 - [x] **Consent before chat**: matches (and chats) from introductions only
   exist once both sides say interested.
-- [x] **Tests**: 32 pytest tests for the matcher, interviewer, and
-  Python/TypeScript constant drift. Offline eval in
+- [x] **Tests**: 24 pytest tests for the matcher and Python/TypeScript
+  constant drift. Offline eval in
   `server/scripts/eval_matchmaker.py`.
 - [x] **`schema.sql` ran on a fresh database**: the "weights: matched
   counterpart reads" policy referenced `matches` before it existed.
 - [x] **Red-flag prompt** still said "a man sent a woman" after the
   gender-symmetric rewrite.
+
+- [x] **Voice interview removed**: client page, FastAPI routes and the
+  interviewer are gone. The `voice_*` tables and the voice term in the
+  `character_scores` view are still in the database, unused.
+- [x] **Chat write hardening** (migration `0017`): 2,000-character limit,
+  senders can no longer set `scanned`/`created_at`, and the match update
+  policy that let a participant repoint a thread is dropped.
+- [x] **Discover reads scores in batches**, so it no longer truncates at
+  Supabase's 1,000-row cap.
 
 ## Remaining
 
@@ -47,10 +51,9 @@ vs. what `points.txt` calls for. Update this file as items are picked up.
 - [ ] **Report / block**: mentioned in Safety/Terms copy but there's no
   reporting or blocking mechanism in the schema or client yet.
 
-- [ ] **Remove or rework `/discover`**: unlinked from the nav, but its
-  "like" still opens a chat one-sidedly, and `getDiscovery` silently
-  truncates `character_scores` reads at Supabase's 1,000-row cap (about 43
-  users). Either delete it or turn "like" into an intro request.
+- [ ] **Make Discover two-sided**: it is back in the nav, and its "like"
+  still opens a chat without the other person agreeing. Only the person
+  who started a chat can unmatch, so the recipient has no way to leave.
 - [ ] **Date planning**: shared availability and a venue near both people,
   chat opening the morning of the date (Known's flow).
 - [ ] **Calibrate the matcher on real outcomes**: replace the heuristic

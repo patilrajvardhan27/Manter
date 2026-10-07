@@ -11,6 +11,9 @@ next-env.d.ts
 .env*.local
 server/.env
 
+# Demo account logins written by server/scripts/seed_profiles.py
+seed_logins.txt
+
 # Python
 __pycache__/
 *.pyc
@@ -19,3 +22,6 @@ venv/
 
 # OS
 .DS_Store
+
+# Audit report: lists unfixed security issues, keep out of the public repo
+AUDIT.md

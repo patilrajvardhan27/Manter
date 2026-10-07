@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { scanMessage, type RedFlagResult } from "@/lib/api";
 import type { ChatMessage } from "@/lib/match";
 
+const MAX_MESSAGE_LENGTH = 2000; // mirrors the messages.body check constraint
+
 const SEVERITY_STYLE: Record<string, string> = {
   low: "bg-gold/15 text-gold",
   medium: "bg-clay/15 text-clay",
@@ -34,6 +36,7 @@ export function Chat({
   const [flags, setFlags] = useState<Record<string, RedFlagResult>>({});
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Only scan the other person's incoming messages.
@@ -83,6 +86,7 @@ export function Chat({
     const body = draft.trim();
     if (!body || sending) return;
     setSending(true);
+    setSendError(false);
     setDraft("");
     const supabase = createClient();
     const { data, error } = await supabase
@@ -93,6 +97,7 @@ export function Chat({
     setSending(false);
     if (error) {
       setDraft(body);
+      setSendError(true);
       return;
     }
     if (data) setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data]));
@@ -143,6 +148,12 @@ export function Chat({
         <div ref={bottomRef} />
       </div>
 
+      {sendError ? (
+        <p className="rounded-xl bg-redflag/10 px-4 py-2 text-xs text-redflag" role="alert">
+          That message didn&apos;t send. Check your connection and try again.
+        </p>
+      ) : null}
+
       <form
         onSubmit={send}
         className="sticky bottom-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center gap-2 bg-grain/0 py-2"
@@ -150,6 +161,7 @@ export function Chat({
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          maxLength={MAX_MESSAGE_LENGTH}
           placeholder={`Message ${otherName}…`}
           className="h-12 flex-1 rounded-2xl border border-ink/10 bg-paper px-4 text-[0.95rem] text-ink outline-none placeholder:text-ink-soft/60 focus:border-brand/40"
         />

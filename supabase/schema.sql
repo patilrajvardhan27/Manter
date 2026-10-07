@@ -153,8 +153,12 @@ create policy "matches: participants read" on matches
   for select using (auth.uid() = seeker_id or auth.uid() = target_id);
 create policy "matches: seeker creates" on matches
   for insert with check (auth.uid() = seeker_id);
-create policy "matches: participants update" on matches
-  for update using (auth.uid() = seeker_id or auth.uid() = target_id);
+-- No update policy: a participant must never be able to repoint a match (and
+-- its messages) at someone else. Introductions open matches through a
+-- security-definer trigger.
+revoke all on matches from anon, authenticated;
+grant select, delete on matches to authenticated;
+grant insert (seeker_id, target_id) on matches to authenticated;
 -- Whoever initiated may unmatch; deleting cascades to the thread's messages.
 create policy "matches: seeker deletes" on matches
   for delete using (auth.uid() = seeker_id);
@@ -177,7 +181,7 @@ create table messages (
   id         uuid primary key default gen_random_uuid(),
   match_id   uuid not null references matches(id) on delete cascade,
   sender_id  uuid not null references profiles(id) on delete cascade,
-  body       text not null,
+  body       text not null check (char_length(btrim(body)) between 1 and 2000),
   -- set by the FastAPI service (service role) once /scan has run on this
   -- message, so re-fetches don't re-bill the model API for the same message.
   scanned    boolean not null default false,
@@ -200,6 +204,19 @@ create policy "messages: participant sends own" on messages
       where m.id = match_id and (auth.uid() = m.seeker_id or auth.uid() = m.target_id)
     )
   );
+-- A sender supplies only the match, themselves, and the text; never scanned,
+-- created_at or id. Messages are immutable (no update or delete).
+revoke all on messages from anon, authenticated;
+grant select on messages to authenticated;
+grant insert (match_id, sender_id, body) on messages to authenticated;
+
+-- Live chat: stream new messages to the two participants (RLS still applies).
+do $$
+begin
+  alter publication supabase_realtime add table messages;
+exception
+  when duplicate_object then null;  -- already added
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- red_flags : written by FastAPI (service role). Visible to whoever received

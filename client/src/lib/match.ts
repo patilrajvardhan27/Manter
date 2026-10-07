@@ -117,6 +117,8 @@ export async function getProfileView(profileId: string): Promise<ProfileView | n
   };
 }
 
+const SCORE_BATCH = 40; // profiles per character_scores request (40 x 23 rows < 1,000)
+
 /** Profiles ranked by compatibility for the given viewer, filtered by mutual interest. */
 export async function getDiscovery(viewerId: string): Promise<DiscoverProfile[]> {
   const supabase = await createClient();
@@ -151,16 +153,23 @@ export async function getDiscovery(viewerId: string): Promise<DiscoverProfile[]>
     mutuallyInterested(viewer.gender, viewerInterestedIn, c.gender, (c.interested_in as Gender[] | null) ?? []),
   );
 
+  // Supabase returns at most 1,000 rows per request and each profile has 23
+  // score rows, so read the scores in batches of profiles.
   const candidateIds = eligible.map((c) => c.id);
-  const { data: quizRows } = await supabase
-    .from("character_scores")
-    .select("profile_id, quality_key, score")
-    .in("profile_id", candidateIds.length ? candidateIds : ["00000000-0000-0000-0000-000000000000"]);
+  const batches: string[][] = [];
+  for (let i = 0; i < candidateIds.length; i += SCORE_BATCH) batches.push(candidateIds.slice(i, i + SCORE_BATCH));
+  const scoreResults = await Promise.all(
+    batches.map((ids) =>
+      supabase.from("character_scores").select("profile_id, quality_key, score").in("profile_id", ids),
+    ),
+  );
 
   const quizByProfile: Record<string, Record<string, number>> = {};
-  (quizRows ?? []).forEach((r) => {
-    (quizByProfile[r.profile_id] ??= {})[r.quality_key] = Number(r.score);
-  });
+  scoreResults.forEach(({ data }) =>
+    (data ?? []).forEach((r) => {
+      (quizByProfile[r.profile_id] ??= {})[r.quality_key] = Number(r.score);
+    }),
+  );
 
   // Sign every candidate's photos in a single batch.
   const allPaths = eligible.flatMap((c) => (c.photos as string[] | null) ?? []);

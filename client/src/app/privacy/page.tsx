@@ -26,12 +26,6 @@ export default function PrivacyPage() {
             users, stored to provide the chat feature.
           </li>
           <li>
-            <strong className="font-medium text-ink">Matchmaker interview</strong>: the text of your
-            optional voice interview, plus what it showed (per-quality scores, what you want in a partner,
-            dealbreakers, and private notes). Only you can read the transcript and notes. Other users see
-            only the character scores it feeds into. You can delete it any time from the interview screen.
-          </li>
-          <li>
             <strong className="font-medium text-ink">Introductions</strong>: who you were introduced to,
             your answer, and whether you&apos;d meet them again. Your answer is never shown to the other
             person unless you both say yes.
@@ -47,25 +41,17 @@ export default function PrivacyPage() {
           <li>Score behavioral quiz answers against the 23 character qualities.</li>
           <li>Scan incoming chat messages for red-flag language patterns (e.g. controlling
             or manipulative phrasing) and surface that to the recipient.</li>
-          <li>Run the matchmaker interview: choose each question, then turn your answers into
-            scores, priorities, and dealbreakers.</li>
         </ul>
-        <p>
-          Voice interview audio never reaches our servers. Your browser converts speech to text and
-          sends us only the text. Depending on your browser, its maker may process that audio to do
-          the conversion (Google for Chrome, Apple for Safari). If you&apos;d rather avoid that, type
-          your answers instead.
-        </p>
         <p>
           Introductions are chosen by an algorithm, not a person. It compares both people&apos;s
           character scores against both people&apos;s priorities and learns from how you respond to
           introductions. No model call is involved in picking who you meet.
         </p>
         <p>
-          Quiz answers, interview answers, and message content are sent to Anthropic&apos;s API for this
+          Quiz answers and message content are sent to Anthropic&apos;s API for this
           processing. Anthropic does not use this data to train its models under our
-          API agreement. We don&apos;t use AI processing for anything beyond scoring,
-          red-flag detection, and the matchmaker interview.
+          API agreement. We don&apos;t use AI processing for anything beyond scoring
+          and red-flag detection.
         </p>
       </StaticSection>
 
@@ -73,7 +59,7 @@ export default function PrivacyPage() {
         <p>We don&apos;t sell your data. We use a small number of infrastructure providers to run the app:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li><strong className="font-medium text-ink">Supabase</strong>: database, authentication, and photo storage.</li>
-          <li><strong className="font-medium text-ink">Anthropic</strong>: AI scoring, red-flag detection, and the matchmaker interview (see above).</li>
+          <li><strong className="font-medium text-ink">Anthropic</strong>: AI scoring and red-flag detection (see above).</li>
           <li><strong className="font-medium text-ink">Vercel</strong> and <strong className="font-medium text-ink">Render</strong>: application hosting.</li>
         </ul>
         <p>Each of these providers processes data only as needed to provide their service to us.</p>

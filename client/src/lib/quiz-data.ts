@@ -43,14 +43,14 @@ export interface QualityScore {
 }
 
 /**
- * A profile's per-quality character score (1–5): the quiz score blended with
- * voice interview evidence, ordered by the canonical 23-quality order.
+ * A profile's per-quality character score (1–5), weighted by how much quiz
+ * evidence backs it, ordered by the canonical 23-quality order.
  * Unknown keys are skipped. `reason` is a short explanation of what drove
  * that score.
  */
 export async function getMyScores(profileId: string): Promise<QualityScore[]> {
   const supabase = await createClient();
-  // Fused quiz + voice score (see supabase/migrations/0015_voice_interview.sql).
+  // Evidence-weighted quiz score (the character_scores view).
   const { data } = await supabase
     .from("character_scores")
     .select("quality_key, score, reason")

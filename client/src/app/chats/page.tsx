@@ -27,8 +27,8 @@ export default async function ChatsPage() {
             <MessagesSquare size={30} className="mx-auto text-brand/70" strokeWidth={1.8} />
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
               No conversations yet.{" "}
-              <Link href="/intro" className="font-medium text-brand underline-offset-4 hover:underline">
-                Chats open when you and an introduction both say yes.
+              <Link href="/discover" className="font-medium text-brand underline-offset-4 hover:underline">
+                Find someone in Discover.
               </Link>
             </p>
           </div>

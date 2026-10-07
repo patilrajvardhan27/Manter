@@ -1,8 +1,7 @@
 """The 23 character qualities, mirrored from client/src/lib/constants/qualities.ts.
 
-The client's blurbs are written for one audience ("her"); the interviewer and
-the extractor need neutral, behavior-level descriptions instead, so those live
-here. tests/test_qualities_sync.py fails if the keys drift from the client.
+The client's blurbs are written for one audience ("her"); the server uses
+neutral, behavior-level descriptions instead, so those live here. tests/test_qualities_sync.py fails if the keys drift from the client.
 """
 
 QUALITIES: dict[str, str] = {
@@ -35,8 +34,7 @@ KEYS: list[str] = list(QUALITIES)
 KEY_INDEX: dict[str, int] = {k: i for i, k in enumerate(KEYS)}
 
 # Qualities the 14-scenario quiz actually measures (from situational-quiz.ts).
-# The other 14 sit at the neutral prior until the voice interview adds evidence,
-# so the interviewer targets those first.
+# The other 14 sit at the neutral prior.
 QUIZ_COVERED: frozenset[str] = frozenset(
     {
         "takes_her_side",

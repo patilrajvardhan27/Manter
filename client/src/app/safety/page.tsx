@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, ShieldAlert, BadgeCheck, ImageOff, MessageCircleHeart, Phone } from "lucide-react";
+import { ArrowRight, Award, ShieldAlert, BadgeCheck, ImageOff, MessageCircleHeart, Phone } from "lucide-react";
 import { StaticPage, StaticSection } from "@/components/StaticPage";
 
 export default function SafetyPage() {
@@ -75,6 +75,21 @@ export default function SafetyPage() {
           <li>Keep your phone charged and accessible.</li>
           <li>Trust your instincts. It&apos;s always okay to leave.</li>
         </ul>
+      </StaticSection>
+
+      <StaticSection title="Real cases, real lessons">
+        <p>
+          Online dating has been the starting point for fraud and for violent crime. We&apos;ve
+          collected a few court-decided cases, with what each one teaches, so the warning signs are
+          familiar before you need them.
+        </p>
+        <Link
+          href="/safety/cases"
+          className="flex items-center justify-between rounded-[var(--radius-card)] border border-brand/15 bg-paper/30 p-5 font-display text-base font-medium text-ink transition hover:border-brand/30 active:scale-[0.99]"
+        >
+          Read the cases
+          <ArrowRight size={18} strokeWidth={2.2} className="shrink-0 text-brand" />
+        </Link>
       </StaticSection>
 
       <StaticSection title="Something feel wrong?">
