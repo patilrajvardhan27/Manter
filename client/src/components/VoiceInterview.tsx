@@ -342,7 +342,7 @@ export function VoiceInterview({
               type="checkbox"
               checked={speakAloud}
               onChange={(e) => setSpeakAloud(e.target.checked)}
-              className="h-4 w-4 accent-[var(--color-plum)]"
+              className="h-4 w-4 accent-[var(--color-brand)]"
             />
             Read questions aloud
           </label>
@@ -452,13 +452,13 @@ export function VoiceInterview({
           ),
         )}
         {phase === "listening" && heard ? (
-          <p className="border-l-2 border-plum/40 pl-3 text-[0.95rem] leading-relaxed text-ink">{heard}</p>
+          <p className="border-l-2 border-brand/40 pl-3 text-[0.95rem] leading-relaxed text-ink">{heard}</p>
         ) : null}
         <div ref={bottom} />
       </div>
 
       <div className="sticky bottom-0 mt-6 space-y-3 bg-cream pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-        <p className="text-sm font-medium text-plum" role="status">
+        <p className="text-sm font-medium text-brand" role="status">
           {status[phase]}
         </p>
 
@@ -473,7 +473,7 @@ export function VoiceInterview({
               maxLength={1500}
               placeholder="Your answer"
               autoFocus
-              className="w-full resize-none rounded-lg border border-ink/15 bg-paper/40 px-3 py-2.5 text-[0.95rem] text-ink outline-none focus:border-plum"
+              className="w-full resize-none rounded-lg border border-ink/15 bg-paper/40 px-3 py-2.5 text-[0.95rem] text-ink outline-none focus:border-brand"
             />
             <div className="flex gap-2">
               <PrimaryButton type="submit" disabled={!draft.trim()}>
@@ -518,7 +518,7 @@ function PrimaryButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...props}
-      className="flex h-12 w-full items-center justify-center rounded-lg bg-plum px-4 text-[0.95rem] font-semibold text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum disabled:opacity-40"
+      className="flex h-12 w-full items-center justify-center rounded-lg bg-brand px-4 text-[0.95rem] font-semibold text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-40"
     />
   );
 }
@@ -528,7 +528,7 @@ function SecondaryButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     <button
       type="button"
       {...props}
-      className="flex h-12 w-full items-center justify-center rounded-lg border border-ink/15 px-4 text-[0.95rem] font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum disabled:opacity-40"
+      className="flex h-12 w-full items-center justify-center rounded-lg border border-ink/15 px-4 text-[0.95rem] font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-40"
     />
   );
 }

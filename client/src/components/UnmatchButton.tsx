@@ -34,7 +34,7 @@ export function UnmatchButton({ matchId, otherName }: { matchId: string; otherNa
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-plum/10 text-plum">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                 <UserMinus size={20} strokeWidth={2} />
               </span>
               <div className="min-w-0 flex-1">
@@ -62,7 +62,7 @@ export function UnmatchButton({ matchId, otherName }: { matchId: string; otherNa
                 type="button"
                 onClick={() => setConfirming(false)}
                 disabled={pending}
-                className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-plum/20 text-sm font-semibold text-plum-deep transition active:scale-[0.98] disabled:opacity-50"
+                className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-brand/20 text-sm font-semibold text-brand-deep transition active:scale-[0.98] disabled:opacity-50"
               >
                 Cancel
               </button>

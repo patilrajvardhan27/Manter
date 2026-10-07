@@ -20,7 +20,7 @@ export function AuthShell({
       <header className="rise" style={{ animationDelay: "0ms" }}>
         <Link
           href="/"
-          className="font-display text-xl font-semibold tracking-tight text-plum-deep"
+          className="font-display text-xl font-semibold tracking-tight text-brand-deep"
         >
           Charms
         </Link>
@@ -29,7 +29,7 @@ export function AuthShell({
       <div className="flex flex-1 flex-col justify-center py-10">
         {eyebrow ? (
           <p
-            className="rise text-xs font-semibold uppercase tracking-wider text-plum"
+            className="rise text-xs font-semibold uppercase tracking-wider text-brand"
             style={{ animationDelay: "60ms" }}
           >
             {eyebrow}

@@ -38,7 +38,7 @@ export function IntroCard({ intro, hoursLeft }: { intro: Intro; hoursLeft: numbe
         // eslint-disable-next-line @next/next/no-img-element
         <img src={intro.other.photo} alt={name} className="aspect-[4/5] w-full object-cover" />
       ) : (
-        <div className="flex aspect-[4/5] w-full items-center justify-center bg-plum/10 font-display text-6xl text-plum">
+        <div className="flex aspect-[4/5] w-full items-center justify-center bg-brand/10 font-display text-6xl text-brand">
           {name.charAt(0)}
         </div>
       )}
@@ -66,7 +66,7 @@ export function IntroCard({ intro, hoursLeft }: { intro: Intro; hoursLeft: numbe
           <p className="text-[0.95rem] text-ink-soft">{intro.score} out of 100 for both of you.</p>
         )}
 
-        <Link href={`/profile/${intro.other.id}`} className="inline-block text-sm font-medium text-plum underline underline-offset-4">
+        <Link href={`/profile/${intro.other.id}`} className="inline-block text-sm font-medium text-brand underline underline-offset-4">
           See {name}&apos;s full profile and answers
         </Link>
 
@@ -75,7 +75,7 @@ export function IntroCard({ intro, hoursLeft }: { intro: Intro; hoursLeft: numbe
             <p className="text-[0.95rem] text-ink">It&apos;s mutual. Your chat with {name} is open.</p>
             <Link
               href={`/chats/${matchId}`}
-              className="flex h-12 w-full items-center justify-center rounded-lg bg-plum text-[0.95rem] font-semibold text-cream"
+              className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-[0.95rem] font-semibold text-cream"
             >
               Open chat
             </Link>
@@ -100,14 +100,14 @@ export function IntroCard({ intro, hoursLeft }: { intro: Intro; hoursLeft: numbe
               <button
                 onClick={() => answer("interested")}
                 disabled={pending}
-                className="flex h-12 flex-1 items-center justify-center rounded-lg bg-plum text-[0.95rem] font-semibold text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum disabled:opacity-50"
+                className="flex h-12 flex-1 items-center justify-center rounded-lg bg-brand text-[0.95rem] font-semibold text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50"
               >
                 I&apos;m interested
               </button>
               <button
                 onClick={() => answer("pass")}
                 disabled={pending}
-                className="flex h-12 flex-1 items-center justify-center rounded-lg border border-ink/15 text-[0.95rem] font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum disabled:opacity-50"
+                className="flex h-12 flex-1 items-center justify-center rounded-lg border border-ink/15 text-[0.95rem] font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50"
               >
                 Pass
               </button>
@@ -146,7 +146,7 @@ export function PastIntro({ intro }: { intro: Intro }) {
       {intro.status === "matched" ? (
         <>
           {intro.matchId ? (
-            <Link href={`/chats/${intro.matchId}`} className="text-sm text-plum underline underline-offset-4">
+            <Link href={`/chats/${intro.matchId}`} className="text-sm text-brand underline underline-offset-4">
               Matched. Open chat
             </Link>
           ) : (

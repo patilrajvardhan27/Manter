@@ -115,7 +115,7 @@ export function ProfileForm({ gender, interestedIn }: { gender: Gender; interest
         </Field>
 
         <div className="border-t border-ink/[0.06] pt-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-plum">
+          <p className="text-xs font-semibold uppercase tracking-wider text-brand">
             About you <span className="font-normal normal-case text-ink-soft/70">· optional</span>
           </p>
           <p className="mt-1 mb-4 text-xs text-ink-soft/80">

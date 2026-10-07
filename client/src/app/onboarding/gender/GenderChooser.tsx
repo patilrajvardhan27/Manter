@@ -10,7 +10,7 @@ const GENDERS: { value: Gender; title: string; body: string; accent: string }[] 
     value: "female",
     title: "Female",
     body: "Set what character qualities matter to you, see explained matches, and use the safety suite.",
-    accent: "var(--color-plum)",
+    accent: "var(--color-brand)",
   },
   {
     value: "male",
@@ -92,7 +92,7 @@ export function GenderChooser() {
               aria-pressed={active}
               className={`w-full rounded-2xl border px-5 py-4 text-left text-base font-medium transition active:scale-[0.99] ${
                 active
-                  ? "border-plum bg-plum text-cream shadow-[var(--shadow-soft)]"
+                  ? "border-brand bg-brand text-cream shadow-[var(--shadow-soft)]"
                   : "border-ink/10 bg-paper/60 text-ink"
               }`}
             >
@@ -105,13 +105,13 @@ export function GenderChooser() {
       <div className="mt-6 flex items-center gap-3">
         <button
           onClick={() => setGender(null)}
-          className="flex h-14 items-center justify-center rounded-2xl border border-plum/20 px-5 text-base font-medium text-plum-deep transition active:scale-[0.98]"
+          className="flex h-14 items-center justify-center rounded-2xl border border-brand/20 px-5 text-base font-medium text-brand-deep transition active:scale-[0.98]"
         >
           Back
         </button>
         <button
           onClick={continueToProfile}
-          className="flex h-14 flex-1 items-center justify-center rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98]"
+          className="flex h-14 flex-1 items-center justify-center rounded-2xl bg-brand text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-brand-deep active:scale-[0.98]"
         >
           Continue
         </button>

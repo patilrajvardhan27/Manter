@@ -44,7 +44,7 @@ export default function AboutPage() {
         <div className="space-y-4">
           <Feature
             Icon={Award}
-            color="var(--color-plum)"
+            color="var(--color-brand)"
             title="Character score, not a swipe deck"
             body="Matches are ranked by how well someone scores on the qualities she actually cares about."
           />
@@ -68,11 +68,11 @@ export default function AboutPage() {
           Charms doesn&apos;t sell your data, and it doesn&apos;t run on ads.
           Our incentive is simple: help you find someone genuinely good, and
           keep you safe while you look. Read more in our{" "}
-          <Link href="/safety" className="font-medium text-plum underline-offset-4 hover:underline">
+          <Link href="/safety" className="font-medium text-brand underline-offset-4 hover:underline">
             Safety Center
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="font-medium text-plum underline-offset-4 hover:underline">
+          <Link href="/privacy" className="font-medium text-brand underline-offset-4 hover:underline">
             Privacy Policy
           </Link>
           .
@@ -81,7 +81,7 @@ export default function AboutPage() {
 
       <Link
         href="/register"
-        className="group mt-2 flex h-14 items-center justify-center gap-2 rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98]"
+        className="group mt-2 flex h-14 items-center justify-center gap-2 rounded-2xl bg-brand text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-brand-deep active:scale-[0.98]"
       >
         Create your account
         <ArrowRight size={18} strokeWidth={2.4} className="transition group-hover:translate-x-0.5" />

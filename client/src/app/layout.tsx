@@ -1,17 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Hanken_Grotesk } from "next/font/google";
+import { DM_Sans, Gloock, Yellowtail } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const gloock = Gloock({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  weight: "400",
+  variable: "--font-gloock",
   display: "swap",
-  axes: ["opsz", "SOFT"],
 });
 
-const hanken = Hanken_Grotesk({
+const yellowtail = Yellowtail({
   subsets: ["latin"],
-  variable: "--font-hanken",
+  weight: "400",
+  variable: "--font-yellowtail",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dmsans",
   display: "swap",
 });
 
@@ -24,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#7A2E55",
+  themeColor: "#FFC61A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -35,7 +42,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${hanken.variable}`}>
+    <html lang="en" className={`${gloock.variable} ${yellowtail.variable} ${dmSans.variable}`}>
       <body className="bg-grain min-h-dvh">{children}</body>
     </html>
   );

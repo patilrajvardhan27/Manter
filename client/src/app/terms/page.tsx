@@ -53,7 +53,7 @@ export default function TermsPage() {
           submit. By posting them, you grant Charms a license to store and display them
           as needed to operate the service (e.g. showing your profile to matches,
           processing quiz answers and messages for scoring as described in our{" "}
-          <a href="/privacy" className="font-medium text-plum underline-offset-4 hover:underline">Privacy Policy</a>).
+          <a href="/privacy" className="font-medium text-brand underline-offset-4 hover:underline">Privacy Policy</a>).
         </p>
       </StaticSection>
 
@@ -85,7 +85,7 @@ export default function TermsPage() {
       <StaticSection title="9. Contact">
         <p>
           Questions about these terms? Email{" "}
-          <a href="mailto:support@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+          <a href="mailto:support@charms.app" className="font-medium text-brand underline-offset-4 hover:underline">
             support@charms.app
           </a>
           .

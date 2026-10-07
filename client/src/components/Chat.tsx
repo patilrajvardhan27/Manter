@@ -114,7 +114,7 @@ export function Chat({
             <div key={m.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed shadow-[var(--shadow-soft)] ${
-                  mine ? "bg-plum text-cream" : "bg-paper text-ink"
+                  mine ? "bg-brand text-cream" : "bg-paper text-ink"
                 }`}
               >
                 {m.body}
@@ -151,12 +151,12 @@ export function Chat({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder={`Message ${otherName}…`}
-          className="h-12 flex-1 rounded-2xl border border-ink/10 bg-paper px-4 text-[0.95rem] text-ink outline-none placeholder:text-ink-soft/60 focus:border-plum/40"
+          className="h-12 flex-1 rounded-2xl border border-ink/10 bg-paper px-4 text-[0.95rem] text-ink outline-none placeholder:text-ink-soft/60 focus:border-brand/40"
         />
         <button
           type="submit"
           disabled={sending || !draft.trim()}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-plum text-cream shadow-[var(--shadow-soft)] transition active:scale-90 disabled:opacity-40"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand text-cream shadow-[var(--shadow-soft)] transition active:scale-90 disabled:opacity-40"
           aria-label="Send"
         >
           <ArrowUp size={20} strokeWidth={2.6} />

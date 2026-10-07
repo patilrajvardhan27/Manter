@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
 const inputBase =
-  "w-full rounded-2xl border border-ink/10 bg-cream px-4 py-3.5 text-base text-ink placeholder:text-ink-soft/50 outline-none transition focus:border-plum/50 focus:ring-2 focus:ring-plum/15";
+  "w-full rounded-2xl border border-ink/10 bg-cream px-4 py-3.5 text-base text-ink placeholder:text-ink-soft/50 outline-none transition focus:border-brand/50 focus:ring-2 focus:ring-brand/15";
 
 export function Field({
   label,

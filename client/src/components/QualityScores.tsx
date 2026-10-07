@@ -35,7 +35,7 @@ export function QualityScoreBreakdown({ scores }: { scores: QualityScore[] }) {
                   <span className="w-36 shrink-0 text-[0.85rem] leading-tight text-ink">
                     {s.label}
                   </span>
-                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-plum/10">
+                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-brand/10">
                     <span
                       className="bar-fill block h-full rounded-full"
                       style={{

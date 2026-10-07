@@ -23,11 +23,11 @@ export interface Quality {
 }
 
 export const QUALITY_GROUPS: Record<QualityGroup, { label: string; color: string }> = {
-  respect: { label: "Respect & Autonomy", color: "var(--color-plum)" },
+  respect: { label: "Respect & Autonomy", color: "var(--color-brand)" },
   "emotional-maturity": { label: "Emotional Maturity", color: "var(--color-clay)" },
   safety: { label: "Safety & Comfort", color: "var(--color-sage)" },
   partnership: { label: "Partnership", color: "var(--color-gold)" },
-  character: { label: "Character", color: "var(--color-plum-deep)" },
+  character: { label: "Character", color: "var(--color-brand-deep)" },
 };
 
 export const QUALITIES: Quality[] = [

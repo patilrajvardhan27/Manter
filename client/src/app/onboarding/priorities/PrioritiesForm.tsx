@@ -128,7 +128,7 @@ export function PrioritiesForm({ initial = {} }: { initial?: Record<string, numb
           type="button"
           onClick={finish}
           disabled={pending}
-          className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-plum px-6 py-3.5 text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition active:scale-[0.99] disabled:opacity-50"
+          className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition active:scale-[0.99] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Finish setup"}
         </button>

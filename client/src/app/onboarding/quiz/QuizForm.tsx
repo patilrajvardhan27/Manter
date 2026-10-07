@@ -48,7 +48,7 @@ export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
       <div className="space-y-5">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper">
           <div
-            className="h-full rounded-full bg-plum transition-all"
+            className="h-full rounded-full bg-brand transition-all"
             style={{ width: `${(answeredCount / total) * 100}%` }}
           />
         </div>
@@ -66,7 +66,7 @@ export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
                 aria-pressed={active}
                 className={`w-full rounded-2xl border px-4 py-3.5 text-left text-[0.95rem] font-medium transition active:scale-[0.99] ${
                   active
-                    ? "border-plum bg-plum text-cream shadow-[var(--shadow-soft)]"
+                    ? "border-brand bg-brand text-cream shadow-[var(--shadow-soft)]"
                     : "border-ink/10 bg-paper/60 text-ink"
                 }`}
               >
@@ -81,7 +81,7 @@ export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
             <button
               onClick={() => setStep((s) => s - 1)}
               disabled={pending}
-              className="flex h-14 items-center justify-center rounded-2xl border border-plum/20 px-5 text-base font-medium text-plum-deep transition active:scale-[0.98] disabled:opacity-40"
+              className="flex h-14 items-center justify-center rounded-2xl border border-brand/20 px-5 text-base font-medium text-brand-deep transition active:scale-[0.98] disabled:opacity-40"
             >
               Back
             </button>
@@ -89,7 +89,7 @@ export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
           <button
             onClick={next}
             disabled={!selected || pending}
-            className="flex h-14 flex-1 items-center justify-center rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98] disabled:opacity-50"
+            className="flex h-14 flex-1 items-center justify-center rounded-2xl bg-brand text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-brand-deep active:scale-[0.98] disabled:opacity-50"
           >
             {pending ? "Scoring your answers…" : isLast ? "Next: set your priorities" : "Next"}
           </button>

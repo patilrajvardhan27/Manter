@@ -11,7 +11,7 @@ export default function SafetyPage() {
     >
       <StaticSection title="The character score">
         <p className="flex gap-3">
-          <IconBadge Icon={Award} color="var(--color-plum)" />
+          <IconBadge Icon={Award} color="var(--color-brand)" />
           <span>
             Every man answers a behavioral quiz in his own words: situational
             questions, not multiple choice. Those answers are scored by AI
@@ -83,7 +83,7 @@ export default function SafetyPage() {
           <span>
             If a conversation crosses a line or someone&apos;s behavior worries
             you, reach out to{" "}
-            <a href="mailto:safety@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+            <a href="mailto:safety@charms.app" className="font-medium text-brand underline-offset-4 hover:underline">
               safety@charms.app
             </a>.
             Every report is reviewed.
@@ -100,11 +100,11 @@ export default function SafetyPage() {
 
       <p className="text-sm">
         Read more in our{" "}
-        <Link href="/privacy" className="font-medium text-plum underline-offset-4 hover:underline">
+        <Link href="/privacy" className="font-medium text-brand underline-offset-4 hover:underline">
           Privacy Policy
         </Link>{" "}
         and{" "}
-        <Link href="/terms" className="font-medium text-plum underline-offset-4 hover:underline">
+        <Link href="/terms" className="font-medium text-brand underline-offset-4 hover:underline">
           Terms of Service
         </Link>
         .

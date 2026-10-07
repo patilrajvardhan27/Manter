@@ -30,7 +30,7 @@ export default async function VoicePage({
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pt-[max(2rem,env(safe-area-inset-top))]">
       <header>
-        <Link href="/" className="font-display text-xl font-semibold tracking-tight text-plum-deep">
+        <Link href="/" className="font-display text-xl font-semibold tracking-tight text-brand-deep">
           Charms
         </Link>
       </header>

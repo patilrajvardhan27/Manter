@@ -6,12 +6,12 @@ export default function Landing() {
     <main className="mx-auto flex h-dvh max-w-[480px] flex-col overflow-hidden px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))]">
       {/* nav */}
       <header className="flex items-center justify-between rise" style={{ animationDelay: "0ms" }}>
-        <span className="font-display text-xl font-semibold tracking-tight text-plum-deep">
+        <span className="font-display text-xl font-semibold tracking-tight text-brand-deep">
           Charms
         </span>
         <Link
           href="/login"
-          className="text-sm font-medium text-ink-soft underline-offset-4 hover:text-plum"
+          className="text-sm font-medium text-ink-soft underline-offset-4 hover:text-brand"
         >
           Sign in
         </Link>
@@ -20,14 +20,17 @@ export default function Landing() {
       {/* hero */}
       <section className="flex flex-1 flex-col justify-center">
         <h1
-          className="rise font-display text-[2.1rem] font-light leading-[1.1] tracking-tight text-ink"
+          className="rise font-display text-[2.6rem] leading-[1.1] tracking-tight text-ink"
           style={{ animationDelay: "60ms" }}
         >
           Date by{" "}
-          <em className="font-medium not-italic text-plum">character</em>,
+          <span className="hl not-italic">character</span>,
           <br />
           not by photos.
         </h1>
+        <p className="rise font-script mt-1 text-2xl text-brand" style={{ animationDelay: "90ms" }}>
+          ten minutes, one honest introduction.
+        </p>
 
         <p
           className="rise mt-3 text-[0.95rem] leading-relaxed text-ink-soft"
@@ -41,7 +44,7 @@ export default function Landing() {
         <div className="rise mt-5" style={{ animationDelay: "180ms" }}>
           <Link
             href="/register"
-            className="group flex h-12 items-center justify-center gap-2 rounded-2xl bg-plum text-base font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98]"
+            className="group flex h-12 items-center justify-center gap-2 rounded-full border border-ink bg-sun text-base font-semibold text-ink shadow-[var(--shadow-soft)] transition hover:bg-sun-deep active:scale-[0.98]"
           >
             Create your account
             <ArrowRight size={18} strokeWidth={2.4} className="transition group-hover:translate-x-0.5" />
@@ -52,16 +55,16 @@ export default function Landing() {
       <footer className="mt-4 border-t border-ink/10 pt-3 text-[0.7rem] text-ink-soft">
         <p>Charms. Pro good people, anti bad ones. Your data stays yours.</p>
         <nav className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
-          <Link href="/about" className="underline-offset-4 hover:text-plum hover:underline">
+          <Link href="/about" className="underline-offset-4 hover:text-brand hover:underline">
             About
           </Link>
-          <Link href="/safety" className="underline-offset-4 hover:text-plum hover:underline">
+          <Link href="/safety" className="underline-offset-4 hover:text-brand hover:underline">
             Safety Center
           </Link>
-          <Link href="/privacy" className="underline-offset-4 hover:text-plum hover:underline">
+          <Link href="/privacy" className="underline-offset-4 hover:text-brand hover:underline">
             Privacy Policy
           </Link>
-          <Link href="/terms" className="underline-offset-4 hover:text-plum hover:underline">
+          <Link href="/terms" className="underline-offset-4 hover:text-brand hover:underline">
             Terms of Service
           </Link>
         </nav>

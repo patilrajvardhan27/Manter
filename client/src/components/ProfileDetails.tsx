@@ -32,7 +32,7 @@ export function ProfileDetails({ details }: { details: ProfileDetailFields }) {
 
   return (
     <section className="card-hover rounded-[var(--radius-card)] bg-paper/70 p-5 shadow-[var(--shadow-soft)]">
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-plum">Details</h2>
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-brand">Details</h2>
 
       {rows.length ? (
         <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
@@ -57,7 +57,7 @@ export function ProfileDetails({ details }: { details: ProfileDetailFields }) {
             {details.interests.map((it, i) => (
               <span
                 key={it}
-                className="pop-in rounded-full bg-plum/10 px-2.5 py-1 text-[0.72rem] font-medium text-plum transition hover:scale-[1.05]"
+                className="pop-in rounded-full bg-brand/10 px-2.5 py-1 text-[0.72rem] font-medium text-brand transition hover:scale-[1.05]"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
                 {it}

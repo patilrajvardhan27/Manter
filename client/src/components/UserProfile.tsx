@@ -58,12 +58,12 @@ export function UserProfile({
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-5 pb-28 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between rise" style={{ animationDelay: "0ms" }}>
-        <span className="font-display text-2xl font-semibold tracking-tight text-plum-deep">Charms</span>
+        <span className="font-display text-2xl font-semibold tracking-tight text-brand-deep">Charms</span>
         <div className="flex items-center gap-1">
           <Link
             href="/profile/edit"
             aria-label="Edit profile"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-plum"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-brand"
           >
             <Pencil size={17} strokeWidth={2} />
           </Link>
@@ -71,7 +71,7 @@ export function UserProfile({
             <button
               type="submit"
               aria-label="Sign out"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-plum"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-brand"
             >
               <LogOut size={18} strokeWidth={2} />
             </button>
@@ -82,7 +82,7 @@ export function UserProfile({
       {/* Hero */}
       <section className="mt-6 rise" style={{ animationDelay: "80ms" }}>
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-plum/10 font-display text-2xl font-semibold text-plum">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand/10 font-display text-2xl font-semibold text-brand">
             {profile.display_name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
@@ -101,7 +101,7 @@ export function UserProfile({
 
       <Link
         href="/onboarding/voice?from=home"
-        className="mt-4 block rounded-lg border border-ink/10 px-4 py-3 text-sm text-ink focus-visible:outline-2 focus-visible:outline-plum"
+        className="mt-4 block rounded-lg border border-ink/10 px-4 py-3 text-sm text-ink focus-visible:outline-2 focus-visible:outline-brand"
       >
         {interviewed
           ? "Retake your matchmaker interview. It replaces what the last one showed."
@@ -119,7 +119,7 @@ export function UserProfile({
               type="button"
               onClick={() => setTab(t.id)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-xs font-semibold transition-colors ${
-                active ? "bg-plum text-cream shadow-[var(--shadow-soft)]" : "text-ink-soft"
+                active ? "bg-brand text-cream shadow-[var(--shadow-soft)]" : "text-ink-soft"
               }`}
             >
               <Icon size={15} strokeWidth={2.2} />
@@ -169,7 +169,7 @@ function ProfilePanel({
 
       {profile.bio ? (
         <Card hover>
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-plum">About</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-brand">About</h2>
           <p className="mt-2 text-[0.95rem] leading-relaxed text-ink">{profile.bio}</p>
         </Card>
       ) : null}
@@ -186,7 +186,7 @@ function ProfilePanel({
 
       <Link
         href="/discover"
-        className="group flex items-center justify-between rounded-[var(--radius-card)] border border-plum/15 bg-paper/30 p-5 transition hover:border-plum/30 active:scale-[0.99]"
+        className="group flex items-center justify-between rounded-[var(--radius-card)] border border-brand/15 bg-paper/30 p-5 transition hover:border-brand/30 active:scale-[0.99]"
       >
         <span>
           <span className="block font-display text-base font-medium text-ink">Discover your matches</span>
@@ -194,18 +194,18 @@ function ProfilePanel({
             People ranked by the qualities that matter to you.
           </span>
         </span>
-        <Compass size={20} strokeWidth={2} className="shrink-0 text-plum" />
+        <Compass size={20} strokeWidth={2} className="shrink-0 text-brand" />
       </Link>
 
       <Link
         href="/chats"
-        className="group flex items-center justify-between rounded-[var(--radius-card)] border border-plum/15 bg-paper/30 p-5 transition hover:border-plum/30 active:scale-[0.99]"
+        className="group flex items-center justify-between rounded-[var(--radius-card)] border border-brand/15 bg-paper/30 p-5 transition hover:border-brand/30 active:scale-[0.99]"
       >
         <span>
           <span className="block font-display text-base font-medium text-ink">Your conversations</span>
           <span className="mt-0.5 block text-[0.85rem] text-ink-soft">When you match, it lands here.</span>
         </span>
-        <MessageCircle size={20} strokeWidth={2} className="shrink-0 text-plum" />
+        <MessageCircle size={20} strokeWidth={2} className="shrink-0 text-brand" />
       </Link>
     </div>
   );
@@ -221,9 +221,9 @@ function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
     <div className="space-y-3">
       {answers.map((a, i) => (
         <Card key={a.questionId} hover>
-          <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-plum">Question {i + 1}</p>
+          <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-brand">Question {i + 1}</p>
           <p className="mt-1.5 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
-          <p className="mt-2.5 border-l-2 border-plum/25 pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
+          <p className="mt-2.5 border-l-2 border-brand/25 pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
             {a.answer}
           </p>
         </Card>
@@ -376,7 +376,7 @@ function PrioritiesPanel({ weights }: { weights: QualityWeight[] }) {
         type="button"
         onClick={onSave}
         disabled={pending || (!dirty && !justSaved)}
-        className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-plum px-6 py-3 text-sm font-semibold text-cream shadow-[var(--shadow-soft)] transition active:scale-[0.99] disabled:opacity-50"
+        className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream shadow-[var(--shadow-soft)] transition active:scale-[0.99] disabled:opacity-50"
       >
         {pending ? (
           "Saving…"
@@ -399,7 +399,7 @@ function PhotoStrip({ photos }: { photos: string[] }) {
     return (
       <Link
         href="/profile/edit"
-        className="flex items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-dashed border-plum/25 bg-paper/30 px-4 py-6 text-sm font-semibold text-plum transition hover:border-plum/45 active:scale-[0.99]"
+        className="flex items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-dashed border-brand/25 bg-paper/30 px-4 py-6 text-sm font-semibold text-brand transition hover:border-brand/45 active:scale-[0.99]"
       >
         <ImagePlus size={18} strokeWidth={2.2} />
         Add photos
@@ -432,7 +432,7 @@ function Card({ children, hover }: { children: React.ReactNode; hover?: boolean 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card-hover rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)]">
-      <p className="pop-in font-display text-2xl font-light text-plum-deep">{value}</p>
+      <p className="pop-in font-display text-2xl font-light text-brand-deep">{value}</p>
       <p className="mt-0.5 text-[0.72rem] leading-tight text-ink-soft">{label}</p>
     </div>
   );

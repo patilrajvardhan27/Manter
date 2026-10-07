@@ -25,7 +25,7 @@ export default async function CandidateDetailPage({
     <div className="space-y-4">
       {person.bio ? (
         <section className="card-hover rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
-          <h2 className="text-[0.68rem] font-semibold uppercase tracking-wider text-plum">About</h2>
+          <h2 className="text-[0.68rem] font-semibold uppercase tracking-wider text-brand">About</h2>
           <p className="mt-1.5 text-[0.92rem] leading-relaxed text-ink-soft">{person.bio}</p>
         </section>
       ) : null}
@@ -114,7 +114,7 @@ export default async function CandidateDetailPage({
             <VerifyBadge status={person.verification} className="mt-1" />
           </div>
           <div className="shrink-0 text-right">
-            <div className="font-display text-4xl font-light leading-none text-plum">
+            <div className="font-display text-4xl font-light leading-none text-brand">
               {person.score}
               <span className="text-lg text-ink-soft">%</span>
             </div>
@@ -136,7 +136,7 @@ export default async function CandidateDetailPage({
             Pass
           </Link>
           <form action={startConversation.bind(null, person.id)} className="flex-[1.4]">
-            <button className="flex h-12 w-full items-center justify-center gap-1.5 rounded-2xl bg-plum text-sm font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-plum-deep active:scale-[0.98]">
+            <button className="flex h-12 w-full items-center justify-center gap-1.5 rounded-2xl bg-brand text-sm font-semibold text-cream shadow-[var(--shadow-soft)] transition hover:bg-brand-deep active:scale-[0.98]">
               <MessageCircle size={17} strokeWidth={2.2} />
               {person.matchId ? "Open chat" : "Message " + person.display_name}
             </button>

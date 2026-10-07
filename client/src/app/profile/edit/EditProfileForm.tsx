@@ -193,7 +193,7 @@ export function EditProfileForm({
               type="button"
               onClick={() => fileInput.current?.click()}
               disabled={uploading}
-              className="flex aspect-[3/4] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-plum/25 text-plum transition hover:border-plum/45 active:scale-[0.98] disabled:opacity-50"
+              className="flex aspect-[3/4] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-brand/25 text-brand transition hover:border-brand/45 active:scale-[0.98] disabled:opacity-50"
             >
               {uploading ? (
                 <Loader2 size={22} className="animate-spin" />
@@ -251,7 +251,7 @@ export function EditProfileForm({
         </Field>
 
         <div className="border-t border-ink/[0.06] pt-4">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-plum">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-brand">
             About you <span className="font-normal normal-case text-ink-soft/70">· optional</span>
           </p>
           <ProfileDetailsFields

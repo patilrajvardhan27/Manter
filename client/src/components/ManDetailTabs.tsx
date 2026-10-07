@@ -75,7 +75,7 @@ export function ManDetailTabs({
               type="button"
               onClick={() => setTab(t.id)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-xs font-semibold transition-colors ${
-                active ? "bg-plum text-cream shadow-[var(--shadow-soft)]" : "text-ink-soft"
+                active ? "bg-brand text-cream shadow-[var(--shadow-soft)]" : "text-ink-soft"
               }`}
             >
               <Icon size={15} strokeWidth={2.2} />
@@ -106,11 +106,11 @@ function AnswersPanel({ answers }: { answers: AnsweredQuestion[] }) {
     <div className="space-y-3">
       {answers.map((a, i) => (
         <div key={a.questionId} className="card-hover rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-plum">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-brand">
             Question {i + 1}
           </p>
           <p className="mt-1 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
-          <p className="mt-2 border-l-2 border-plum/25 pl-2.5 text-[0.88rem] leading-relaxed text-ink-soft">
+          <p className="mt-2 border-l-2 border-brand/25 pl-2.5 text-[0.88rem] leading-relaxed text-ink-soft">
             {a.answer}
           </p>
         </div>
@@ -127,7 +127,7 @@ function CompatibilityPanel({
   return (
     <div className="space-y-4">
       <p className="text-[0.78rem] text-ink-soft">
-        <span className="font-medium text-plum">●</span> their self-assessment ·{" "}
+        <span className="font-medium text-brand">●</span> their self-assessment ·{" "}
         <span className="font-medium text-ink-soft">●</span> your priority
       </p>
       {byGroup.map((sec) => (
@@ -140,7 +140,7 @@ function CompatibilityPanel({
               <div key={q.key} className="flex items-center justify-between gap-3 py-2">
                 <span className="min-w-0 flex-1 truncate text-[0.82rem] text-ink">{q.label}</span>
                 <div className="flex shrink-0 flex-col items-end gap-1">
-                  <Dots value={q.candidateScore} color="var(--color-plum)" />
+                  <Dots value={q.candidateScore} color="var(--color-brand)" />
                   <Dots value={q.weight} color="color-mix(in srgb, var(--color-ink) 45%, transparent)" />
                 </div>
               </div>

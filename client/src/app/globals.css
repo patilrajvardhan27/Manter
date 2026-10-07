@@ -1,28 +1,33 @@
 @import "tailwindcss";
 
 /* ----------------------------------------------------------------------------
-   Charms design system: "Warm Editorial"
-   Cream paper · aubergine ink · plum brand · sage green-flags · clay-red flags
+   Charms design system: "Canary Rom-Com"
+   Airy, Known-style layout in the yellow of Andie's gown (How to Lose a Guy in
+   10 Days): butter paper, canary sun, warm-black ink. Gloock poster serif for
+   headlines, Yellowtail script for asides, DM Sans for body.
 ---------------------------------------------------------------------------- */
 @theme {
-  --color-cream: #faf5ef;
-  --color-paper: #f2e9df;
-  --color-ink: #241019;
-  --color-ink-soft: #5b4651;
+  --color-cream: #fffbea;
+  --color-paper: #fff2b8;
+  --color-ink: #1f1705;
+  --color-ink-soft: #5e5230;
 
-  --color-plum: #7a2e55;
-  --color-plum-deep: #5c1f40;
-  --color-clay: #d9694a;
-  --color-sage: #5e8b6a;
-  --color-gold: #c2913f;
-  --color-redflag: #b23a2e;
-  --color-rose: #e8c4c0;
+  --color-sun: #ffc61a;
+  --color-sun-deep: #f2a900;
+  --color-brand: #2b2008;
+  --color-brand-deep: #120d02;
+  --color-clay: #e2602f;
+  --color-sage: #4f8a5b;
+  --color-gold: #b88a00;
+  --color-redflag: #c0392b;
+  --color-rose: #f3c9b8;
 
-  --font-display: var(--font-fraunces), Georgia, serif;
-  --font-body: var(--font-hanken), system-ui, sans-serif;
+  --font-display: var(--font-gloock), Georgia, serif;
+  --font-script: var(--font-yellowtail), cursive;
+  --font-body: var(--font-dmsans), system-ui, sans-serif;
 
-  --radius-card: 1.25rem;
-  --shadow-soft: 0 1px 2px rgba(36, 16, 25, 0.04), 0 12px 28px -12px rgba(92, 31, 64, 0.18);
+  --radius-card: 1.5rem;
+  --shadow-soft: 0 1px 0 rgba(31, 23, 5, 0.9), 0 10px 24px -14px rgba(242, 169, 0, 0.55);
 }
 
 * {
@@ -45,12 +50,15 @@ body {
 /* subtle warm grain so the cream never reads as flat AI-white */
 .bg-grain {
   background-image:
-    radial-gradient(at 20% 0%, rgba(216, 105, 74, 0.06) 0px, transparent 50%),
-    radial-gradient(at 90% 10%, rgba(122, 46, 85, 0.07) 0px, transparent 45%),
-    radial-gradient(at 50% 100%, rgba(94, 139, 106, 0.05) 0px, transparent 55%);
+    radial-gradient(at 85% 0%, rgba(255, 198, 26, 0.28) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(255, 198, 26, 0.16) 0px, transparent 55%);
 }
 
-.font-display { font-family: var(--font-display); }
+.font-display { font-family: var(--font-display); font-synthesis: none; }
+.font-script { font-family: var(--font-script); }
+
+/* highlighter swipe behind a word, like a magazine column headline */
+.hl { background: linear-gradient(transparent 58%, var(--color-sun) 58% 92%, transparent 92%); padding: 0 0.12em; }
 
 /* one orchestrated entrance, staggered via inline animation-delay */
 @keyframes rise {
@@ -65,7 +73,7 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(36, 16, 25, 0.05), 0 18px 32px -14px rgba(92, 31, 64, 0.22);
+  box-shadow: 0 4px 10px rgba(31, 23, 5, 0.06), 0 18px 32px -14px rgba(242, 169, 0, 0.5);
 }
 .card-hover:active {
   transform: translateY(0) scale(0.99);

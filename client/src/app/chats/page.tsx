@@ -15,7 +15,7 @@ export default async function ChatsPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-28 pt-[max(2rem,env(safe-area-inset-top))]">
       <header className="rise" style={{ animationDelay: "0ms" }}>
-        <p className="text-xs font-semibold uppercase tracking-wider text-plum">Chats</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-brand">Chats</p>
         <h1 className="mt-1 font-display text-[2rem] font-light leading-tight tracking-tight text-ink">
           Your conversations
         </h1>
@@ -24,10 +24,10 @@ export default async function ChatsPage() {
       <section className="mt-8 space-y-3">
         {conversations.length === 0 ? (
           <div className="rounded-[var(--radius-card)] bg-paper/70 p-8 text-center shadow-[var(--shadow-soft)]">
-            <MessagesSquare size={30} className="mx-auto text-plum/70" strokeWidth={1.8} />
+            <MessagesSquare size={30} className="mx-auto text-brand/70" strokeWidth={1.8} />
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
               No conversations yet.{" "}
-              <Link href="/intro" className="font-medium text-plum underline-offset-4 hover:underline">
+              <Link href="/intro" className="font-medium text-brand underline-offset-4 hover:underline">
                 Chats open when you and an introduction both say yes.
               </Link>
             </p>
@@ -41,7 +41,7 @@ export default async function ChatsPage() {
             className="rise card-hover flex items-center gap-3 rounded-[var(--radius-card)] bg-paper/70 p-4 shadow-[var(--shadow-soft)] transition active:scale-[0.99]"
             style={{ animationDelay: `${60 + i * 50}ms` }}
           >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-plum/10 font-display text-lg text-plum">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand/10 font-display text-lg text-brand">
               {c.other.display_name.charAt(0)}
             </span>
             <div className="min-w-0 flex-1">

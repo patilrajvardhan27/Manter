@@ -15,7 +15,7 @@ export default async function DiscoverPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 pb-28 pt-[max(2rem,env(safe-area-inset-top))]">
       <header className="rise" style={{ animationDelay: "0ms" }}>
-        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand">
           <Compass size={14} strokeWidth={2.4} />
           Discover
         </p>

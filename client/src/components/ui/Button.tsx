@@ -5,13 +5,13 @@ type Variant = "primary" | "outline" | "ghost";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-plum text-cream shadow-[var(--shadow-soft)] disabled:opacity-50",
-  outline: "border border-plum/20 text-plum-deep disabled:opacity-50",
-  ghost: "text-plum-deep disabled:opacity-40",
+    "border border-ink bg-sun text-ink shadow-[var(--shadow-soft)] hover:bg-sun-deep disabled:opacity-50",
+  outline: "border border-brand/20 text-brand-deep disabled:opacity-50",
+  ghost: "text-brand-deep disabled:opacity-40",
 };
 
 const base =
-  "flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold transition active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed";
+  "flex h-14 w-full items-center justify-center rounded-full text-base font-semibold transition active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed";
 
 export function Button({
   variant = "primary",

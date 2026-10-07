@@ -22,13 +22,13 @@ export function StaticPage({
         >
           <ArrowLeft size={20} strokeWidth={2.2} />
         </Link>
-        <span className="font-display text-lg font-semibold tracking-tight text-plum-deep">
+        <span className="font-display text-lg font-semibold tracking-tight text-brand-deep">
           Charms
         </span>
       </header>
 
       <section className="mt-8">
-        <p className="text-xs font-semibold uppercase tracking-wider text-plum">
+        <p className="text-xs font-semibold uppercase tracking-wider text-brand">
           {eyebrow}
         </p>
         <h1 className="mt-2 font-display text-[2rem] font-light leading-tight tracking-tight text-ink">

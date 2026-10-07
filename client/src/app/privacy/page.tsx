@@ -97,7 +97,7 @@ export default function PrivacyPage() {
         </ul>
         <p>
           To request a data export or deletion, email{" "}
-          <a href="mailto:privacy@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+          <a href="mailto:privacy@charms.app" className="font-medium text-brand underline-offset-4 hover:underline">
             privacy@charms.app
           </a>
           . We&apos;ll act on verified requests within 30 days.
@@ -136,7 +136,7 @@ export default function PrivacyPage() {
       <StaticSection title="10. Contact">
         <p>
           Questions about this policy? Email{" "}
-          <a href="mailto:privacy@charms.app" className="font-medium text-plum underline-offset-4 hover:underline">
+          <a href="mailto:privacy@charms.app" className="font-medium text-brand underline-offset-4 hover:underline">
             privacy@charms.app
           </a>
           .

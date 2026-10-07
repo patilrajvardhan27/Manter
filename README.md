@@ -4,6 +4,8 @@
 
 Everyone answers the same 14 real-world scenarios, then talks to a voice matchmaker for about five minutes. Both feed a score on 23 qualities, like respecting boundaries and conflict repair. There is no swipe feed. Each round, the matchmaker introduces every person to one other person, chosen so the fit works in both directions, and the chat only opens when both say yes. Incoming messages are screened for manipulation patterns, and any flag is shown to the recipient. It's an installable PWA for men, women, and LGBTQ+ users.
 
+![Charms: date by character](docs/images/hero.png)
+
 ---
 
 ## Architecture
@@ -67,6 +69,8 @@ flowchart LR
 ## Matching
 
 The model follows [Known](https://known.com/readme): no browsing, one considered introduction at a time, mutual opt-in, a response window, and feedback that tunes the next round.
+
+![One person per round, both must say yes](docs/images/matching.png)
 
 ### 1. Character score
 
@@ -157,6 +161,10 @@ python scripts/eval_matchmaker.py --n 400 --seeds 10
 
 ## Voice matchmaker
 
+![The voice matchmaker: five minutes of talking, nine questions](docs/images/voice.png)
+
+The voice agent is a browser-based interview. It speaks each question with text-to-speech, opens the mic, and ends your turn after about 2 seconds of silence or when you tap Done. Typing works everywhere, including Firefox and when the mic is blocked. The client is `client/src/components/VoiceInterview.tsx`, the routes are `server/app/routers/voice.py`, and the question planner and extractor are `server/app/services/interviewer.py`.
+
 ```mermaid
 sequenceDiagram
     participant U as Browser
@@ -194,6 +202,8 @@ sequenceDiagram
 ---
 
 ## Red-flag scan
+
+![Messages get read before they hurt](docs/images/safety.png)
 
 ```mermaid
 sequenceDiagram
@@ -350,3 +360,20 @@ curl -X POST "$API/matchmaker/run" -H "X-Matchmaker-Secret: $MATCHMAKER_SECRET"
 - **Legacy Discover.** The swipe deck is still at `/discover` but out of the nav, and its "like" still opens a chat one-sidedly. It also inherits the 1,000-row read cap. Next: remove it, or make "like" an intro request.
 - **Scans run when the recipient opens a chat**, so long threads fire one request per message. Next: scan on insert through a queue.
 - **Not built yet:** date check-in with emergency contacts, ID verification, report/block UI, `/scan` rate limiting, client tests.
+
+---
+
+## Design
+
+The theme is "Canary Rom-Com": a Known-style airy layout (big type, whitespace, pill buttons) in the yellow of Andie's gown from *How to Lose a Guy in 10 Days*. Tokens live in `client/src/app/globals.css`.
+
+| Role | Value |
+|---|---|
+| Page / card paper | `#FFFBEA` / `#FFF2B8` |
+| Sun (primary action) | `#FFC61A`, hover `#F2A900` |
+| Ink | `#1F1705` |
+| Headlines | Gloock, a poster serif |
+| Script asides | Yellowtail |
+| Body | DM Sans |
+
+The README images are rendered from the same tokens.

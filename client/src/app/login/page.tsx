@@ -77,7 +77,7 @@ function LoginForm() {
         footer={
           <button
             onClick={() => setMagicSent(false)}
-            className="font-medium text-plum underline-offset-4 hover:underline"
+            className="font-medium text-brand underline-offset-4 hover:underline"
           >
             Use a different method
           </button>
@@ -97,7 +97,7 @@ function LoginForm() {
       footer={
         <>
           New here?{" "}
-          <Link href="/register" className="font-medium text-plum underline-offset-4 hover:underline">
+          <Link href="/register" className="font-medium text-brand underline-offset-4 hover:underline">
             Create an account
           </Link>
         </>
@@ -112,7 +112,7 @@ function LoginForm() {
               setError(null);
             }}
             className={`rounded-xl py-2.5 text-sm font-medium transition ${
-              mode === m ? "bg-cream text-plum-deep shadow-sm" : "text-ink-soft"
+              mode === m ? "bg-cream text-brand-deep shadow-sm" : "text-ink-soft"
             }`}
           >
             {m === "password" ? "Password" : "Magic link"}

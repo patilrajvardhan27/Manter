@@ -35,7 +35,7 @@ export default async function ChatThreadPage({
           href={`/profile/${thread.other.id}`}
           className="flex min-w-0 flex-1 items-center gap-3 rounded-full transition active:scale-[0.99]"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-plum/10 font-display text-lg text-plum">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 font-display text-lg text-brand">
             {thread.other.display_name.charAt(0)}
           </span>
           <div className="min-w-0">

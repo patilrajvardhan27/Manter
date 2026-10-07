@@ -56,7 +56,7 @@ export default function RegisterPage() {
           </>
         }
         footer={
-          <Link href="/login" className="font-medium text-plum underline-offset-4 hover:underline">
+          <Link href="/login" className="font-medium text-brand underline-offset-4 hover:underline">
             Back to sign in
           </Link>
         }
@@ -76,7 +76,7 @@ export default function RegisterPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-plum underline-offset-4 hover:underline">
+          <Link href="/login" className="font-medium text-brand underline-offset-4 hover:underline">
             Sign in
           </Link>
         </>

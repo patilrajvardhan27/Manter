@@ -88,7 +88,7 @@ export function SwipeDeck({ people }: { people: DiscoverProfile[] }) {
   if (!current) {
     return (
       <div className="mt-10 rounded-[var(--radius-card)] bg-paper/70 p-8 text-center shadow-[var(--shadow-soft)]">
-        <PartyPopper size={32} className="mx-auto text-plum" strokeWidth={1.8} />
+        <PartyPopper size={32} className="mx-auto text-brand" strokeWidth={1.8} />
         <p className="mt-3 font-display text-xl text-ink">You&apos;re all caught up.</p>
         <p className="mt-2 text-sm text-ink-soft">
           No more profiles for now. Check your chats, or come back later.
@@ -144,7 +144,7 @@ export function SwipeDeck({ people }: { people: DiscoverProfile[] }) {
           onClick={() => router.push(`/discover/${current.id}`)}
           disabled={busy}
           aria-label="View full profile & answers"
-          className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/10 bg-paper text-plum shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-0.5 hover:border-plum/30 hover:shadow-lg active:scale-90 disabled:opacity-40"
+          className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/10 bg-paper text-brand shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-lg active:scale-90 disabled:opacity-40"
         >
           <Info size={20} strokeWidth={2.2} />
         </button>
@@ -152,7 +152,7 @@ export function SwipeDeck({ people }: { people: DiscoverProfile[] }) {
           onClick={() => like(current)}
           disabled={busy}
           aria-label="Like and message"
-          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-plum text-cream shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-0.5 hover:bg-plum-deep hover:shadow-lg active:scale-90 disabled:opacity-40"
+          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-brand text-cream shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-lg active:scale-90 disabled:opacity-40"
         >
           <Heart size={28} strokeWidth={2.2} fill="currentColor" />
         </button>
@@ -218,8 +218,8 @@ function Card({
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-plum/15">
-          <Sparkles size={48} className="text-plum/40" strokeWidth={1.5} />
+        <div className="absolute inset-0 flex items-center justify-center bg-brand/15">
+          <Sparkles size={48} className="text-brand/40" strokeWidth={1.5} />
         </div>
       )}
 

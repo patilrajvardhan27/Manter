@@ -25,12 +25,12 @@ export function TabBar() {
               key={t.href}
               href={t.href}
               className={`flex flex-1 flex-col items-center gap-1 rounded-2xl py-1.5 text-[0.68rem] font-medium transition-colors ${
-                active ? "text-plum" : "text-ink-soft/70"
+                active ? "text-brand" : "text-ink-soft/70"
               }`}
             >
               <span
                 className={`flex h-8 w-12 items-center justify-center rounded-full transition-colors ${
-                  active ? "bg-plum/10" : "bg-transparent"
+                  active ? "bg-brand/10" : "bg-transparent"
                 }`}
               >
                 <Icon size={20} strokeWidth={active ? 2.4 : 1.9} />

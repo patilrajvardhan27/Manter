@@ -97,11 +97,11 @@ export default async function ProfileViewPage({
       {scores.length ? (
         <section className="mt-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+            <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand">
               <BarChart3 size={14} strokeWidth={2.4} />
               Character score
             </h2>
-            <p className="font-display text-2xl font-light leading-none text-plum-deep">
+            <p className="font-display text-2xl font-light leading-none text-brand-deep">
               {avgScore!.toFixed(1)}
               <span className="text-sm text-ink-soft">/5</span>
             </p>
@@ -118,7 +118,7 @@ export default async function ProfileViewPage({
       {/* Priorities */}
       {weights.length ? (
         <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
-          <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+          <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand">
             <SlidersHorizontal size={14} strokeWidth={2.4} />
             What they're looking for
           </h2>
@@ -164,18 +164,18 @@ export default async function ProfileViewPage({
       {/* Quiz answers */}
       {answers.length ? (
         <section className="mt-4 rounded-[var(--radius-card)] bg-paper/70 p-6 shadow-[var(--shadow-soft)]">
-          <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum">
+          <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand">
             <MessageSquareQuote size={14} strokeWidth={2.4} />
             Their answers
           </h2>
           <ul className="mt-4 space-y-3">
             {answers.map((a, i) => (
               <li key={a.questionId} className="rounded-2xl bg-paper/60 p-3.5 shadow-[var(--shadow-soft)]">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-plum">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-brand">
                   Question {i + 1}
                 </p>
                 <p className="mt-1 text-sm font-medium leading-snug text-ink">{a.prompt}</p>
-                <p className="mt-2 border-l-2 border-plum/25 pl-2.5 text-[0.88rem] leading-relaxed text-ink-soft">
+                <p className="mt-2 border-l-2 border-brand/25 pl-2.5 text-[0.88rem] leading-relaxed text-ink-soft">
                   {a.answer}
                 </p>
               </li>

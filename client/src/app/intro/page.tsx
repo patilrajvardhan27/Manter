@@ -50,7 +50,7 @@ export default async function IntroPage() {
             </p>
             <Link
               href="/onboarding/voice?from=home"
-              className="mt-3 inline-block text-sm font-medium text-plum underline underline-offset-4"
+              className="mt-3 inline-block text-sm font-medium text-brand underline underline-offset-4"
             >
               Talk to your matchmaker
             </Link>
