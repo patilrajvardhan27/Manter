@@ -4,6 +4,10 @@
 
 Everyone answers the same 14 real-world scenarios, which feed a score on 23 qualities, like respecting boundaries and conflict repair. Discover ranks people by how well their scores fit the priorities you set. Alongside it, each matchmaker round introduces every person to one other person, chosen so the fit works in both directions. Incoming messages are screened for manipulation patterns, and any flag is shown to the recipient. It's an installable PWA for men, women, and LGBTQ+ users.
 
+[![Charms in 23 seconds: quiz, score, one introduction, red-flag scan](docs/images/charms.gif)](docs/video/charms.mp4)
+
+*Click the preview for the full video with sound.*
+
 ![Charms: date by character](docs/images/hero.png)
 
 ---

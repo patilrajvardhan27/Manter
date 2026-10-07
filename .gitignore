@@ -23,5 +23,8 @@ venv/
 # OS
 .DS_Store
 
+# /brag launch-video output and render scratch (the published copy lives in docs/)
+brag-output*/
+
 # Audit report: lists unfixed security issues, keep out of the public repo
 AUDIT.md
