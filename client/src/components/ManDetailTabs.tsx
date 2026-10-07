@@ -22,7 +22,7 @@ const GROUP_ORDER: QualityGroup[] = [
   "character",
 ];
 
-/** Tiny dot row — `value` (0-5, rounded) of them filled, each popping in in sequence. */
+/** Tiny dot row: `value` (0-5, rounded) of them filled, each popping in in sequence. */
 function Dots({ value, color }: { value: number; color: string }) {
   const filled = Math.round(value);
   return (

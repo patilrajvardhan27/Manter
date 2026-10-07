@@ -50,7 +50,7 @@ export default function Landing() {
       </section>
 
       <footer className="mt-4 border-t border-ink/10 pt-3 text-[0.7rem] text-ink-soft">
-        <p>Charms — pro good people, anti bad ones. Your data stays yours.</p>
+        <p>Charms. Pro good people, anti bad ones. Your data stays yours.</p>
         <nav className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
           <Link href="/about" className="underline-offset-4 hover:text-plum hover:underline">
             About

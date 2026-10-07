@@ -1,7 +1,7 @@
 -- Richer profile fields: profession, education, height, lifestyle habits,
 -- relationship goal, and free-form interests. All optional (nullable / empty
 -- array) so existing profiles stay valid. Apply via Supabase Dashboard -> SQL
--- Editor. No RLS changes — these ride on the existing profiles policies.
+-- Editor. No RLS changes. These ride on the existing profiles policies.
 
 alter table profiles
   add column if not exists profession        text,

@@ -6,7 +6,7 @@
 --
 -- This is a destructive rebuild of the man/woman-specific tables (man_quiz_
 -- scores, woman_weights, woman_quiz_answers, quiz_questions, quiz_answers,
--- ratings) — appropriate pre-launch with only seed/demo data. If real user
+-- ratings), appropriate pre-launch with only seed/demo data. If real user
 -- data exists, back it up first.
 
 -- ---------------------------------------------------------------------------

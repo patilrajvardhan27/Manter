@@ -1,5 +1,5 @@
 /**
- * Compatibility scoring — ranks a candidate profile against the viewer's
+ * Compatibility scoring: ranks a candidate profile against the viewer's
  * priority weights and the candidate's character score.
  *
  *   compatibility = Σ weight·candidateScore / Σ weight·5 · 100

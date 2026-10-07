@@ -1,4 +1,4 @@
--- Quiz answers are now free text (men type their answers; Claude scores them)
+-- Quiz answers are now free text (men type their answers; the model scores them)
 -- instead of a chosen option. Apply via Supabase Dashboard -> SQL Editor.
 
 -- Rename the column if the old one is still there.

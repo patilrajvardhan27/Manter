@@ -27,32 +27,32 @@ QUALITIES
 ---
 
 WEB RESEARCH INSIGHTS
-(Niche points from psychology research, safety apps, and dating industry data — to inform app features)
+(Niche points from psychology research, safety apps, and dating industry data, to inform app features)
 
 GREEN FLAG PSYCHOLOGY (Research-Backed)
-24) He can disagree respectfully, take responsibility for his mistakes, apologize sincerely, and repair after arguments — relationship researchers consistently identify conflict repair as the #1 predictor of long-term relationship success (2022 study)
-25) He ensures your voice genuinely influences his decisions — a 2020 study found that when both partners feel their voice truly matters, relationship quality stays high and emotional security deepens over years
-26) He has a secure attachment style — he is consistent, responsive, and emotionally available (based on Bowlby & Ainsworth attachment theory; secure attachment is the foundation of healthy long-term relationships)
-27) He can admit when he is wrong — people who admit mistakes are rated as more competent and more likable than those who refuse to (2022 study); this directly ties to emotional maturity (point 9)
+24) He can disagree respectfully, take responsibility for his mistakes, apologize sincerely, and repair after arguments: relationship researchers consistently identify conflict repair as the #1 predictor of long-term relationship success (2022 study)
+25) He ensures your voice genuinely influences his decisions: a 2020 study found that when both partners feel their voice truly matters, relationship quality stays high and emotional security deepens over years
+26) He has a secure attachment style: he is consistent, responsive, and emotionally available (based on Bowlby & Ainsworth attachment theory; secure attachment is the foundation of healthy long-term relationships)
+27) He can admit when he is wrong: people who admit mistakes are rated as more competent and more likable than those who refuse to (2022 study); this directly ties to emotional maturity (point 9)
 
 BEHAVIORAL RED FLAGS TO WATCH FOR (What the App Should Screen Against)
-28) Uses controlling language — "you should wear this", "I decide where we go", "I don't like your friends"
-29) Shows anger escalation patterns in text — starts calm, becomes aggressive when questioned or told no
-30) Guilt-trips after a "no" — makes her feel bad for saying no to anything physical, social, or personal
-31) Rushes physical or emotional intimacy — creates a sense of urgency or pressure before trust is established
-32) Dismisses her feelings — "you're overreacting", "you're too sensitive", "why do you always make it a big deal"
-33) Shows jealousy or possessiveness early — questions who she is talking to, wants to track her location, gets upset when she spends time with others
-34) Makes fun of women to fit in with his friend group (social misogyny) — laughs at sexist jokes, stays silent when others disrespect women
+28) Uses controlling language: "you should wear this", "I decide where we go", "I don't like your friends"
+29) Shows anger escalation patterns in text: starts calm, becomes aggressive when questioned or told no
+30) Guilt-trips after a "no": makes her feel bad for saying no to anything physical, social, or personal
+31) Rushes physical or emotional intimacy: creates a sense of urgency or pressure before trust is established
+32) Dismisses her feelings: "you're overreacting", "you're too sensitive", "why do you always make it a big deal"
+33) Shows jealousy or possessiveness early: questions who she is talking to, wants to track her location, gets upset when she spends time with others
+34) Makes fun of women to fit in with his friend group (social misogyny): laughs at sexist jokes, stays silent when others disrespect women
 
 SAFETY & VERIFICATION INSIGHTS (From Tea App, Red Flag App, Cray App)
-35) ID verification is the single most effective tool against fake profiles and catfishing — apps that require it see dramatically less harassment
-36) Community-sourced warnings work — the Tea app (women warn each other about men in their city) went #1 on the App Store in 2025 purely because women needed a place to share real experiences with real names and faces
-37) AI chat analysis catches manipulation before it escalates — Red Flag app's AI analyzes screenshots for gaslighting, love-bombing, and concerning patterns and alerts women before they're in too deep
-38) Pattern detection saves women who miss early signs — Cray app (founded after its creator survived a traumatic betrayal) found users consistently miss early behavioral warning signs; explanatory content showing why a behavior matters is more effective than just flagging it
-39) Timed date check-in saves lives — a simple timer that alerts emergency contacts if the woman does not confirm she is safe is one of the highest-rated safety features in women's dating app reviews
+35) ID verification is the single most effective tool against fake profiles and catfishing: apps that require it see dramatically less harassment
+36) Community-sourced warnings work: the Tea app (women warn each other about men in their city) went #1 on the App Store in 2025 purely because women needed a place to share real experiences with real names and faces
+37) AI chat analysis catches manipulation before it escalates: Red Flag app's AI analyzes screenshots for gaslighting, love-bombing, and concerning patterns and alerts women before they're in too deep
+38) Pattern detection saves women who miss early signs: Cray app (founded after its creator survived a traumatic betrayal) found users consistently miss early behavioral warning signs; explanatory content showing why a behavior matters is more effective than just flagging it
+39) Timed date check-in saves lives: a simple timer that alerts emergency contacts if the woman does not confirm she is safe is one of the highest-rated safety features in women's dating app reviews
 
 APP DESIGN PRINCIPLES (From Bumble, Hinge, and Dating Industry Research)
-40) Women-first design — letting women control who can message them reduces harassment and measurably improves mental health outcomes for women on the platform (Bumble model, validated over 10 years)
-41) Quality over quantity in matching — Hinge's prompt-based profiles (not just photos) produce the highest date-to-match ratio of any major dating app; selective women respond better to fewer, better-matched candidates than endless swiping
-42) Ambition and stability verification builds trust — exclusive apps like Luxy that require income verification attract more serious, commitment-oriented users on both sides
-43) Curated, ranked candidate pools outperform endless swipe feeds for selective users — a woman who knows why she is being shown someone (compatibility score, quality match) is far more likely to invest in the connection than a random swipe result
+40) Women-first design: letting women control who can message them reduces harassment and measurably improves mental health outcomes for women on the platform (Bumble model, validated over 10 years)
+41) Quality over quantity in matching: Hinge's prompt-based profiles (not just photos) produce the highest date-to-match ratio of any major dating app; selective women respond better to fewer, better-matched candidates than endless swiping
+42) Ambition and stability verification builds trust: exclusive apps like Luxy that require income verification attract more serious, commitment-oriented users on both sides
+43) Curated, ranked candidate pools outperform endless swipe feeds for selective users: a woman who knows why she is being shown someone (compatibility score, quality match) is far more likely to invest in the connection than a random swipe result

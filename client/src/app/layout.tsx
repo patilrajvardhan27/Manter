@@ -16,7 +16,7 @@ const hanken = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Charms — date by character",
+  title: "Charms: date by character",
   description:
     "Safety-first dating for women. Match on verified character across 23 qualities, not photos.",
   manifest: "/manifest.webmanifest",

@@ -16,7 +16,7 @@ const SEVERITY_STYLE: Record<string, string> = {
  * Realtime conversation. Messages stream in via Supabase Postgres changes;
  * sending writes straight to the messages table (RLS guards participation).
  * Every participant's incoming messages are run through the FastAPI red-flag
- * scan and any hits are surfaced inline — symmetric protection regardless of
+ * scan and any hits are surfaced inline, symmetric protection regardless of
  * gender.
  */
 export function Chat({

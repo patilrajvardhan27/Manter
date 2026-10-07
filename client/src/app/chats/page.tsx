@@ -27,8 +27,8 @@ export default async function ChatsPage() {
             <MessagesSquare size={30} className="mx-auto text-plum/70" strokeWidth={1.8} />
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
               No conversations yet.{" "}
-              <Link href="/discover" className="font-medium text-plum underline-offset-4 hover:underline">
-                Find someone in Discover.
+              <Link href="/intro" className="font-medium text-plum underline-offset-4 hover:underline">
+                Chats open when you and an introduction both say yes.
               </Link>
             </p>
           </div>
@@ -47,7 +47,7 @@ export default async function ChatsPage() {
             <div className="min-w-0 flex-1">
               <p className="font-medium text-ink">{c.other.display_name}</p>
               <p className="truncate text-sm text-ink-soft">
-                {c.last ? c.last.body : "No messages yet — say hi."}
+                {c.last ? c.last.body : "No messages yet. Say hi."}
               </p>
             </div>
             <ChevronRight size={18} className="shrink-0 text-ink-soft/40" strokeWidth={2} />

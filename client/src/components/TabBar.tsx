@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, MessageCircle, User, type LucideIcon } from "lucide-react";
+import { HeartHandshake, MessageCircle, User, type LucideIcon } from "lucide-react";
 
 const TABS: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/discover", label: "Discover", icon: Compass },
+  { href: "/intro", label: "Intro", icon: HeartHandshake },
   { href: "/chats", label: "Chats", icon: MessageCircle },
   { href: "/home", label: "Profile", icon: User },
 ];

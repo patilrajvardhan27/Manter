@@ -18,7 +18,7 @@ export default function TermsPage() {
       <StaticSection title="2. Your account">
         <p>
           You&apos;re responsible for keeping your login credentials secure and for
-          activity that happens under your account. One person, one account — accounts
+          activity that happens under your account. One person, one account. Accounts
           may not be shared, sold, or transferred.
         </p>
       </StaticSection>
@@ -38,7 +38,7 @@ export default function TermsPage() {
       <StaticSection title="4. Character scores & AI features">
         <p>
           Character scores, quiz results, verification badges, and AI red-flag scans are
-          provided as informational tools to help you make decisions — they are{" "}
+          provided as informational tools to help you make decisions. They are{" "}
           <strong className="font-medium text-ink">not a guarantee</strong> of any
           person&apos;s character, intentions, or safety. Charms does not perform criminal
           background checks unless explicitly stated on a profile. You&apos;re always

@@ -2,7 +2,7 @@ import { QUALITY_BY_KEY, QUALITY_GROUPS, type QualityGroup } from "@/lib/constan
 import type { QualityScore } from "@/lib/quiz-data";
 
 /**
- * Grouped per-quality score bars with Claude's reason for low/high scores.
+ * Grouped per-quality score bars with the model's reason for low/high scores.
  * Shared between a man's own profile and anyone else viewing his profile.
  */
 export function QualityScoreBreakdown({ scores }: { scores: QualityScore[] }) {

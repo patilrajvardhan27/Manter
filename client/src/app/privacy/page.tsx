@@ -5,25 +5,36 @@ export default function PrivacyPage() {
     <StaticPage
       eyebrow="Legal"
       title="Privacy Policy"
-      subtitle="Last updated: June 14, 2026. This explains what we collect, why, and how it's used — including how AI fits in."
+      subtitle="Last updated: October 6, 2026. This explains what we collect, why, and how it's used, including how AI fits in."
     >
       <StaticSection title="1. What we collect">
         <ul className="list-disc space-y-2 pl-5">
           <li>
-            <strong className="font-medium text-ink">Account info</strong> — email and authentication
+            <strong className="font-medium text-ink">Account info</strong>: email and authentication
             details, handled by Supabase Auth.
           </li>
           <li>
-            <strong className="font-medium text-ink">Profile info</strong> — display name, age, city,
+            <strong className="font-medium text-ink">Profile info</strong>: display name, age, city,
             bio, and up to 3 photos.
           </li>
           <li>
-            <strong className="font-medium text-ink">Quiz responses</strong> — free-text answers to
+            <strong className="font-medium text-ink">Quiz responses</strong>: free-text answers to
             behavioral questions, and the quality weights you set.
           </li>
           <li>
-            <strong className="font-medium text-ink">Messages</strong> — chat content between matched
+            <strong className="font-medium text-ink">Messages</strong>: chat content between matched
             users, stored to provide the chat feature.
+          </li>
+          <li>
+            <strong className="font-medium text-ink">Matchmaker interview</strong>: the text of your
+            optional voice interview, plus what it showed (per-quality scores, what you want in a partner,
+            dealbreakers, and private notes). Only you can read the transcript and notes. Other users see
+            only the character scores it feeds into. You can delete it any time from the interview screen.
+          </li>
+          <li>
+            <strong className="font-medium text-ink">Introductions</strong>: who you were introduced to,
+            your answer, and whether you&apos;d meet them again. Your answer is never shown to the other
+            person unless you both say yes.
           </li>
         </ul>
       </StaticSection>
@@ -36,21 +47,34 @@ export default function PrivacyPage() {
           <li>Score behavioral quiz answers against the 23 character qualities.</li>
           <li>Scan incoming chat messages for red-flag language patterns (e.g. controlling
             or manipulative phrasing) and surface that to the recipient.</li>
+          <li>Run the matchmaker interview: choose each question, then turn your answers into
+            scores, priorities, and dealbreakers.</li>
         </ul>
         <p>
-          Quiz answers and message content are sent to Anthropic&apos;s API for this
+          Voice interview audio never reaches our servers. Your browser converts speech to text and
+          sends us only the text. Depending on your browser, its maker may process that audio to do
+          the conversion (Google for Chrome, Apple for Safari). If you&apos;d rather avoid that, type
+          your answers instead.
+        </p>
+        <p>
+          Introductions are chosen by an algorithm, not a person. It compares both people&apos;s
+          character scores against both people&apos;s priorities and learns from how you respond to
+          introductions. No model call is involved in picking who you meet.
+        </p>
+        <p>
+          Quiz answers, interview answers, and message content are sent to Anthropic&apos;s API for this
           processing. Anthropic does not use this data to train its models under our
-          API agreement. We don&apos;t use AI processing for anything beyond scoring
-          and red-flag detection.
+          API agreement. We don&apos;t use AI processing for anything beyond scoring,
+          red-flag detection, and the matchmaker interview.
         </p>
       </StaticSection>
 
       <StaticSection title="3. Who we share data with">
         <p>We don&apos;t sell your data. We use a small number of infrastructure providers to run the app:</p>
         <ul className="list-disc space-y-2 pl-5">
-          <li><strong className="font-medium text-ink">Supabase</strong> — database, authentication, and photo storage.</li>
-          <li><strong className="font-medium text-ink">Anthropic</strong> — AI scoring and red-flag detection (see above).</li>
-          <li><strong className="font-medium text-ink">Vercel</strong> and <strong className="font-medium text-ink">Render</strong> — application hosting.</li>
+          <li><strong className="font-medium text-ink">Supabase</strong>: database, authentication, and photo storage.</li>
+          <li><strong className="font-medium text-ink">Anthropic</strong>: AI scoring, red-flag detection, and the matchmaker interview (see above).</li>
+          <li><strong className="font-medium text-ink">Vercel</strong> and <strong className="font-medium text-ink">Render</strong>: application hosting.</li>
         </ul>
         <p>Each of these providers processes data only as needed to provide their service to us.</p>
       </StaticSection>

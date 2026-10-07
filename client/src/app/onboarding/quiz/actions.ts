@@ -14,7 +14,7 @@ export interface Answer {
 
 /**
  * Persist a profile's situational quiz answers and derive their per-quality
- * character score deterministically from the picked option's effects —
+ * character score deterministically from the picked option's effects:
  * identical mechanic for every gender. Every quality starts neutral (3);
  * qualities touched by one or more answered questions get the average of
  * those answers' scores instead.
@@ -59,10 +59,13 @@ export async function submitQuiz(answers: Answer[]) {
       profile_id: user.id,
       quality_key,
       score,
+      // How many answered scenarios touched this quality. 0 means it sat at
+      // the neutral default; the character_scores view weights by this.
+      evidence_n: perQuality[quality_key]?.length ?? 0,
       reason: null,
     })),
     { onConflict: "profile_id,quality_key" },
   );
 
-  redirect("/onboarding/priorities");
+  redirect("/onboarding/voice");
 }

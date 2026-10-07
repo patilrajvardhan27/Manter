@@ -1,4 +1,4 @@
--- Store Claude's one-sentence reason alongside each per-quality score, so a
+-- Store the model's one-sentence reason alongside each per-quality score, so a
 -- man can see what specifically drove a low (or high) score.
 -- Apply via Supabase Dashboard -> SQL Editor.
 

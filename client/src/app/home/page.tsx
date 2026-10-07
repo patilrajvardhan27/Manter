@@ -4,6 +4,7 @@ import { getMyAnswers, getMyScores, getMyWeights } from "@/lib/quiz-data";
 import { signPhotoUrls } from "@/lib/photos";
 import { createClient } from "@/lib/supabase/server";
 import { UserProfile } from "@/components/UserProfile";
+import { hasVoiceProfile } from "@/lib/intros";
 import { TabBar } from "@/components/TabBar";
 
 export default async function HomePage() {
@@ -12,16 +13,24 @@ export default async function HomePage() {
   if (!profile) redirect("/onboarding/gender");
 
   const supabase = await createClient();
-  const [photos, answers, scores, weights] = await Promise.all([
+  const [photos, answers, scores, weights, interviewed] = await Promise.all([
     signPhotoUrls(supabase, profile.photos),
     getMyAnswers(userId),
     getMyScores(userId),
     getMyWeights(userId),
+    hasVoiceProfile(userId),
   ]);
 
   return (
     <>
-      <UserProfile profile={profile} answers={answers} scores={scores} weights={weights} photos={photos} />
+      <UserProfile
+        profile={profile}
+        answers={answers}
+        scores={scores}
+        weights={weights}
+        photos={photos}
+        interviewed={interviewed}
+      />
       <TabBar />
     </>
   );

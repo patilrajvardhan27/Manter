@@ -1,6 +1,6 @@
 /**
  * Behavioral red-flag categories the AI scans for (points 28–34).
- * Each carries a "why it matters" explainer — research point 38 shows
+ * Each carries a "why it matters" explainer; research point 38 shows
  * explaining *why* a behavior is concerning beats a bare flag.
  */
 
@@ -44,7 +44,7 @@ export const RED_FLAG_CATEGORIES: RedFlagCategory[] = [
     key: "dismissiveness",
     label: "Dismissing your feelings",
     signal: "“you're overreacting”, “you're too sensitive”, “why is it always a big deal”.",
-    whyItMatters: "Dismissal teaches you to doubt your own feelings — a gaslighting pattern.",
+    whyItMatters: "Dismissal teaches you to doubt your own feelings, a gaslighting pattern.",
   },
   {
     key: "jealousy_possessiveness",

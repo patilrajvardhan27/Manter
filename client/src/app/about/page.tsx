@@ -7,17 +7,17 @@ export default function AboutPage() {
     <StaticPage
       eyebrow="About Charms"
       title="Date by character, not by photos."
-      subtitle="Every major dating app surfaces men based on looks and proximity. Charms surfaces them based on whether they're actually good people — backed by data, not just a gut feeling."
+      subtitle="Every major dating app surfaces men based on looks and proximity. Charms surfaces them based on whether they're actually good people, backed by data, not just a gut feeling."
     >
       <StaticSection title="The problem">
         <p>
           Women with high standards are stuck swiping through endless profiles
           with no real signal about whether someone is emotionally mature,
-          respectful, or kind. That leaves a lot of trial and error — and a lot
+          respectful, or kind. That leaves a lot of trial and error, and a lot
           of room to get hurt.
         </p>
         <p>
-          We built Charms for women who aren&apos;t anti-men — they&apos;re
+          We built Charms for women who aren&apos;t anti-men. They&apos;re
           anti-<em className="not-italic font-medium text-ink">bad</em> men,
           and they want a faster, safer way to find the good ones.
         </p>
@@ -26,8 +26,8 @@ export default function AboutPage() {
       <StaticSection title="The 23-quality framework">
         <p>
           Instead of a bio and six photos, every man on Charms is scored across{" "}
-          <strong className="font-medium text-ink">23 character qualities</strong>{" "}
-          — things like respecting boundaries, emotional maturity, reliability,
+          <strong className="font-medium text-ink">23 character qualities</strong>:{" "}
+          things like respecting boundaries, emotional maturity, reliability,
           and how he treats women when no one&apos;s watching. These aren&apos;t
           arbitrary: they&apos;re drawn from real lists women wrote, mapped to
           what relationship research shows actually predicts a healthy
@@ -35,7 +35,7 @@ export default function AboutPage() {
         </p>
         <p>
           A woman sets how much each quality matters to her. A man&apos;s score
-          comes from a behavioral quiz — answered in his own words, and scored
+          comes from a behavioral quiz, answered in his own words, and scored
           by AI rather than a multiple-choice form he can game.
         </p>
       </StaticSection>
@@ -52,7 +52,7 @@ export default function AboutPage() {
             Icon={ShieldAlert}
             color="var(--color-redflag)"
             title="AI red-flag scanning"
-            body="Claude reads conversations for controlling language, guilt-trips, and love-bombing — and explains why each pattern matters."
+            body="An AI model reads conversations for controlling language, guilt-trips, and love-bombing, and explains why each pattern matters."
           />
           <Feature
             Icon={BadgeCheck}

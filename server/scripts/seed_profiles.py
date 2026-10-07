@@ -9,7 +9,7 @@ gender gets in the gender-symmetric model:
   * quiz_answers      -> their picked Likert label per situational question
 
 Rather than randomizing every quality independently (which produces
-incoherent people — high on "respects boundaries" and low on "trustworthy"
+incoherent people, high on "respects boundaries" and low on "trustworthy"
 with no story behind either), each profile is drawn from a small set of
 named character archetypes per gender (PERSONAS below). An archetype pins a
 handful of standout-high and standout-low qualities and a priorities
@@ -135,7 +135,7 @@ PERSONAS: dict[str, list[dict]] = {
         },
         {
             "label": "The Workhorse",
-            "tagline": "married to the hustle — reliable with deadlines, harder to reach emotionally",
+            "tagline": "married to the hustle, reliable with deadlines, harder to reach emotionally",
             "baseline": 3,
             "high": ["ambitious", "reliable", "trustworthy"],
             "low": ["expresses_emotions", "notices_small_things", "shares_chores"],
@@ -265,7 +265,7 @@ def client() -> Client:
 def quality_keys(sb: Client) -> list[str]:
     rows = sb.table("qualities").select("key").execute().data
     if not rows:
-        sys.exit("The `qualities` table is empty — run supabase/seed.sql first.")
+        sys.exit("The `qualities` table is empty. Run supabase/seed.sql first.")
     return [r["key"] for r in rows]
 
 
@@ -304,7 +304,7 @@ def likert_answers_from_scores(scores: dict[str, float]) -> dict[str, str]:
     """Derive each situational-quiz answer from the two qualities it affects.
 
     Keeps stated attitudes consistent with character score instead of
-    generating the two independently — an archetype low on respects_boundaries
+    generating the two independently: an archetype low on respects_boundaries
     lands on "Disagree"/"Neutral" for the boundary-pushing scenarios, etc.
     """
     answers = {}
@@ -363,7 +363,7 @@ def upload_photos(sb: Client, uid: str, gender: str) -> list[str]:
         try:
             with urllib.request.urlopen(f"{PORTRAIT_BASE}/{portrait_set}/{idx}.jpg", timeout=20) as r:
                 data = r.read()
-        except Exception as exc:  # noqa: BLE001 — best-effort seeding
+        except Exception as exc:  # noqa: BLE001  best-effort seeding
             print(f"    (skipped a photo: {exc})")
             continue
         path = f"{uid}/{uuid.uuid4().hex}.jpg"
@@ -449,7 +449,7 @@ def remove_photos(sb: Client, uid: str) -> None:
         names = [f"{uid}/{f['name']}" for f in (files or []) if f.get("name")]
         if names:
             sb.storage.from_(PHOTO_BUCKET).remove(names)
-    except Exception:  # noqa: BLE001 — bucket may not exist yet; ignore
+    except Exception:  # noqa: BLE001  bucket may not exist yet; ignore
         pass
 
 

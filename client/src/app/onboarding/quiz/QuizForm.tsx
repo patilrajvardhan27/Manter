@@ -8,7 +8,7 @@ import { submitQuiz, type Answer } from "./actions";
 /**
  * One-question-at-a-time situational quiz, answered by every profile
  * regardless of gender. Each pick is scored deterministically against the 23
- * qualities (see actions.ts) — no free text, no AI call needed for this step.
+ * qualities (see actions.ts); no free text, no AI call needed for this step.
  */
 export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
   const [step, setStep] = useState(0);
@@ -43,7 +43,7 @@ export function QuizForm({ questions }: { questions: SituationalQuestion[] }) {
     <AuthShell
       eyebrow={`Question ${step + 1} of ${total}`}
       title="The character quiz."
-      subtitle="Real situations, no right answers — just how much you agree. This builds the score on your profile."
+      subtitle="Real situations, no right answers, just how much you agree. This builds the score on your profile."
     >
       <div className="space-y-5">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-paper">

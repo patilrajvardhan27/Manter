@@ -78,7 +78,7 @@ function SelectField({
   return (
     <Field label={label}>
       <Select value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="">—</option>
+        <option value="">Not set</option>
         {options.map((o) => (
           <option key={o} value={o}>
             {o}

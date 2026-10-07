@@ -1,5 +1,5 @@
 /**
- * The 23-quality framework — the core of Charms.
+ * The 23-quality framework: the core of Charms.
  * Sourced from points.txt (1–23) and mapped to the research-backed groupings
  * in why_charms.md §4. `key` is stable and used as the DB quality identifier.
  */
@@ -40,11 +40,11 @@ export const QUALITIES: Quality[] = [
   { key: "notices_small_things", n: 7, label: "Notices the small things", blurb: "Pays attention to the little details.", group: "emotional-maturity" },
   { key: "patient", n: 8, label: "Patient, gives space", blurb: "Never rushes; gives space when needed.", group: "safety" },
   { key: "emotionally_intelligent", n: 9, label: "Emotionally mature", blurb: "Emotionally intelligent, not just academic.", group: "emotional-maturity" },
-  { key: "sense_of_humour", n: 10, label: "A little funny", blurb: "Has a sense of humour — a little crazy.", group: "character" },
+  { key: "sense_of_humour", n: 10, label: "A little funny", blurb: "Has a sense of humour, a little crazy.", group: "character" },
   { key: "respects_boundaries", n: 11, label: "Respects boundaries", blurb: "Never forces anything she's not comfortable with.", group: "safety" },
   { key: "feels_safe", n: 12, label: "Makes her feel safe", blurb: "She can be herself, share anything, no judgment.", group: "safety" },
   { key: "confident_self_respect", n: 13, label: "Confident & self-respecting", blurb: "Secure in himself, with healthy self-respect.", group: "character" },
-  { key: "expresses_emotions", n: 14, label: "Expresses his feelings", blurb: "Can cry, share, be vulnerable — no 'real men don't'.", group: "emotional-maturity" },
+  { key: "expresses_emotions", n: 14, label: "Expresses his feelings", blurb: "Can cry, share, be vulnerable, no 'real men don't'.", group: "emotional-maturity" },
   { key: "no_womanhood_taboo", n: 15, label: "No taboo about womanhood", blurb: "Understands periods and women's experiences.", group: "respect" },
   { key: "no_misogyny", n: 16, label: "Never mocks women to fit in", blurb: "Won't put women down to look cool.", group: "character" },
   { key: "ambitious", n: 17, label: "Ambitious & hardworking", blurb: "Driven, futuristic, won't settle for less.", group: "partnership" },

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ----------------------------------------------------------------------------
-   Charms design system — "Warm Editorial"
+   Charms design system: "Warm Editorial"
    Cream paper · aubergine ink · plum brand · sage green-flags · clay-red flags
 ---------------------------------------------------------------------------- */
 @theme {
@@ -52,14 +52,14 @@ body {
 
 .font-display { font-family: var(--font-display); }
 
-/* one orchestrated entrance — staggered via inline animation-delay */
+/* one orchestrated entrance, staggered via inline animation-delay */
 @keyframes rise {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* lift + deepen shadow on hover, settle on press — for tappable cards/rows */
+/* lift + deepen shadow on hover, settle on press, for tappable cards/rows */
 .card-hover {
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease-out;
 }
@@ -71,14 +71,14 @@ body {
   transform: translateY(0) scale(0.99);
 }
 
-/* progress/score bars fill in from 0 on mount — pair with --bar-w custom property */
+/* progress/score bars fill in from 0 on mount; pair with --bar-w custom property */
 @keyframes fill-bar {
   from { width: 0%; }
   to { width: var(--bar-w, 100%); }
 }
 .bar-fill { animation: fill-bar 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* small badges/dots/chips pop in — stagger with animation-delay */
+/* small badges/dots/chips pop in; stagger with animation-delay */
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.6); }
   to { opacity: 1; transform: scale(1); }

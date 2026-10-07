@@ -1,8 +1,8 @@
 /**
- * The onboarding character quiz — situational questions grounded in real,
+ * The onboarding character quiz: situational questions grounded in real,
  * well-documented incident patterns (e.g. the viral ₹370 biryani story about
  * dating entitlement; workplace/family discrimination LGBTQ+ people face).
- * Every profile answers the same bank regardless of gender — agreement is
+ * Every profile answers the same bank regardless of gender; agreement is
  * scored deterministically against the 23-quality framework via the picked
  * Likert level's effects (see lib/constants/likert.ts), so the mechanic and
  * the visible score/reason on a profile work identically for everyone.
@@ -19,7 +19,7 @@ export const SITUATIONAL_QUESTIONS: SituationalQuestion[] = [
   {
     id: "s1_online_hate",
     prompt:
-      "A partner gets sent sexist or hateful messages by a stranger online after posting something completely ordinary — work, an opinion, a photo. How much do you agree: “Taking it seriously and asking what would actually help matters more than telling them to just ignore it.”",
+      "A partner gets sent sexist or hateful messages by a stranger online after posting something completely ordinary: work, an opinion, a photo. How much do you agree: “Taking it seriously and asking what would actually help matters more than telling them to just ignore it.”",
     options: likertOptions([
       { key: "takes_her_side", positive: true },
       { key: "feels_safe", positive: true },
@@ -37,7 +37,7 @@ export const SITUATIONAL_QUESTIONS: SituationalQuestion[] = [
   {
     id: "s3_bill_no_strings",
     prompt:
-      "Like the viral ₹370 biryani story — someone pays for a date's dinner, and afterward the other person doesn't want anything physical. How much do you agree: “What got paid for dinner doesn't entitle anyone to anything afterward — a 'no' stands regardless of the bill.”",
+      "Like the viral ₹370 biryani story: someone pays for a date's dinner, and afterward the other person doesn't want anything physical. How much do you agree: “What got paid for dinner doesn't entitle anyone to anything afterward. A 'no' stands regardless of the bill.”",
     options: likertOptions([
       { key: "respects_boundaries", positive: true },
       { key: "no_ego", positive: true },
@@ -73,7 +73,7 @@ export const SITUATIONAL_QUESTIONS: SituationalQuestion[] = [
   {
     id: "s7_recover_money_framing",
     prompt:
-      "After one person declines anything further, the other suggests they're owed something for what they spent — even joking about \"recovering their money.\" How much do you agree: “That framing alone says a lot about someone's values — it's not something to overlook.”",
+      "After one person declines anything further, the other suggests they're owed something for what they spent, even joking about \"recovering their money.\" How much do you agree: “That framing alone says a lot about someone's values. It's not something to overlook.”",
     options: likertOptions([
       { key: "trustworthy", positive: true },
       { key: "no_ego", positive: true },
@@ -91,7 +91,7 @@ export const SITUATIONAL_QUESTIONS: SituationalQuestion[] = [
   {
     id: "s9_workplace_discrimination",
     prompt:
-      "A partner comes out at work and their manager starts quietly giving them worse shifts and vague excuses for skipped promotions — nothing said outright, just a pattern. How much do you agree: “That deserves to be taken seriously as discrimination, not brushed off as them overreacting.”",
+      "A partner comes out at work and their manager starts quietly giving them worse shifts and vague excuses for skipped promotions. Nothing said outright, just a pattern. How much do you agree: “That deserves to be taken seriously as discrimination, not brushed off as them overreacting.”",
     options: likertOptions([
       { key: "takes_her_side", positive: true },
       { key: "emotionally_intelligent", positive: true },
@@ -109,7 +109,7 @@ export const SITUATIONAL_QUESTIONS: SituationalQuestion[] = [
   {
     id: "s11_outed_without_consent",
     prompt:
-      "Someone close to a partner — a friend, a relative — tells other people about that partner's identity before the partner was ready to share it themselves. How much do you agree: “That's a serious breach of trust, not just an awkward slip.”",
+      "Someone close to a partner (a friend, a relative) tells other people about that partner's identity before the partner was ready to share it themselves. How much do you agree: “That's a serious breach of trust, not just an awkward slip.”",
     options: likertOptions([
       { key: "trustworthy", positive: true },
       { key: "respects_decisions", positive: true },

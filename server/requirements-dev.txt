@@ -1,3 +1,4 @@
 # Dev/seed-only dependencies (not needed to run the service).
 -r requirements.txt
 faker==40.21.0
+pytest==8.3.4

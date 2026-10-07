@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Find-or-create the match with this profile, then open the chat. RLS
  * ("matches: seeker creates") guarantees only the viewer can initiate as
- * seeker — symmetric regardless of gender.
+ * seeker, symmetric regardless of gender.
  */
 export async function startConversation(targetId: string) {
   const supabase = await createClient();

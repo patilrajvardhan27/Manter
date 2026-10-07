@@ -23,7 +23,7 @@ export default async function DiscoverPage() {
           Ranked for you, {profile.display_name}.
         </h1>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">
-          Every score is built from the 23 qualities you weighted — not photos.
+          Every score is built from the 23 qualities you weighted, not photos.
         </p>
       </header>
 

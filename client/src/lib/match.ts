@@ -153,7 +153,7 @@ export async function getDiscovery(viewerId: string): Promise<DiscoverProfile[]>
 
   const candidateIds = eligible.map((c) => c.id);
   const { data: quizRows } = await supabase
-    .from("quiz_scores")
+    .from("character_scores")
     .select("profile_id, quality_key, score")
     .in("profile_id", candidateIds.length ? candidateIds : ["00000000-0000-0000-0000-000000000000"]);
 
@@ -170,7 +170,7 @@ export async function getDiscovery(viewerId: string): Promise<DiscoverProfile[]>
   const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
 
   return eligible
-    // Drop profiles already matched/conversing — once matched, they live in Chats.
+    // Drop profiles already matched/conversing; once matched, they live in Chats.
     .filter((c) => !matchByOther[c.id])
     .map((c) => {
       const { score, top } = scoreCandidate(weights, quizByProfile[c.id] ?? {});
@@ -235,7 +235,7 @@ export async function getProfileDetail(viewerId: string, candidateId: string): P
 
   const [{ data: weightRows }, { data: quizRows }, { data: existing }, answers] = await Promise.all([
     supabase.from("priority_weights").select("quality_key, weight").eq("profile_id", viewerId),
-    supabase.from("quiz_scores").select("quality_key, score").eq("profile_id", candidateId),
+    supabase.from("character_scores").select("quality_key, score").eq("profile_id", candidateId),
     supabase
       .from("matches")
       .select("id")

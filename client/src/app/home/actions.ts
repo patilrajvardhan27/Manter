@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { QUALITY_BY_KEY } from "@/lib/constants/qualities";
 
 /**
- * Persist a profile's priority weights (1–5 per quality) — same mechanic for
+ * Persist a profile's priority weights (1–5 per quality), same mechanic for
  * every gender. RLS limits the write to their own rows. Only valid quality
  * keys and in-range weights are saved.
  */

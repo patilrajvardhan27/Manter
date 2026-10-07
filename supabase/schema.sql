@@ -1,5 +1,5 @@
 -- ============================================================================
--- Charms — Postgres schema + Row Level Security (Supabase)
+-- Charms: Postgres schema + Row Level Security (Supabase)
 -- Run in the Supabase SQL editor, or `supabase db push` with the CLI.
 -- Default posture: RLS on, deny by default, grant the minimum each role needs.
 --
@@ -55,7 +55,7 @@ create policy "profiles: read own" on profiles
 
 -- Discovery is open browsing: any signed-in user may read any other profile's
 -- public fields. Interest/gender filtering happens in the app query, not RLS
--- (the data isn't sensitive — photos and quiz answers/scores follow the same
+-- (the data isn't sensitive: photos and quiz answers/scores follow the same
 -- posture below). Private preference data (priority_weights) stays gated.
 create policy "profiles: authenticated read all" on profiles
   for select to authenticated using (true);
@@ -93,20 +93,12 @@ create table priority_weights (
 alter table priority_weights enable row level security;
 create policy "weights: owner all" on priority_weights
   for all using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
-create policy "weights: matched counterpart reads" on priority_weights
-  for select to authenticated
-  using (
-    exists (
-      select 1 from matches m
-      where (m.seeker_id = priority_weights.profile_id and m.target_id = auth.uid())
-         or (m.target_id = priority_weights.profile_id and m.seeker_id = auth.uid())
-    )
-  );
+-- ("weights: matched counterpart reads" is created after the matches table below.)
 
 -- ---------------------------------------------------------------------------
 -- quiz_scores : a profile's derived character score per quality (1..5),
 -- scored deterministically from their situational quiz answers. Same
--- visibility as the quiz answers below — readable by anyone signed in, the
+-- visibility as the quiz answers below, readable by anyone signed in, the
 -- way a character score on a dating profile is meant to be seen.
 -- ---------------------------------------------------------------------------
 create table quiz_scores (
@@ -167,6 +159,17 @@ create policy "matches: participants update" on matches
 create policy "matches: seeker deletes" on matches
   for delete using (auth.uid() = seeker_id);
 
+-- Defined here rather than with priority_weights because it references matches.
+create policy "weights: matched counterpart reads" on priority_weights
+  for select to authenticated
+  using (
+    exists (
+      select 1 from matches m
+      where (m.seeker_id = priority_weights.profile_id and m.target_id = auth.uid())
+         or (m.target_id = priority_weights.profile_id and m.seeker_id = auth.uid())
+    )
+  );
+
 -- ---------------------------------------------------------------------------
 -- messages : realtime chat, participants only.
 -- ---------------------------------------------------------------------------
@@ -176,7 +179,7 @@ create table messages (
   sender_id  uuid not null references profiles(id) on delete cascade,
   body       text not null,
   -- set by the FastAPI service (service role) once /scan has run on this
-  -- message, so re-fetches don't re-bill Anthropic for the same message.
+  -- message, so re-fetches don't re-bill the model API for the same message.
   scanned    boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -200,7 +203,7 @@ create policy "messages: participant sends own" on messages
 
 -- ---------------------------------------------------------------------------
 -- red_flags : written by FastAPI (service role). Visible to whoever received
--- the flagged message (not the sender) — symmetric regardless of gender.
+-- the flagged message (not the sender), symmetric regardless of gender.
 -- ---------------------------------------------------------------------------
 create table red_flags (
   id         uuid primary key default gen_random_uuid(),

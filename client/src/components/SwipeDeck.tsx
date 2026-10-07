@@ -11,7 +11,7 @@ const THRESHOLD = 110; // px past which a release commits the swipe
 
 /**
  * Tinder-style deck: drag the top card (or use the buttons). Right commits a
- * "like" — find-or-create the match and open the chat (server action). Left
+ * "like": find-or-create the match and open the chat (server action). Left
  * passes and reveals the next card. Tap the left/right edge of the photo to
  * step through a person's photos; tap the center (or the info badge) to open
  * their full profile. Built on pointer events, no deps.

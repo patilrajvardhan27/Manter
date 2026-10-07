@@ -21,7 +21,7 @@ const GENDERS: { value: Gender; title: string; body: string; accent: string }[] 
   {
     value: "lgbtq",
     title: "LGBTQ+",
-    body: "Same quiz, same verified score, same safety suite — built for you too.",
+    body: "Same quiz, same verified score, same safety suite, built for you too.",
     accent: "var(--color-clay)",
   },
 ];
@@ -79,7 +79,7 @@ export function GenderChooser() {
     <AuthShell
       eyebrow="Step 2 of 3"
       title="Who are you interested in?"
-      subtitle="Pick as many as you like — leave it blank to see everyone in Discover."
+      subtitle="Pick as many as you like. Leave it blank to see everyone in Discover."
     >
       <div className="space-y-3">
         {INTERESTS.map((i) => {

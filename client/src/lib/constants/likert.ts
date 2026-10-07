@@ -1,7 +1,7 @@
 /**
  * Shared 5-point agree/disagree scale for situational attitude questions.
- * Unlike the free-text behavioral questions (judged by Claude), a Likert
- * question's score is fully determined by which level the user picks —
+ * Unlike the free-text behavioral questions (judged by a model), a Likert
+ * question's score is fully determined by which level the user picks, so it's
  * cheaper to evaluate and directly comparable across men and women asked
  * about the same underlying scenario.
  */

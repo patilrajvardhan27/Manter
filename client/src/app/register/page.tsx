@@ -72,7 +72,7 @@ export default function RegisterPage() {
     <AuthShell
       eyebrow="Create your account"
       title="Start dating by character."
-      subtitle="It takes a minute. Your data stays yours — we only ask for what safety and matching need."
+      subtitle="It takes a minute. Your data stays yours. We only ask for what safety and matching need."
       footer={
         <>
           Already have an account?{" "}

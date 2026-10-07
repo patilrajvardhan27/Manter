@@ -70,7 +70,7 @@ function LoginForm() {
         subtitle={
           <>
             We sent a sign-in link to <strong className="text-ink">{email}</strong>. Tap it to
-            come right back in — no password needed.
+            come right back in. No password needed.
           </>
         }
         footer={
